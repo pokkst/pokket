@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/wallet_nav"
+    app:startDestination="@id/sendHomeFragment">
+    <fragment
+        android:id="@+id/sendHomeFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.SendHomeFragment"
+        android:label="fragment_send_home"
+        tools:layout="@layout/fragment_send_home">
+        <action
+            android:id="@+id/nav_to_send"
+            app:destination="@id/sendAmountFragment">
+            <argument
+                android:name="address"
+                app:argType="string" />
+        </action>
+        <action
+            android:id="@+id/nav_to_tokens"
+            app:destination="@id/viewTokensFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/sendAmountFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.SendAmountFragment"
+        android:label="fragment_send_amount"
+        tools:layout="@layout/fragment_send_amount">
+    </fragment>
+    <fragment
+        android:id="@+id/viewTokensFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.ViewTokensFragment"
+        android:label="fragment_view_tokens"
+        tools:layout="@layout/fragment_view_tokens">
+    </fragment>
+</navigation>

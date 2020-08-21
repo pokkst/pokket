@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/new_user_nav"
+    app:startDestination="@id/newUserFragment">
+    <fragment
+        android:id="@+id/newUserFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.NewUserFragment"
+        android:label="fragment_new_user"
+        tools:layout="@layout/fragment_new_user">
+        <action
+            android:id="@+id/nav_to_new_wallet"
+            app:destination="@id/newWalletFragment" />
+        <action
+            android:id="@+id/nav_to_restore_wallet"
+            app:destination="@id/restoreWalletFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/newWalletFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.NewWalletFragment"
+        android:label="fragment_new_wallet"
+        tools:layout="@layout/fragment_new_wallet">
+        <action
+            android:id="@+id/nav_to_generated_seed"
+            app:destination="@id/generatedSeedFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/restoreWalletFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.RestoreWalletFragment"
+        android:label="fragment_new_wallet"
+        tools:layout="@layout/fragment_restore_wallet" />
+    <fragment
+        android:id="@+id/generatedSeedFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.GeneratedSeedFragment"
+        android:label="fragment_new_wallet"
+        tools:layout="@layout/fragment_generated_seed">
+    </fragment>
+</navigation>

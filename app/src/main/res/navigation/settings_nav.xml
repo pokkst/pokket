@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settings_nav"
+    app:startDestination="@id/settingsHomeFragment">
+    <fragment
+        android:id="@+id/settingsHomeFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.SettingsHomeFragment"
+        android:label="fragment_setings_home"
+        tools:layout="@layout/fragment_settings_home">
+        <action
+            android:id="@+id/nav_to_about"
+            app:destination="@id/settingsAboutFragment" />
+        <action
+            android:id="@+id/nav_to_phrase"
+            app:destination="@id/settingsPhraseFragment" />
+        <action
+            android:id="@+id/nav_to_wipe"
+            app:destination="@id/settingsWipeFragment" />
+        <action
+            android:id="@+id/nav_to_tx_received"
+            app:destination="@id/transactionReceivedFragment">
+            <argument
+                android:name="txid"
+                app:argType="string" />
+            <argument
+                android:name="slp"
+                app:argType="boolean" />
+        </action>
+        <action
+            android:id="@+id/nav_to_tx_sent"
+            app:destination="@id/transactionSentFragment">
+            <argument
+                android:name="txid"
+                app:argType="string" />
+            <argument
+                android:name="slp"
+                app:argType="boolean" />
+        </action>
+        <action
+            android:id="@+id/nav_to_tx_list"
+            app:destination="@id/transactionsListFragment">
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/settingsAboutFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.SettingsAboutFragment"
+        android:label="fragment_settings_about"
+        tools:layout="@layout/fragment_settings_about">
+    </fragment>
+    <fragment
+        android:id="@+id/settingsPhraseFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.SettingsPhraseFragment"
+        android:label="fragment_settings_about"
+        tools:layout="@layout/fragment_settings_phrase">
+    </fragment>
+    <fragment
+        android:id="@+id/settingsWipeFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.SettingsWipeFragment"
+        android:label="fragment_settings_about"
+        tools:layout="@layout/fragment_settings_wipe">
+    </fragment>
+    <fragment
+        android:id="@+id/transactionReceivedFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.TransactionReceivedFragment"
+        android:label="fragment_tx_received"
+        tools:layout="@layout/transaction_item_expanded_received">
+    </fragment>
+    <fragment
+        android:id="@+id/transactionSentFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.TransactionSentFragment"
+        android:label="fragment_tx_received"
+        tools:layout="@layout/transaction_item_expanded_sent">
+    </fragment>
+    <fragment
+        android:id="@+id/transactionsListFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.SettingsTransactionsFragment"
+        android:label="fragment_tx_received"
+        tools:layout="@layout/fragment_settings_transactions">
+        <action
+            android:id="@+id/nav_to_tx_received"
+            app:destination="@id/transactionReceivedFragment">
+            <argument
+                android:name="txid"
+                app:argType="string" />
+            <argument
+                android:name="slp"
+                app:argType="boolean" />
+        </action>
+        <action
+            android:id="@+id/nav_to_tx_sent"
+            app:destination="@id/transactionSentFragment">
+            <argument
+                android:name="txid"
+                app:argType="string" />
+            <argument
+                android:name="slp"
+                app:argType="boolean" />
+        </action>
+    </fragment>
+</navigation>
