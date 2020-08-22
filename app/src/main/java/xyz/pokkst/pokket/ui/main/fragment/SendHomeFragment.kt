@@ -30,7 +30,7 @@ class SendHomeFragment : Fragment() {
         root.paste_address_button.setOnClickListener {
             val clipBoard= requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val pasteData = clipBoard.primaryClip?.getItemAt(0)?.text.toString()
-            if(pasteData.contains("http") || Address.isValidPaymentCode(pasteData) || Address.isValidSlpAddress(WalletManager.parameters, pasteData) || Address.isValidCashAddr(WalletManager.parameters, pasteData) || Address.isValidLegacyAddress(WalletManager.parameters, pasteData)) {
+            if(isValidPaymentType(pasteData)) {
                 findNavController().navigate(SendHomeFragmentDirections.navToSend(pasteData))
             }
         }
@@ -48,11 +48,15 @@ class SendHomeFragment : Fragment() {
             if (requestCode == Constants.REQUEST_CODE_SCAN_QR) {
                 if (data != null) {
                     val scanData = data.getStringExtra(Constants.QR_SCAN_RESULT)
-                    if(scanData.contains("http") || Address.isValidPaymentCode(scanData) || Address.isValidSlpAddress(WalletManager.parameters, scanData) || Address.isValidCashAddr(WalletManager.parameters, scanData) || Address.isValidLegacyAddress(WalletManager.parameters, scanData)) {
+                    if(isValidPaymentType(scanData)) {
                         findNavController().navigate(SendHomeFragmentDirections.navToSend(scanData))
                     }
                 }
             }
         }
+    }
+
+    private fun isValidPaymentType(address: String): Boolean {
+        return address.contains("http") || Address.isValidPaymentCode(address) || Address.isValidSlpAddress(WalletManager.parameters, address) || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)
     }
 }
