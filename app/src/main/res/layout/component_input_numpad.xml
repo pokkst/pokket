@@ -13,8 +13,8 @@
             android:gravity="center_horizontal">
             <Button
                 android:id="@+id/input_1"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -26,8 +26,8 @@
                 android:textSize="30sp"/>
             <Button
                 android:id="@+id/input_2"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -39,8 +39,8 @@
                 android:textSize="30sp"/>
             <Button
                 android:id="@+id/input_3"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -58,8 +58,8 @@
             android:gravity="center_horizontal">
             <Button
                 android:id="@+id/input_4"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -71,8 +71,8 @@
                 android:textSize="30sp"/>
             <Button
                 android:id="@+id/input_5"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -84,8 +84,8 @@
                 android:textSize="30sp"/>
             <Button
                 android:id="@+id/input_6"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -103,8 +103,8 @@
             android:gravity="center_horizontal">
             <Button
                 android:id="@+id/input_7"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -116,8 +116,8 @@
                 android:textSize="30sp"/>
             <Button
                 android:id="@+id/input_8"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -129,8 +129,8 @@
                 android:textSize="30sp"/>
             <Button
                 android:id="@+id/input_9"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -148,8 +148,8 @@
             android:gravity="center_horizontal">
             <Button
                 android:id="@+id/decimal_button"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -161,8 +161,8 @@
                 android:textSize="30sp"/>
             <Button
                 android:id="@+id/input_0"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:paddingEnd="30dp"
                 android:paddingStart="30dp"
@@ -175,8 +175,8 @@
 
             <ImageButton
                 android:id="@+id/delete_button"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:background="@drawable/button_regular_blue"
                 android:scaleType="centerInside"
                 android:shadowColor="@android:color/transparent"

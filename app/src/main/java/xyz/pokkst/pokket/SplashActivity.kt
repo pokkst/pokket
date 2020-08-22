@@ -27,13 +27,13 @@ class SplashActivity : AppCompatActivity() {
 
                 val newUser = !File(applicationInfo.dataDir, "${WalletManager.walletFileName}.wallet").exists()
                 val intent = if(newUser) {
-                    Intent(this@SplashActivity, NewUserActivity::class.java)
+                    Intent(baseContext, NewUserActivity::class.java)
                 } else {
-                    Intent(this@SplashActivity, MainActivity::class.java)
+                    Intent(baseContext, MainActivity::class.java)
                 }
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
-
+                finish()
                 Looper.loop()
             }
         }.start()

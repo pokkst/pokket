@@ -22,6 +22,7 @@ import java.text.DecimalFormatSymbols
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
+    var inFragment = false
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_UPDATE_RECEIVE_QR == intent.action) {
@@ -87,6 +88,17 @@ class MainActivity : AppCompatActivity() {
         WalletManager.startWallet(this, seed, newUser)
     }
 
+    override fun onBackPressed() {
+        if(!inFragment) {
+            val a = Intent(Intent.ACTION_MAIN)
+            a.addCategory(Intent.CATEGORY_HOME)
+            a.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(a)
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     private fun refresh(sync: Int?) {
         if(WalletManager.walletKit?.wallet() != null) {
             object : Thread() {
@@ -131,6 +143,7 @@ class MainActivity : AppCompatActivity() {
         pay_button.visibility = View.VISIBLE
         pay_button.isEnabled = true
         tabs.visibility = View.GONE
+        inFragment = true
     }
 
     fun enableTokensScreen() {
@@ -139,6 +152,7 @@ class MainActivity : AppCompatActivity() {
         viewPager.setPagingEnabled(false)
         settings_button.setImageResource(R.drawable.navigationback)
         tabs.visibility = View.GONE
+        inFragment = true
     }
 
     fun disableSendScreen() {
@@ -150,6 +164,7 @@ class MainActivity : AppCompatActivity() {
         pay_button.visibility = View.GONE
         val intent = Intent(Constants.ACTION_MAIN_ENABLE_PAGER)
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        inFragment = false
     }
 
     fun formatBalance(amount: Double, pattern: String): String {
