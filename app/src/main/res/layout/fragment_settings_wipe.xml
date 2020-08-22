@@ -3,6 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:id="@+id/continue_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/editText_phrase"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="30dp"
+        android:background="@android:color/transparent"
+        android:text="@string/continue_button"
+        android:textAllCaps="true"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+        android:textColor="@color/dark_blue"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/confirm"
         android:layout_width="wrap_content"
@@ -45,20 +59,6 @@
         android:scrollHorizontally="false"
         android:textColorHint="@color/light_gray"
         android:textSize="22sp" />
-
-    <Button
-        android:id="@+id/continue_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/editText_phrase"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="30dp"
-        android:background="@android:color/transparent"
-        android:text="@string/continue_button"
-        android:textAllCaps="true"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-        android:textColor="@color/dark_blue"
-        android:textStyle="bold" />
 
     <Button
         android:id="@+id/cancel_button"

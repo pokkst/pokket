@@ -31,5 +31,17 @@
         android:name="xyz.pokkst.pokket.ui.main.fragment.ViewTokensFragment"
         android:label="fragment_view_tokens"
         tools:layout="@layout/fragment_view_tokens">
+        <action
+            android:id="@+id/nav_to_send_from_view_tokens"
+            app:destination="@id/sendAmountFragment">
+            <argument
+                android:name="address"
+                app:nullable="true"
+                app:argType="string" />
+            <argument
+                android:name="tokenId"
+                app:nullable="true"
+                app:argType="string" />
+        </action>
     </fragment>
 </navigation>

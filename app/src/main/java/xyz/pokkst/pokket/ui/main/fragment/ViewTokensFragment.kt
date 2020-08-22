@@ -12,25 +12,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
-import androidx.annotation.Nullable
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.common.collect.ImmutableList
-import com.google.common.util.concurrent.FutureCallback
-import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
 import com.luminiasoft.ethereum.blockiesandroid.BlockiesIdenticon
-import kotlinx.android.synthetic.main.component_input_numpad.view.*
-import kotlinx.android.synthetic.main.fragment_send_amount.view.*
-import org.bitcoinj.core.Coin
-import org.bitcoinj.core.InsufficientMoneyException
-import org.bitcoinj.core.Transaction
-import org.bitcoinj.protocols.payments.PaymentProtocol
-import org.bitcoinj.protocols.payments.PaymentProtocolException
-import org.bitcoinj.protocols.payments.PaymentSession
 import org.bitcoinj.utils.MonetaryFormat
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
@@ -83,6 +69,12 @@ class ViewTokensFragment : Fragment() {
         srlSLP = root?.findViewById(R.id.srlSLP)
         slpList = root?.findViewById(R.id.slpList)
         this.srlSLP?.setOnRefreshListener { this.refresh() }
+        this.slpList?.setOnItemClickListener { parent, view, position, id ->
+            val tokenBalance = WalletManager.walletKit?.slpBalances?.get(position)
+            val tokenId = tokenBalance?.tokenId
+            findNavController().navigate(ViewTokensFragmentDirections.navToSendFromViewTokens(null, tokenId))
+        }
+
         refresh()
         return root
     }

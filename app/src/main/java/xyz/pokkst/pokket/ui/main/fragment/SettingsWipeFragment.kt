@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_settings_wipe.view.*
+import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.NewUserActivity
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.wallet.WalletManager
@@ -23,15 +24,25 @@ class SettingsWipeFragment : Fragment() {
             val seedEntered = root.editText_phrase.text.toString().trim()
             val walletSeed = WalletManager.walletKit?.wallet()?.keyChainSeed?.mnemonicString
             if(seedEntered == walletSeed) {
-                val walletFile = File(WalletManager.walletDir, "bagelwallet.wallet")
-                val spvChainFile = File(WalletManager.walletDir, "bagelwallet.spvchain")
-                walletFile.delete()
-                spvChainFile.delete()
                 val intent = Intent(requireContext(), NewUserActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
+                wipeAndRestart(intent)
+            } else if(seedEntered.isNotEmpty()) {
+                val intent = Intent(requireActivity(), MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.putExtra("seed", seedEntered)
+                intent.putExtra("new", false)
+                wipeAndRestart(intent)
             }
         }
         return root
+    }
+
+    private fun wipeAndRestart(intent: Intent) {
+        val walletFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}.wallet")
+        val spvChainFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}.spvchain")
+        walletFile.delete()
+        spvChainFile.delete()
+        startActivity(intent)
     }
 }

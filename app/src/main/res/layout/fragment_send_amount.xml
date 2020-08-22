@@ -69,19 +69,21 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         app:layout_constraintTop_toBottomOf="@id/input_area"
-        app:layout_constraintBottom_toTopOf="@id/to_field_text2"/>
+        app:layout_constraintBottom_toTopOf="@id/token_selector_todo"/>
 
-    <TextView
-        android:id="@+id/to_field_text2"
+    <Spinner
+        android:id="@+id/token_selector_todo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="10dp"
         android:text="token"
         android:textSize="20sp"
+        android:visibility="gone"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:padding="10dp"
+        app:layout_constraintBottom_toTopOf="@id/input_numpad"
         app:layout_constraintTop_toBottomOf="@id/line"
-        app:layout_constraintBottom_toTopOf="@id/input_numpad"/>
+        tools:layout_editor_absoluteX="20dp" />
 
     <LinearLayout
         android:id="@+id/input_numpad"
@@ -89,7 +91,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/to_field_text2"
+        app:layout_constraintTop_toBottomOf="@id/token_selector_todo"
         app:layout_constraintBottom_toTopOf="@id/line_bottom">
         <include
             layout="@layout/component_input_numpad"/>
@@ -112,6 +114,15 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginEnd="20dp"
         android:layout_marginStart="20dp">
+        <EditText
+            android:id="@+id/to_field_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="enter address"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textSize="20sp"
+            android:visibility="gone"/>
         <TextView
             android:id="@+id/to_field_text"
             android:layout_width="match_parent"

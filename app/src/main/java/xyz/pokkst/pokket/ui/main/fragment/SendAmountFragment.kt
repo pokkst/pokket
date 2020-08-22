@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.Nullable
@@ -21,11 +23,13 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.android.synthetic.main.component_input_numpad.view.*
 import kotlinx.android.synthetic.main.fragment_send_amount.view.*
+import kotlinx.android.synthetic.main.token_spinner_cell.view.*
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.InsufficientMoneyException
 import org.bitcoinj.core.Transaction
 import org.bitcoinj.core.bip47.BIP47Channel
+import org.bitcoinj.core.slp.SlpTokenBalance
 import org.bitcoinj.protocols.payments.PaymentProtocol
 import org.bitcoinj.protocols.payments.PaymentProtocolException
 import org.bitcoinj.protocols.payments.PaymentSession
@@ -50,7 +54,9 @@ import java.util.concurrent.ExecutionException
 class SendAmountFragment : Fragment() {
     //TODO add SLP sending
     var address: String? = null
+    var tokenId: String? = null
     var root: View? = null
+    var currentTokenId: String? = null
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_MAIN_ENABLE_PAGER == intent.action) {
@@ -74,12 +80,72 @@ class SendAmountFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         root = inflater.inflate(R.layout.fragment_send_amount, container, false)
+        prepareViews()
+        setListeners()
+        return root
+    }
+
+    private fun prepareViews() {
         (requireActivity() as MainActivity).enableSendScreen()
-        val filter = IntentFilter()
-        filter.addAction(Constants.ACTION_MAIN_ENABLE_PAGER)
-        filter.addAction(Constants.ACTION_FRAGMENT_SEND_SEND)
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
+
         root?.input_type_toggle?.isChecked = true
+
+        tokenId = arguments?.getString("tokenId", null)
+        address = arguments?.getString("address", null)
+        when {
+            address?.contains("http") == true -> { this.getBIP70Data(root, address?.replace("bitcoincash:?r=", "")) }
+            address != null -> { root?.to_field_text?.text = "to: ${address?.replace("bitcoincash:", "")}" }
+            address == null -> {
+                root?.to_field_text?.visibility = View.GONE
+                root?.to_field_edit_text?.visibility = View.VISIBLE
+            }
+        }
+
+        if(tokenId != null || Address.isValidSlpAddress(WalletManager.parameters, address)) {
+            val items = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
+            val adapter = object : ArrayAdapter<SlpTokenBalance>(requireContext(), R.layout.token_spinner_cell, items) {
+                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    val view = LayoutInflater.from(requireContext()).inflate(R.layout.token_spinner_cell, null)
+                    val slpToken = WalletManager.walletKit?.getSlpToken(WalletManager.walletKit?.slpBalances?.get(position)?.tokenId)
+                    if(slpToken != null) {
+                        view.token_ticker.text = slpToken.ticker
+                    }
+                    return view
+                }
+
+                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    val view = LayoutInflater.from(requireContext()).inflate(R.layout.token_spinner_cell, null)
+                    val slpToken = WalletManager.walletKit?.getSlpToken(WalletManager.walletKit?.slpBalances?.get(position)?.tokenId)
+                    if(slpToken != null) {
+                        view.token_ticker.text = slpToken.ticker
+                    }
+                    return view
+                }
+            }
+            root?.token_selector_todo?.adapter = adapter
+            root?.token_selector_todo?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, v: View?, position: Int, id: Long) {
+                    tokenId = WalletManager.walletKit?.slpBalances?.get(position)?.tokenId
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+            if(tokenId != null) {
+                for(x in items.indices) {
+                    if(items[x].tokenId == tokenId) {
+                        root?.token_selector_todo?.setSelection(x)
+                    }
+                }
+            }
+            root?.token_selector_todo?.visibility = View.VISIBLE
+            root?.alt_currency_symbol?.visibility = View.GONE
+            root?.alt_currency_display?.visibility = View.GONE
+            root?.input_type_toggle?.visibility = View.GONE
+            root?.main_currency_symbol?.visibility = View.GONE
+        }
+    }
+
+    private fun setListeners() {
         root?.input_type_toggle?.setOnClickListener {
             bchIsSendType = !bchIsSendType
             swapSendTypes(root)
@@ -112,13 +178,10 @@ class SendAmountFragment : Fragment() {
             }
         }
 
-        address = arguments?.getString("address", "")
-        if(address?.contains("http") == true) {
-            this.getBIP70Data(root, address?.replace("bitcoincash:?r=", ""))
-        } else {
-            root?.to_field_text?.text = "to: ${address?.replace("bitcoincash:", "")}"
-        }
-        return root
+        val filter = IntentFilter()
+        filter.addAction(Constants.ACTION_MAIN_ENABLE_PAGER)
+        filter.addAction(Constants.ACTION_FRAGMENT_SEND_SEND)
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
     }
 
     override fun onDestroy() {
@@ -128,22 +191,34 @@ class SendAmountFragment : Fragment() {
 
     private fun send() {
         if(WalletManager.walletKit?.wallet()?.getBalance(Wallet.BalanceType.ESTIMATED)?.isZero == false) {
-            if(address?.startsWith("http") == true) {
-                this.processBIP70(address!!)
-            } else {
-                if(address?.contains("#") == true || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)) {
-                    this.processNormalTransaction()
-                } else if(Address.isValidPaymentCode(address)) {
-                    val canSendToPaymentCode = WalletManager.walletKit?.canSendToPaymentCode(address)
-                    if(canSendToPaymentCode == true) {
-                        this.attemptBip47Payment()
-                    } else {
-                        val notification = WalletManager.walletKit?.makeNotificationTransaction(address, true)
-                        WalletManager.walletKit?.broadcastTransaction(notification?.tx)
-                        WalletManager.walletKit?.putPaymenCodeStatusSent(address, notification?.tx)
-                        this.attemptBip47Payment()
+            if(address != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
+                if(address == null) address = root?.to_field_edit_text?.text?.toString()
+                if(address?.startsWith("http") == true) {
+                    this.processBIP70(address!!)
+                } else {
+                    if(address?.contains("#") == true || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)) {
+                        this.processNormalTransaction()
+                    } else if(Address.isValidPaymentCode(address)) {
+                        val canSendToPaymentCode = WalletManager.walletKit?.canSendToPaymentCode(address)
+                        if(canSendToPaymentCode == true) {
+                            this.attemptBip47Payment()
+                        } else {
+                            val notification = WalletManager.walletKit?.makeNotificationTransaction(address, true)
+                            WalletManager.walletKit?.broadcastTransaction(notification?.tx)
+                            WalletManager.walletKit?.putPaymenCodeStatusSent(address, notification?.tx)
+                            this.attemptBip47Payment()
+                        }
+                    } else if(Address.isValidSlpAddress(WalletManager.parameters, address)) {
+                        val amount = root?.send_amount_input?.text?.toString()?.toDouble() ?: 0.0
+                        val slpAddress = address
+                        val slpTokenId = tokenId
+                        if(slpAddress != null && slpTokenId != null) {
+                            this.processSlpTransaction(slpAddress, amount, slpTokenId)
+                        }
                     }
                 }
+            } else {
+                Toaster.showMessage(requireActivity() as MainActivity, "please enter an address")
             }
         } else {
             Toaster.showMessage(requireActivity() as MainActivity, "wallet balance is zero")
@@ -298,6 +373,29 @@ class SendAmountFragment : Fragment() {
                 }
             }
         }.start()
+    }
+
+    private fun processSlpTransaction(address: String, tokenAmount: Double, tokenId: String) {
+        val tx = WalletManager.walletKit?.createSlpTransaction(address, tokenId, tokenAmount, null)
+        val req = SendRequest.forTx(tx)
+        val sendResult = WalletManager.walletKit?.wallet()?.sendCoins(req)
+        Futures.addCallback(
+            sendResult?.broadcastComplete,
+            object : FutureCallback<Transaction?> {
+                override fun onSuccess(@Nullable result: Transaction?) {
+                    Toaster.showMessage(
+                        requireActivity() as MainActivity,
+                        "coins sent!"
+                    )
+                    (requireActivity() as MainActivity).disableSendScreen()
+                }
+
+                override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
+
+                }
+            },
+            MoreExecutors.directExecutor()
+        )
     }
 
     private fun processNormalTransaction() {
