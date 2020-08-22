@@ -309,7 +309,7 @@ class SendAmountFragment : Fragment() {
 
     private fun processNormalTransaction(address: String, bchAmount: String) {
         val bchToSend = formatBalance(bchAmount.toDouble(), "#.########")
-        val coinToSend = Coin.parseCoin(bchAmount)
+        val coinToSend = Coin.parseCoin(bchToSend)
 
         object : Thread() {
             override fun run() {
