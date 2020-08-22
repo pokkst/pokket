@@ -48,7 +48,7 @@ class SendHomeFragment : Fragment() {
             if (requestCode == Constants.REQUEST_CODE_SCAN_QR) {
                 if (data != null) {
                     val scanData = data.getStringExtra(Constants.QR_SCAN_RESULT)
-                    if(scanData.contains("http") || Address.isValidCashAddr(WalletManager.parameters, scanData) || Address.isValidLegacyAddress(WalletManager.parameters, scanData)) {
+                    if(scanData.contains("http") || Address.isValidPaymentCode(scanData) || Address.isValidSlpAddress(WalletManager.parameters, scanData) || Address.isValidCashAddr(WalletManager.parameters, scanData) || Address.isValidLegacyAddress(WalletManager.parameters, scanData)) {
                         findNavController().navigate(SendHomeFragmentDirections.navToSend(scanData))
                     }
                 }
