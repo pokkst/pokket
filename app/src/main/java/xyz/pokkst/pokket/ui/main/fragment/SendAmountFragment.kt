@@ -20,9 +20,11 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.android.synthetic.main.component_input_numpad.view.*
 import kotlinx.android.synthetic.main.fragment_send_amount.view.*
+import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.InsufficientMoneyException
 import org.bitcoinj.core.Transaction
+import org.bitcoinj.core.bip47.BIP47Channel
 import org.bitcoinj.protocols.payments.PaymentProtocol
 import org.bitcoinj.protocols.payments.PaymentProtocolException
 import org.bitcoinj.protocols.payments.PaymentSession
@@ -44,7 +46,7 @@ import java.util.concurrent.ExecutionException
  * A placeholder fragment containing a simple view.
  */
 class SendAmountFragment : Fragment() {
-    //val args: SendAmountFragment by navArgs()
+    //TODO add SLP sending
     var address: String? = null
     var root: View? = null
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -118,10 +120,43 @@ class SendAmountFragment : Fragment() {
             if(address?.startsWith("http") == true) {
                 this.processBIP70(address!!)
             } else {
-                this.processNormalTransaction()
+                if(address?.contains("#") == true || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)) {
+                    this.processNormalTransaction()
+                } else if(Address.isValidPaymentCode(address)) {
+                    val canSendToPaymentCode = WalletManager.walletKit?.canSendToPaymentCode(address)
+                    if(canSendToPaymentCode == true) {
+                        this.attemptBip47Payment()
+                    } else {
+                        val notification = WalletManager.walletKit?.makeNotificationTransaction(address, true)
+                        WalletManager.walletKit?.broadcastTransaction(notification?.tx)
+                        WalletManager.walletKit?.putPaymenCodeStatusSent(address, notification?.tx)
+                        this.attemptBip47Payment()
+                    }
+                }
             }
         } else {
             Toaster.showMessage(requireActivity() as MainActivity, "wallet balance is zero")
+        }
+    }
+
+    private fun attemptBip47Payment() {
+        val paymentChannel: BIP47Channel? = WalletManager.walletKit?.getBip47MetaForPaymentCode(address)
+        var depositAddress: String? = null
+        if (paymentChannel != null) {
+            if(paymentChannel.isNotificationTransactionSent) {
+                depositAddress = WalletManager.walletKit?.getCurrentOutgoingAddress(paymentChannel)
+                if(depositAddress != null) {
+                    println("Received user's deposit address $depositAddress")
+                    paymentChannel.incrementOutgoingIndex()
+                    WalletManager.walletKit?.saveBip47MetaData()
+                    this.processNormalTransaction(depositAddress)
+                }
+            } else {
+                val notification = WalletManager.walletKit?.makeNotificationTransaction(address, true)
+                WalletManager.walletKit?.broadcastTransaction(notification?.tx)
+                WalletManager.walletKit?.putPaymenCodeStatusSent(address, notification?.tx)
+                this.attemptBip47Payment()
+            }
         }
     }
 
@@ -260,20 +295,27 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun processNormalTransaction() {
-        var bchToSend = if (bchIsSendType) {
+        address?.let { this.processNormalTransaction(it) }
+    }
+
+    private fun processNormalTransaction(address: String?) {
+        val bchToSend = if (bchIsSendType) {
             root?.send_amount_input?.text.toString()
         } else {
             root?.alt_currency_display?.text.toString()
         }
+        address?.let { this.processNormalTransaction(it, bchToSend) }
+    }
 
-        bchToSend = formatBalance(bchToSend.toDouble(), "#.########")
-        val coinToSend = Coin.parseCoin(bchToSend)
+    private fun processNormalTransaction(address: String, bchAmount: String) {
+        val bchToSend = formatBalance(bchAmount.toDouble(), "#.########")
+        val coinToSend = Coin.parseCoin(bchAmount)
 
         object : Thread() {
             override fun run() {
                 try {
                     val req: SendRequest =
-                        if (coinToSend >= WalletManager.getBalance(WalletManager.walletKit!!.wallet())) {
+                        if (coinToSend == WalletManager.getBalance(WalletManager.walletKit!!.wallet())) {
                             SendRequest.emptyWallet(WalletManager.parameters, address)
                         } else {
                             SendRequest.to(WalletManager.parameters, address, coinToSend)

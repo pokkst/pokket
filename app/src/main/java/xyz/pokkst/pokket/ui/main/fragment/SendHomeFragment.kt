@@ -30,7 +30,7 @@ class SendHomeFragment : Fragment() {
         root.paste_address_button.setOnClickListener {
             val clipBoard= requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val pasteData = clipBoard.primaryClip?.getItemAt(0)?.text.toString()
-            if(pasteData.contains("http") || Address.isValidCashAddr(WalletManager.parameters, pasteData) || Address.isValidLegacyAddress(WalletManager.parameters, pasteData)) {
+            if(pasteData.contains("http") || Address.isValidPaymentCode(pasteData) || Address.isValidSlpAddress(WalletManager.parameters, pasteData) || Address.isValidCashAddr(WalletManager.parameters, pasteData) || Address.isValidLegacyAddress(WalletManager.parameters, pasteData)) {
                 findNavController().navigate(SendHomeFragmentDirections.navToSend(pasteData))
             }
         }
