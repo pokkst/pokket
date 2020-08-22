@@ -14,6 +14,7 @@ import com.google.android.material.tabs.TabLayout
 import kotlinx.android.synthetic.main.activity_main.*
 import xyz.pokkst.pokket.ui.ToggleViewPager
 import xyz.pokkst.pokket.ui.main.SectionsPagerAdapter
+import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
@@ -39,6 +40,21 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val extras = intent.extras
+        var seed: String? = null
+        var newUser: Boolean = false
+        if (extras != null) {
+            seed = extras.getString("seed")
+            newUser = extras.getBoolean("new")
+        }
+
+        prepareViews(newUser)
+        setListeners()
+
+        WalletManager.startWallet(this, seed, newUser)
+    }
+
+    private fun prepareViews(newUser: Boolean) {
         val decorView = window.decorView
         var flags = decorView.systemUiVisibility
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -52,22 +68,22 @@ class MainActivity : AppCompatActivity() {
             window.statusBarColor = resources.getColor(R.color.statusBarLight)
             window.navigationBarColor = resources.getColor(R.color.navBarLight)
         }
-        val extras = intent.extras
-        var seed: String? = null
-        var newUser: Boolean = false
-        if (extras != null) {
-            seed = extras.getString("seed")
-            newUser = extras.getBoolean("new")
-        }
+
         val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
-        val viewPager: ToggleViewPager = findViewById(R.id.view_pager)
-        viewPager.adapter = sectionsPagerAdapter
-        if(newUser) { viewPager.currentItem = 2 }
-        val tabs: TabLayout = findViewById(R.id.tabs)
-        tabs.setupWithViewPager(viewPager)
-        val settingsButton: ImageView = findViewById(R.id.settings_button)
-        settingsButton.setOnClickListener {
-            if(viewPager.isPagingEnabled()) {
+        view_pager.adapter = sectionsPagerAdapter
+        if(newUser) { view_pager.currentItem = 2 }
+        tabs.setupWithViewPager(view_pager)
+    }
+
+    private fun setListeners() {
+        pay_button.setOnClickListener {
+            pay_button.isEnabled = false
+            val intent = Intent(Constants.ACTION_FRAGMENT_SEND_SEND)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        }
+
+        settings_button.setOnClickListener {
+            if(view_pager.isPagingEnabled()) {
                 val intentSettings = Intent(this, SettingsActivity::class.java)
                 startActivity(intentSettings)
             } else {
@@ -75,17 +91,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        pay_button.setOnClickListener {
-            pay_button.isEnabled = false
-            val intent = Intent(Constants.ACTION_FRAGMENT_SEND_SEND)
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
-        }
-
         val filter = IntentFilter()
         filter.addAction(Constants.ACTION_UPDATE_RECEIVE_QR)
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter)
-
-        WalletManager.startWallet(this, seed, newUser)
     }
 
     override fun onBackPressed() {
@@ -106,7 +114,7 @@ class MainActivity : AppCompatActivity() {
                     super.run()
                     val bch = WalletManager.getBalance(WalletManager.walletKit?.wallet()!!).toPlainString().toDouble()
                     val fiat = bch * PriceHelper.price
-                    val fiatStr = formatBalance(fiat, "0.00")
+                    val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
                     this@MainActivity.runOnUiThread {
                         appbar_title.text = "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
                     }
@@ -126,7 +134,7 @@ class MainActivity : AppCompatActivity() {
                     super.run()
                     val bch = WalletManager.getBalance(WalletManager.walletKit?.wallet()!!).toPlainString().toDouble()
                     val fiat = bch * PriceHelper.price
-                    val fiatStr = formatBalance(fiat, "0.00")
+                    val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
                     this@MainActivity.runOnUiThread {
                         appbar_title.text = "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
                     }
@@ -165,10 +173,5 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(Constants.ACTION_MAIN_ENABLE_PAGER)
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
         inFragment = false
-    }
-
-    fun formatBalance(amount: Double, pattern: String): String {
-        val formatter = DecimalFormat(pattern, DecimalFormatSymbols(Locale.US))
-        return formatter.format(amount)
     }
 }

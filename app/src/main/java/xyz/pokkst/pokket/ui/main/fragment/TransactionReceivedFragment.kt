@@ -15,6 +15,7 @@ import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptException
 import org.bitcoinj.script.ScriptPattern
 import xyz.pokkst.pokket.R
+import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.lang.Exception
@@ -89,10 +90,10 @@ class TransactionReceivedFragment : Fragment() {
             tx.getValueSentToMe(WalletManager.walletKit?.wallet()).toPlainString().toDouble()
         }
         root.tx_amount_text.text = if(slpTx != null && slpToken != null) {
-            "${formatBalance(bchReceived, "#.#########")} ${slpToken.ticker}"
+            "${BalanceFormatter.formatBalance(bchReceived, "#.#########")} ${slpToken.ticker}"
 
         } else {
-            resources.getString(R.string.tx_amount_moved, formatBalance(bchReceived, "#.########"))
+            resources.getString(R.string.tx_amount_moved, BalanceFormatter.formatBalance(bchReceived, "#.########"))
         }
 
         if(!isSlp || slpToken == null) {
@@ -100,7 +101,7 @@ class TransactionReceivedFragment : Fragment() {
                 override fun run() {
                     val fiatValue = bchReceived * PriceHelper.price
                     requireActivity().runOnUiThread {
-                        root.tx_exchange_text.text = "($${formatBalance(fiatValue, "0.00")})"
+                        root.tx_exchange_text.text = "($${BalanceFormatter.formatBalance(fiatValue, "0.00")})"
                     }
                 }
             }.start()
@@ -109,11 +110,6 @@ class TransactionReceivedFragment : Fragment() {
         setReceivedToAddresses(root.general_tx_to_layout, toAddresses, toAmounts)
 
         return root
-    }
-
-    fun formatBalance(amount: Double, pattern: String): String {
-        val formatter = DecimalFormat(pattern, DecimalFormatSymbols(Locale.US))
-        return formatter.format(amount)
     }
 
     private fun setReceivedFromAddresses(
@@ -187,19 +183,19 @@ class TransactionReceivedFragment : Fragment() {
                     amounts[i] / 100000000.0
                 }
                 txToAmount.text = if(slpUtxo != null && slpToken != null) {
-                    "${formatBalance(amountInBch, "#.#########")} ${slpToken.ticker}"
+                    "${BalanceFormatter.formatBalance(amountInBch, "#.#########")} ${slpToken.ticker}"
                 } else {
                     if(utxoIsMine) {
                         if(i == slpTx?.slpOpReturn?.mintingBatonVout && isSlp && slpTx.slpOpReturn?.hasMintingBaton()!! && slpToken != null) {
                             "Minting Baton"
                         } else {
-                            resources.getString(R.string.tx_amount_moved, "${formatBalance(amountInBch, "#.########")}")
+                            resources.getString(R.string.tx_amount_moved, "${BalanceFormatter.formatBalance(amountInBch, "#.########")}")
                         }
                     } else {
                         if(i == slpTx?.slpOpReturn?.mintingBatonVout && isSlp && slpTx.slpOpReturn?.hasMintingBaton()!! && slpToken != null) {
                             "Minting Baton"
                         } else {
-                            resources.getString(R.string.tx_amount_moved, "${formatBalance(amountInBch, "#.########")}")
+                            resources.getString(R.string.tx_amount_moved, "${BalanceFormatter.formatBalance(amountInBch, "#.########")}")
                         }
                     }
                 }
@@ -210,7 +206,7 @@ class TransactionReceivedFragment : Fragment() {
                         null
                     } else {
                         val amountInFiat = amountInBch * PriceHelper.price
-                        "($${formatBalance(amountInFiat, "0.00")})"
+                        "($${BalanceFormatter.formatBalance(amountInFiat, "0.00")})"
                     }
                 }
 

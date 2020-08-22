@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.activity_settings.appbar_title
 import kotlinx.android.synthetic.main.activity_settings.settings_button
+import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
@@ -78,7 +79,7 @@ class SettingsActivity : AppCompatActivity() {
                     val bch = WalletManager.getBalance(WalletManager.walletKit?.wallet()!!)
                         .toPlainString().toDouble()
                     val fiat = bch * PriceHelper.price
-                    val fiatStr = formatBalance(fiat, "0.00")
+                    val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
                     this@SettingsActivity.runOnUiThread {
                         appbar_title.text =
                             "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
@@ -87,10 +88,5 @@ class SettingsActivity : AppCompatActivity() {
             }
         }.start()
         settings_button.setImageResource(R.drawable.x)
-    }
-
-    fun formatBalance(amount: Double, pattern: String): String {
-        val formatter = DecimalFormat(pattern, DecimalFormatSymbols(Locale.US))
-        return formatter.format(amount)
     }
 }

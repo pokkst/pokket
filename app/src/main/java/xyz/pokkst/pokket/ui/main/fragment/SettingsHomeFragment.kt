@@ -18,6 +18,7 @@ import org.bitcoinj.core.slp.SlpOpReturn
 import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.R
+import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.DateFormatter
 import xyz.pokkst.pokket.util.PriceHelper
@@ -142,7 +143,7 @@ class SettingsHomeFragment : Fragment() {
                                         ticker = slpToken.ticker
                                         val slpAmount = slpTx.getRawValue(WalletManager.walletKit?.wallet())
                                             .scaleByPowerOfTen(-slpToken.decimals).toDouble()
-                                        formatBalance(slpAmount, "#.#########")
+                                        BalanceFormatter.formatBalance(slpAmount, "#.#########")
                                     } else {
                                         value.toPlainString()
                                     }
@@ -159,7 +160,7 @@ class SettingsHomeFragment : Fragment() {
                                 datum["ticker"] = ticker
                                 datum["slp"] = if(isSlp) "true" else "false"
                                 datum["amount"] = amountStr
-                                datum["fiatAmount"] = formatBalance((amountStr.toDouble() * PriceHelper.price), "0.00")
+                                datum["fiatAmount"] = BalanceFormatter.formatBalance((amountStr.toDouble() * PriceHelper.price), "0.00")
                                 datum["timestamp"] = timestamp
 
                                 when {
@@ -220,10 +221,5 @@ class SettingsHomeFragment : Fragment() {
                 }
             }
         }.start()
-    }
-
-    fun formatBalance(amount: Double, pattern: String): String {
-        val formatter = DecimalFormat(pattern, DecimalFormatSymbols(Locale.US))
-        return formatter.format(amount)
     }
 }

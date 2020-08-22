@@ -33,6 +33,7 @@ import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.R
+import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.util.Toaster
@@ -217,13 +218,13 @@ class SendAmountFragment : Fragment() {
                         if (bchIsSendType) {
                             val fiatValue = value * price
                             requireActivity().runOnUiThread {
-                                root.alt_currency_display.text = formatBalance(fiatValue, "0.00")
+                                root.alt_currency_display.text = BalanceFormatter.formatBalance(fiatValue, "0.00")
                             }
                         } else {
                             val bchValue = value / price
                             requireActivity().runOnUiThread {
                                 root.alt_currency_display.text =
-                                    formatBalance(bchValue, "#.########")
+                                    BalanceFormatter.formatBalance(bchValue, "#.########")
                             }
                         }
                     } else {
@@ -234,11 +235,6 @@ class SendAmountFragment : Fragment() {
                 }
             }.start()
         }
-    }
-
-    fun formatBalance(amount: Double, pattern: String): String {
-        val formatter = DecimalFormat(pattern, DecimalFormatSymbols(Locale.US))
-        return formatter.format(amount)
     }
 
     private fun processBIP70(url: String) {
@@ -318,7 +314,7 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun processNormalTransaction(address: String, bchAmount: String) {
-        val bchToSend = formatBalance(bchAmount.toDouble(), "#.########")
+        val bchToSend = BalanceFormatter.formatBalance(bchAmount.toDouble(), "#.########")
         val coinToSend = Coin.parseCoin(bchToSend)
 
         object : Thread() {
@@ -390,17 +386,17 @@ class SendAmountFragment : Fragment() {
                     val future: ListenableFuture<PaymentSession> = PaymentSession.createFromUrl(url)
                     val session = future.get()
                     val amountWanted = session.value
-                    val amountFormatted = formatBalance(amountWanted.toPlainString().toDouble(), "#.########")
+                    val amountFormatted = BalanceFormatter.formatBalance(amountWanted.toPlainString().toDouble(), "#.########")
                     requireActivity().runOnUiThread {
                         val bchValue = amountFormatted.toDouble()
                         val price = PriceHelper.price
                         val fiatValue = bchValue * price
                         if (bchIsSendType) {
-                            root?.send_amount_input?.setText(formatBalance(bchValue, "#.########"))
-                            root?.alt_currency_display?.text = formatBalance(fiatValue, "0.00")
+                            root?.send_amount_input?.setText(BalanceFormatter.formatBalance(bchValue, "#.########"))
+                            root?.alt_currency_display?.text = BalanceFormatter.formatBalance(fiatValue, "0.00")
                         } else {
-                            root?.send_amount_input?.setText(formatBalance(fiatValue, "0.00"))
-                            root?.alt_currency_display?.text = formatBalance(bchValue, "#.########")
+                            root?.send_amount_input?.setText(BalanceFormatter.formatBalance(fiatValue, "0.00"))
+                            root?.alt_currency_display?.text = BalanceFormatter.formatBalance(bchValue, "#.########")
                         }
 
                         root?.send_amount_input?.isEnabled = false

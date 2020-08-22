@@ -17,6 +17,7 @@ import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.wallet.Wallet
 import org.bitcoinj.wallet.WalletTransaction
 import xyz.pokkst.pokket.R
+import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.lang.Exception
@@ -97,15 +98,15 @@ class TransactionSentFragment : Fragment() {
         } else {
             0.0
         }
-        root.tx_to_fee_amount_text.text = resources.getString(R.string.tx_amount_moved, "-${formatBalance(bchFee, "#.########")}")
+        root.tx_to_fee_amount_text.text = resources.getString(R.string.tx_amount_moved, "-${BalanceFormatter.formatBalance(bchFee, "#.########")}")
         root.tx_amount_text.text = if(slpTx != null && slpToken != null) {
             if(bchSent > 0) {
-                "-${formatBalance(bchSent, "#.#########")} ${slpToken.ticker}"
+                "-${BalanceFormatter.formatBalance(bchSent, "#.#########")} ${slpToken.ticker}"
             } else {
-                "${formatBalance(-bchSent, "#.#########")} ${slpToken.ticker}"
+                "${BalanceFormatter.formatBalance(-bchSent, "#.#########")} ${slpToken.ticker}"
             }
         } else {
-            resources.getString(R.string.tx_amount_moved, formatBalance(bchSent, "#.########"))
+            resources.getString(R.string.tx_amount_moved, BalanceFormatter.formatBalance(bchSent, "#.########"))
         }
 
         if(!isSlp || slpToken == null) {
@@ -115,9 +116,9 @@ class TransactionSentFragment : Fragment() {
                     val feeFiatValue = bchFee * PriceHelper.price
                     requireActivity().runOnUiThread {
                         root.tx_to_fee_exchange_text.text =
-                            "($-${formatBalance(feeFiatValue, "0.00")})"
+                            "($-${BalanceFormatter.formatBalance(feeFiatValue, "0.00")})"
                         root.tx_exchange_text.text =
-                            "($${formatBalance(fiatValue, "0.00")})"
+                            "($${BalanceFormatter.formatBalance(fiatValue, "0.00")})"
                     }
                 }
             }.start()
@@ -126,11 +127,6 @@ class TransactionSentFragment : Fragment() {
         setSentToAddresses(root.general_tx_to_layout, toAddresses, toAmounts)
 
         return root
-    }
-
-    fun formatBalance(amount: Double, pattern: String): String {
-        val formatter = DecimalFormat(pattern, DecimalFormatSymbols(Locale.US))
-        return formatter.format(amount)
     }
 
     private fun setSentFromAddresses(
@@ -207,9 +203,9 @@ class TransactionSentFragment : Fragment() {
 
                 txToAmount.text = if(slpUtxo != null && slpToken != null) {
                     if(utxoIsMine) {
-                        "${formatBalance(amountInBch, "#.#########")} ${slpToken.ticker}"
+                        "${BalanceFormatter.formatBalance(amountInBch, "#.#########")} ${slpToken.ticker}"
                     } else {
-                        "-${formatBalance(amountInBch, "#.#########")} ${slpToken.ticker}"
+                        "-${BalanceFormatter.formatBalance(amountInBch, "#.#########")} ${slpToken.ticker}"
                     }
                 } else {
                     if(utxoIsMine) {
@@ -218,7 +214,7 @@ class TransactionSentFragment : Fragment() {
                         } else {
                             resources.getString(
                                 R.string.tx_amount_moved,
-                                "${formatBalance(amountInBch, "#.########")}"
+                                "${BalanceFormatter.formatBalance(amountInBch, "#.########")}"
                             )
                         }
                     } else {
@@ -227,7 +223,7 @@ class TransactionSentFragment : Fragment() {
                         } else {
                             resources.getString(
                                 R.string.tx_amount_moved,
-                                "-${formatBalance(amountInBch, "#.########")}"
+                                "-${BalanceFormatter.formatBalance(amountInBch, "#.########")}"
                             )
                         }
                     }
@@ -240,9 +236,9 @@ class TransactionSentFragment : Fragment() {
                     } else {
                         val amountInFiat = amountInBch * PriceHelper.price
                         if (utxoIsMine) {
-                            "($${formatBalance(amountInFiat, "0.00")})"
+                            "($${BalanceFormatter.formatBalance(amountInFiat, "0.00")})"
                         } else {
-                            "($-${formatBalance(amountInFiat, "0.00")})"
+                            "($-${BalanceFormatter.formatBalance(amountInFiat, "0.00")})"
                         }
                     }
                 }
