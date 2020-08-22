@@ -10,10 +10,7 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.SimpleAdapter
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.Nullable
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -125,78 +122,122 @@ class ViewTokensFragment : Fragment() {
                 tokenList.add(datum)
             }
 
-            val itemsAdapter = object : SimpleAdapter(requireContext(), tokenList, R.layout.token_list_cell, null, null) {
-                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    // Get the Item from ListView
-                    val view = LayoutInflater.from(requireContext()).inflate(R.layout.token_list_cell, null)
-                    val slpBlockiesAddress = blockieAddressFromTokenId(tokenList[position]["tokenHash"]
-                        ?: error(""))
+            if(tokenList.isNotEmpty()) {
+                root?.findViewById<TextView>(R.id.loading_tokens_view)?.visibility = View.GONE
+                root?.findViewById<TextView>(R.id.no_tokens_view)?.visibility = View.GONE
+                slpList?.visibility = View.VISIBLE
+                val itemsAdapter = object : SimpleAdapter(
+                    requireContext(),
+                    tokenList,
+                    R.layout.token_list_cell,
+                    null,
+                    null
+                ) {
+                    override fun getView(
+                        position: Int,
+                        convertView: View?,
+                        parent: ViewGroup
+                    ): View {
+                        // Get the Item from ListView
+                        val view = LayoutInflater.from(requireContext())
+                            .inflate(R.layout.token_list_cell, null)
+                        val slpBlockiesAddress = blockieAddressFromTokenId(
+                            tokenList[position]["tokenHash"]
+                                ?: error("")
+                        )
 
-                    val slpImage = view.findViewById<BlockiesIdenticon>(R.id.slpImage)
-                    val slpIcon = view.findViewById<ImageView>(R.id.slpWithIcon)
-                    val tokenHash = tokenList[position]["tokenHash"]
-                    val slpToken = WalletManager.walletKit?.getSlpToken(tokenHash)
+                        val slpImage = view.findViewById<BlockiesIdenticon>(R.id.slpImage)
+                        val slpIcon = view.findViewById<ImageView>(R.id.slpWithIcon)
+                        val tokenHash = tokenList[position]["tokenHash"]
+                        val slpToken = WalletManager.walletKit?.getSlpToken(tokenHash)
 
-                    object : Thread() {
-                        override fun run() {
-                            try {
-                                if (slpToken != null) {
-                                    val exists = this@ViewTokensFragment.resources.getIdentifier("slp$tokenHash", "drawable", this@ViewTokensFragment.requireActivity().packageName) != 0
-                                    if (exists) {
-                                        val drawable = this@ViewTokensFragment.resources.getDrawable(this@ViewTokensFragment.resources.getIdentifier("slp$tokenHash", "drawable", this@ViewTokensFragment.requireActivity().packageName))
+                        object : Thread() {
+                            override fun run() {
+                                try {
+                                    if (slpToken != null) {
+                                        val exists =
+                                            this@ViewTokensFragment.resources.getIdentifier(
+                                                "slp$tokenHash",
+                                                "drawable",
+                                                this@ViewTokensFragment.requireActivity().packageName
+                                            ) != 0
+                                        if (exists) {
+                                            val drawable =
+                                                this@ViewTokensFragment.resources.getDrawable(
+                                                    this@ViewTokensFragment.resources.getIdentifier(
+                                                        "slp$tokenHash",
+                                                        "drawable",
+                                                        this@ViewTokensFragment.requireActivity().packageName
+                                                    )
+                                                )
+                                            this@ViewTokensFragment.requireActivity()
+                                                .runOnUiThread {
+                                                    slpIcon.setImageDrawable(drawable)
+                                                    slpImage.visibility = View.GONE
+                                                    slpIcon.visibility = View.VISIBLE
+                                                }
+                                        } else {
+                                            slpImage.setAddress(slpBlockiesAddress)
+                                            slpImage.setCornerRadius(128f)
+                                        }
+                                    } else {
+                                        val drawable =
+                                            this@ViewTokensFragment.resources.getDrawable(
+                                                this@ViewTokensFragment.resources.getIdentifier(
+                                                    "logo_bch",
+                                                    "drawable",
+                                                    this@ViewTokensFragment.requireActivity().packageName
+                                                )
+                                            )
                                         this@ViewTokensFragment.requireActivity().runOnUiThread {
                                             slpIcon.setImageDrawable(drawable)
                                             slpImage.visibility = View.GONE
                                             slpIcon.visibility = View.VISIBLE
                                         }
-                                    } else {
-                                        slpImage.setAddress(slpBlockiesAddress)
-                                        slpImage.setCornerRadius(128f)
                                     }
-                                } else {
-                                    val drawable = this@ViewTokensFragment.resources.getDrawable(this@ViewTokensFragment.resources.getIdentifier("logo_bch", "drawable", this@ViewTokensFragment.requireActivity().packageName))
-                                    this@ViewTokensFragment.requireActivity().runOnUiThread {
-                                        slpIcon.setImageDrawable(drawable)
-                                        slpImage.visibility = View.GONE
-                                        slpIcon.visibility = View.VISIBLE
-                                    }
+                                } catch (e: Exception) {
+                                    slpImage.setAddress(slpBlockiesAddress)
+                                    slpImage.setCornerRadius(128f)
                                 }
-                            } catch (e: Exception) {
-                                slpImage.setAddress(slpBlockiesAddress)
-                                slpImage.setCornerRadius(128f)
                             }
-                        }
-                    }.start()
+                        }.start()
 
-                    // Initialize a TextView for ListView each Item
-                    val text1 = view.findViewById<TextView>(R.id.text1)
-                    val text2 = view.findViewById<TextView>(R.id.text2)
-                    val text3 = view.findViewById<TextView>(R.id.text3)
-                    val tokenBalString = tokenList[position]["balance"].toString()
-                    text1.text = String.format(Locale.ENGLISH, "%.${slpToken?.decimals
-                        ?: 0}f", java.lang.Double.parseDouble(tokenBalString))
-                    text3.text = tokenList[position]["tokenTicker"].toString()
-                    text2.text = slpToken?.tokenId
-                    // Set the text color of TextView (ListView Item)
-                    /*if (UIManager.nightModeEnabled) {
+                        // Initialize a TextView for ListView each Item
+                        val text1 = view.findViewById<TextView>(R.id.text1)
+                        val text2 = view.findViewById<TextView>(R.id.text2)
+                        val text3 = view.findViewById<TextView>(R.id.text3)
+                        val tokenBalString = tokenList[position]["balance"].toString()
+                        text1.text = String.format(
+                            Locale.ENGLISH, "%.${slpToken?.decimals
+                                ?: 0}f", java.lang.Double.parseDouble(tokenBalString)
+                        )
+                        text3.text = tokenList[position]["tokenTicker"].toString()
+                        text2.text = slpToken?.tokenId
+                        // Set the text color of TextView (ListView Item)
+                        /*if (UIManager.nightModeEnabled) {
                         text1.setTextColor(Color.WHITE)
                         text2.setTextColor(Color.GRAY)
                         text3.setTextColor(Color.WHITE)
                     } else {*/
-                    text1.setTextColor(Color.BLACK)
-                    text3.setTextColor(Color.BLACK)
-                    //}
+                        text1.setTextColor(Color.BLACK)
+                        text3.setTextColor(Color.BLACK)
+                        //}
 
-                    text2.ellipsize = TextUtils.TruncateAt.END
-                    text2.maxLines = 1
-                    text2.isSingleLine = true
-                    // Generate ListView Item using TextView
-                    return view
+                        text2.ellipsize = TextUtils.TruncateAt.END
+                        text2.maxLines = 1
+                        text2.isSingleLine = true
+                        // Generate ListView Item using TextView
+                        return view
+                    }
                 }
-            }
-            this.requireActivity().runOnUiThread {
-                slpList?.adapter = itemsAdapter
-                slpList?.refreshDrawableState()
+                this.requireActivity().runOnUiThread {
+                    slpList?.adapter = itemsAdapter
+                    slpList?.refreshDrawableState()
+                }
+            } else {
+                root?.findViewById<TextView>(R.id.loading_tokens_view)?.visibility = View.GONE
+                root?.findViewById<TextView>(R.id.no_tokens_view)?.visibility = View.VISIBLE
+                slpList?.visibility = View.GONE
             }
         }
     }
