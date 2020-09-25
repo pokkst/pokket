@@ -77,8 +77,8 @@ class SettingsActivity : AppCompatActivity() {
             override fun run() {
                 if(WalletManager.walletKit?.wallet() != null) {
                     val bch = WalletManager.getBalance(WalletManager.walletKit?.wallet()!!)
-                        .toPlainString().toDouble()
-                    val fiat = bch * PriceHelper.price
+                        .toPlainString()
+                    val fiat = bch.toDouble() * PriceHelper.price
                     val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
                     this@SettingsActivity.runOnUiThread {
                         appbar_title.text =

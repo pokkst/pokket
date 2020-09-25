@@ -354,7 +354,7 @@
     <string name="word_nr11">select the <b>11th</b> word of your recovery phrase from the list below</string>
     <string name="early_access">early access</string>
     <!-- android -->
-    <string name="appbar_title">&#384;%1$f</string>
+    <string name="appbar_title">&#384;%1$s</string>
     <string name="tx_amount_moved">&#384;%1$s</string>
     <string name="b_symbol">&#384;</string>
     <string name="fiat_symbol">$</string>

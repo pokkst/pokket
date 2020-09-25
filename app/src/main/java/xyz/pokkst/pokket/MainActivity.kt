@@ -112,8 +112,8 @@ class MainActivity : AppCompatActivity() {
             object : Thread() {
                 override fun run() {
                     super.run()
-                    val bch = WalletManager.getBalance(WalletManager.walletKit?.wallet()!!).toPlainString().toDouble()
-                    val fiat = bch * PriceHelper.price
+                    val bch = WalletManager.getBalance(WalletManager.walletKit?.wallet()!!).toPlainString()
+                    val fiat = bch.toDouble() * PriceHelper.price
                     val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
                     this@MainActivity.runOnUiThread {
                         appbar_title.text = "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
@@ -132,8 +132,8 @@ class MainActivity : AppCompatActivity() {
             object : Thread() {
                 override fun run() {
                     super.run()
-                    val bch = WalletManager.getBalance(WalletManager.walletKit?.wallet()!!).toPlainString().toDouble()
-                    val fiat = bch * PriceHelper.price
+                    val bch = WalletManager.getBalance(WalletManager.walletKit?.wallet()!!).toPlainString()
+                    val fiat = bch.toDouble() * PriceHelper.price
                     val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
                     this@MainActivity.runOnUiThread {
                         appbar_title.text = "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
