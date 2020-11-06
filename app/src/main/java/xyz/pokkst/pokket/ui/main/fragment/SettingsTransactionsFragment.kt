@@ -17,6 +17,7 @@ import org.bitcoinj.core.slp.SlpOpReturn
 import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.R
+import xyz.pokkst.pokket.SettingsActivity
 import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.DateFormatter
@@ -43,8 +44,7 @@ class SettingsTransactionsFragment : Fragment() {
         receivedColor = Color.parseColor("#00BF00")
         this.setArrayAdapter(root, WalletManager.walletKit?.wallet())
         root.transactions_list.setOnItemClickListener { parent, view, position, id ->
-            val intent = Intent(Constants.ACTION_SETTINGS_HIDE_BAR)
-            LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
+            (activity as? SettingsActivity)?.adjustDeepMenu(1)
             val txid = txList[position]
             val tx = WalletManager.walletKit?.wallet()?.getTransaction(Sha256Hash.wrap(txid))
             val amount = tx?.getValue(WalletManager.walletKit?.wallet())

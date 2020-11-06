@@ -55,14 +55,14 @@ class ViewTokensFragment : Fragment() {
         super.onCreate(savedInstanceState)
         activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                (requireActivity() as MainActivity).disableSendScreen()
+                (activity as? MainActivity)?.toggleSendScreen(false)
             }
         })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         root = inflater.inflate(R.layout.fragment_view_tokens, container, false)
-        (requireActivity() as MainActivity).enableTokensScreen()
+        (activity as? MainActivity)?.enableTokensScreen()
         val filter = IntentFilter()
         filter.addAction(Constants.ACTION_MAIN_ENABLE_PAGER)
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
@@ -117,7 +117,7 @@ class ViewTokensFragment : Fragment() {
                 val balance = tokenBalance.balance
 
                 datum["tokenHash"] = tokenHash
-                datum["tokenTicker"] = tokenTicker!!
+                datum["tokenTicker"] = tokenTicker
                 datum["balance"] = balance.toString()
 
                 tokenList.add(datum)

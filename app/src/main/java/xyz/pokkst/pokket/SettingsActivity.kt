@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.activity_settings.appbar_title
 import kotlinx.android.synthetic.main.activity_settings.settings_button
@@ -20,73 +21,44 @@ import java.util.*
 
 
 class SettingsActivity : AppCompatActivity() {
-    var deepMenuCount = 0
-    private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (Constants.ACTION_SETTINGS_HIDE_BAR == intent.action) {
-                this@SettingsActivity.showDeepMenuBar()
-            } else if (Constants.ACTION_SETTINGS_SHOW_BAR == intent.action) {
-                this@SettingsActivity.showRootMenuBar()
-            }
-        }
-    }
+    var deepMenuCount: MutableLiveData<Int> = MutableLiveData(0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         val settingsButton: ImageView = findViewById(R.id.settings_button)
         settingsButton.setOnClickListener {
-            if(deepMenuCount > 0) {
-                onBackPressed()
-            } else {
-                finish()
+            deepMenuCount.value?.let {
+                if(it > 0) {
+                    onBackPressed()
+                } else {
+                    finish()
+                }
             }
         }
 
-        showRootMenuBar()
+        deepMenuCount.observe(this, androidx.lifecycle.Observer { count ->
+            if(count <= 0) {
+                if(count < 0)
+                    deepMenuCount.value = 0
 
-        val filter = IntentFilter()
-        filter.addAction(Constants.ACTION_SETTINGS_HIDE_BAR)
-        filter.addAction(Constants.ACTION_SETTINGS_SHOW_BAR)
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter)
+                settings_button.setImageResource(R.drawable.x)
+            } else {
+                settings_button.setImageResource(R.drawable.navigationback)
+            }
+        })
+
+        appbar_title.text = resources.getString(R.string.app_name)
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
-
-        if(deepMenuCount > 0)
-            handleDeepMenu()
+         adjustDeepMenu(-1)
     }
 
-    private fun handleDeepMenu() {
-        deepMenuCount--
-
-        if(deepMenuCount <= 0) {
-            deepMenuCount = 0
-            showRootMenuBar()
-        }
-    }
-    private fun showDeepMenuBar() {
-        deepMenuCount++
-        appbar_title.text = resources.getString(R.string.app_name)
-        settings_button.setImageResource(R.drawable.navigationback)
-    }
-
-    private fun showRootMenuBar() {
-        deepMenuCount = 0
-        object : Thread() {
-            override fun run() {
-                if(WalletManager.walletKit?.wallet() != null) {
-                    val bch = WalletManager.getBalance(WalletManager.walletKit?.wallet()!!)
-                        .toPlainString()
-                    val fiat = bch.toDouble() * PriceHelper.price
-                    val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
-                    this@SettingsActivity.runOnUiThread {
-                        appbar_title.text =
-                            "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
-                    }
-                }
-            }
-        }.start()
-        settings_button.setImageResource(R.drawable.x)
+    fun adjustDeepMenu(byAmount: Int) {
+        val previousValue = deepMenuCount.value ?: 0
+        val newValue = previousValue + byAmount
+        deepMenuCount.value = newValue
     }
 }

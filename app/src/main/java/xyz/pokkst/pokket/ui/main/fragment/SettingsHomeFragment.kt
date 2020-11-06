@@ -18,6 +18,7 @@ import org.bitcoinj.core.slp.SlpOpReturn
 import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.R
+import xyz.pokkst.pokket.SettingsActivity
 import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.DateFormatter
@@ -45,16 +46,12 @@ class SettingsHomeFragment : Fragment() {
         this.setArrayAdapter(root, WalletManager.walletKit?.wallet())
 
         root.about.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
-            val intent = Intent(Constants.ACTION_SETTINGS_HIDE_BAR)
-            LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
-            findNavController().navigate(R.id.nav_to_about)
+            navigate(R.id.nav_to_about)
         }
         root.about.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.about)
 
         root.recovery_phrase.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
-            val intent = Intent(Constants.ACTION_SETTINGS_HIDE_BAR)
-            LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
-            findNavController().navigate(R.id.nav_to_phrase)
+            navigate(R.id.nav_to_phrase)
         }
         root.recovery_phrase.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.recovery_phrase_label)
 
@@ -66,14 +63,11 @@ class SettingsHomeFragment : Fragment() {
         root.extended_public_key.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.epk_label)*/
 
         root.start_recovery_wallet.setOnClickListener {
-            val intent = Intent(Constants.ACTION_SETTINGS_HIDE_BAR)
-            LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
-            findNavController().navigate(R.id.nav_to_wipe)
+            navigate(R.id.nav_to_wipe)
         }
 
         root.transactions_list.setOnItemClickListener { parent, view, position, id ->
-            val intent = Intent(Constants.ACTION_SETTINGS_HIDE_BAR)
-            LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
+            (activity as? SettingsActivity)?.adjustDeepMenu(1)
             val txid = txList[position]
             val tx = WalletManager.walletKit?.wallet()?.getTransaction(Sha256Hash.wrap(txid))
             val amount = tx?.getValue(WalletManager.walletKit?.wallet())
@@ -99,14 +93,16 @@ class SettingsHomeFragment : Fragment() {
         }
 
         root.more_transactions.setOnClickListener {
-            val intent = Intent(Constants.ACTION_SETTINGS_HIDE_BAR)
-            LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
-            findNavController().navigate(R.id.nav_to_tx_list)
+            navigate(R.id.nav_to_tx_list)
         }
 
         return root
     }
 
+    private fun navigate(navResId: Int) {
+        (activity as? SettingsActivity)?.adjustDeepMenu(1)
+        findNavController().navigate(navResId)
+    }
     private fun setArrayAdapter(root: View, wallet: Wallet?) {
         setListViewShit(root, wallet)
     }

@@ -73,7 +73,7 @@ class SendAmountFragment : Fragment() {
         super.onCreate(savedInstanceState)
         activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                (requireActivity() as MainActivity).disableSendScreen()
+                (activity as? MainActivity)?.toggleSendScreen(false)
             }
         })
     }
@@ -86,7 +86,7 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun prepareViews() {
-        (requireActivity() as MainActivity).enableSendScreen()
+        (activity as? MainActivity)?.toggleSendScreen(true)
 
         root?.input_type_toggle?.isChecked = true
 
@@ -194,7 +194,9 @@ class SendAmountFragment : Fragment() {
             if(address != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
                 if(address == null) address = root?.to_field_edit_text?.text?.toString()
                 if(address?.startsWith("http") == true) {
-                    this.processBIP70(address!!)
+                    address?.let {
+                        this.processBIP70(it)
+                    }
                 } else {
                     if(address?.contains("#") == true || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)) {
                         this.processNormalTransaction()
@@ -218,10 +220,10 @@ class SendAmountFragment : Fragment() {
                     }
                 }
             } else {
-                Toaster.showMessage(requireActivity() as MainActivity, "please enter an address")
+                (activity as? MainActivity)?.let { Toaster.showMessage(it, "please enter an address") }
             }
         } else {
-            Toaster.showMessage(requireActivity() as MainActivity, "wallet balance is zero")
+            (activity as? MainActivity)?.let { Toaster.showMessage(it, "wallet balance is zero") }
         }
     }
 
@@ -292,18 +294,18 @@ class SendAmountFragment : Fragment() {
 
                         if (bchIsSendType) {
                             val fiatValue = value * price
-                            requireActivity().runOnUiThread {
+                            activity?.runOnUiThread {
                                 root.alt_currency_display.text = BalanceFormatter.formatBalance(fiatValue, "0.00")
                             }
                         } else {
                             val bchValue = value / price
-                            requireActivity().runOnUiThread {
+                            activity?.runOnUiThread {
                                 root.alt_currency_display.text =
                                     BalanceFormatter.formatBalance(bchValue, "#.########")
                             }
                         }
                     } else {
-                        requireActivity().runOnUiThread {
+                        activity?.runOnUiThread {
                             root.alt_currency_display.text = null
                         }
                     }
@@ -320,7 +322,8 @@ class SendAmountFragment : Fragment() {
 
                     val session = future.get()
                     if (session.isExpired) {
-                        Toaster.showMessage(requireActivity() as MainActivity, "invoice is expired")
+                        showToast("invoice is expired")
+                        return
                     }
 
                     val req = session.sendRequest
@@ -332,43 +335,28 @@ class SendAmountFragment : Fragment() {
                         Futures.addCallback<PaymentProtocol.Ack>(ack, object : FutureCallback<PaymentProtocol.Ack> {
                             override fun onSuccess(ack: PaymentProtocol.Ack?) {
                                 WalletManager.walletKit?.wallet()?.commitTx(req.tx)
-                                Toaster.showMessage(
-                                    requireActivity() as MainActivity,
-                                    "coins sent!"
-                                )
-                                (requireActivity() as MainActivity).disableSendScreen()
+                                showToast("coins sent!")
+                                (activity as? MainActivity)?.toggleSendScreen(false)
                             }
 
                             override fun onFailure(throwable: Throwable) {
-                                Toaster.showMessage(requireActivity() as MainActivity, "an error occurred")
+                                showToast("an error occurred")
                             }
                         }, MoreExecutors.directExecutor())
                     }
                 } catch (e: InsufficientMoneyException) {
                     e.printStackTrace()
-                    Toaster.showMessage(
-                        requireActivity() as MainActivity,
-                        "not enough coins in wallet"
-                    )
+                    showToast("not enough coins in wallet")
                 } catch (e: Wallet.CouldNotAdjustDownwards) {
                     e.printStackTrace()
-                    Toaster.showMessage(
-                        requireActivity() as MainActivity,
-                        "error adjusting downwards"
-                    )
+                    showToast("error adjusting downwards")
                 } catch (e: Wallet.ExceededMaxTransactionSize) {
                     e.printStackTrace()
-                    Toaster.showMessage(
-                        requireActivity() as MainActivity,
-                        "transaction is too big"
-                    )
+                    showToast("transaction is too big")
                 } catch (e: NullPointerException) {
                     e.printStackTrace()
                     e.message?.let {
-                        Toaster.showMessage(
-                            requireActivity() as MainActivity,
-                            it
-                        )
+                        showToast(it)
                     }
                 }
             }
@@ -383,11 +371,8 @@ class SendAmountFragment : Fragment() {
             sendResult?.broadcastComplete,
             object : FutureCallback<Transaction?> {
                 override fun onSuccess(@Nullable result: Transaction?) {
-                    Toaster.showMessage(
-                        requireActivity() as MainActivity,
-                        "coins sent!"
-                    )
-                    (requireActivity() as MainActivity).disableSendScreen()
+                    showToast("coins sent!")
+                    (activity as? MainActivity)?.toggleSendScreen(false)
                 }
 
                 override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
@@ -419,7 +404,7 @@ class SendAmountFragment : Fragment() {
             override fun run() {
                 try {
                     val req: SendRequest =
-                        if (coinToSend == WalletManager.getBalance(WalletManager.walletKit!!.wallet())) {
+                        if (coinToSend == WalletManager.walletKit?.wallet()?.let { WalletManager.getBalance(it) }) {
                             SendRequest.emptyWallet(WalletManager.parameters, address)
                         } else {
                             SendRequest.to(WalletManager.parameters, address, coinToSend)
@@ -433,11 +418,8 @@ class SendAmountFragment : Fragment() {
                         sendResult?.broadcastComplete,
                         object : FutureCallback<Transaction?> {
                             override fun onSuccess(@Nullable result: Transaction?) {
-                                Toaster.showMessage(
-                                    requireActivity() as MainActivity,
-                                    "coins sent!"
-                                )
-                                (requireActivity() as MainActivity).disableSendScreen()
+                                showToast("coins sent!")
+                                (activity as? MainActivity)?.toggleSendScreen(false)
                             }
 
                             override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
@@ -448,29 +430,17 @@ class SendAmountFragment : Fragment() {
                     )
                 } catch (e: InsufficientMoneyException) {
                     e.printStackTrace()
-                    Toaster.showMessage(
-                        requireActivity() as MainActivity,
-                        "not enough coins in wallet"
-                    )
+                    showToast("not enough coins in wallet")
                 } catch (e: Wallet.CouldNotAdjustDownwards) {
                     e.printStackTrace()
-                    Toaster.showMessage(
-                        requireActivity() as MainActivity,
-                        "error adjusting downwards"
-                    )
+                    showToast("error adjusting downwards")
                 } catch (e: Wallet.ExceededMaxTransactionSize) {
                     e.printStackTrace()
-                    Toaster.showMessage(
-                        requireActivity() as MainActivity,
-                        "transaction is too big"
-                    )
+                    showToast("transaction is too big")
                 } catch (e: NullPointerException) {
                     e.printStackTrace()
                     e.message?.let {
-                        Toaster.showMessage(
-                            requireActivity() as MainActivity,
-                            it
-                        )
+                        showToast(it)
                     }
                 }
             }
@@ -485,7 +455,7 @@ class SendAmountFragment : Fragment() {
                     val session = future.get()
                     val amountWanted = session.value
                     val amountFormatted = BalanceFormatter.formatBalance(amountWanted.toPlainString().toDouble(), "#.########")
-                    requireActivity().runOnUiThread {
+                    activity?.runOnUiThread {
                         val bchValue = amountFormatted.toDouble()
                         val price = PriceHelper.price
                         val fiatValue = bchValue * price
@@ -511,5 +481,9 @@ class SendAmountFragment : Fragment() {
 
             }
         }.start()
+    }
+
+    private fun showToast(message: String) {
+        (activity as? MainActivity)?.let { Toaster.showMessage(it, message) }
     }
 }
