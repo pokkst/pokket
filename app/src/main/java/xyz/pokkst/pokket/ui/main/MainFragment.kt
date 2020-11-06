@@ -44,7 +44,7 @@ class MainFragment : Fragment() {
 
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (Constants.ACTION_UPDATE_RECEIVE_QR == intent.action) {
+            if (Constants.ACTION_UPDATE_REFRESH == intent.action) {
                 when(currentAddressViewType) {
                     AddressViewType.SLP -> { refresh(WalletManager.walletKit?.currentSlpReceiveAddress().toString(), true) }
                     AddressViewType.BIP47 -> { refresh(WalletManager.walletKit?.paymentCode, false) }
@@ -62,7 +62,7 @@ class MainFragment : Fragment() {
         }
 
         val filter = IntentFilter()
-        filter.addAction(Constants.ACTION_UPDATE_RECEIVE_QR)
+        filter.addAction(Constants.ACTION_UPDATE_REFRESH)
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
 
     }

@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     var inFragment = false
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (Constants.ACTION_UPDATE_RECEIVE_QR == intent.action) {
+            if (Constants.ACTION_UPDATE_REFRESH == intent.action) {
                 if(intent.extras?.containsKey("sync") == true) {
                     val pct = intent.extras?.getInt("sync")
                     this@MainActivity.refresh(pct)
@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val filter = IntentFilter()
-        filter.addAction(Constants.ACTION_UPDATE_RECEIVE_QR)
+        filter.addAction(Constants.ACTION_UPDATE_REFRESH)
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter)
     }
 

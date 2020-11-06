@@ -84,13 +84,13 @@ class WalletManager {
         }
 
         fun refresh(activity: Activity, sync: Int?) {
-            val intent = Intent(Constants.ACTION_UPDATE_RECEIVE_QR)
+            val intent = Intent(Constants.ACTION_UPDATE_REFRESH)
             intent.putExtra("sync", sync)
             LocalBroadcastManager.getInstance(activity).sendBroadcast(intent)
         }
 
         fun refresh(activity: Activity) {
-            val intent = Intent(Constants.ACTION_UPDATE_RECEIVE_QR)
+            val intent = Intent(Constants.ACTION_UPDATE_REFRESH)
             LocalBroadcastManager.getInstance(activity).sendBroadcast(intent)
         }
     }
