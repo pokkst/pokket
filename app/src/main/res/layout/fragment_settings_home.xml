@@ -64,9 +64,9 @@
                     android:id="@+id/recovery_phrase"
                     layout="@layout/fragment_component_setting"/>
 
-                <include
+                <!--<include
                     android:id="@+id/extended_public_key"
-                    layout="@layout/fragment_component_setting"/>
+                    layout="@layout/fragment_component_setting"/>-->
 
                 <RelativeLayout
                     android:layout_width="match_parent"

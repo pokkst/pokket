@@ -58,12 +58,12 @@ class SettingsHomeFragment : Fragment() {
         }
         root.recovery_phrase.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.recovery_phrase_label)
 
-        root.extended_public_key.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
+        /*root.extended_public_key.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
             val intent = Intent(Constants.ACTION_SETTINGS_HIDE_BAR)
             LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
             findNavController().navigate(R.id.nav_to_phrase)
         }
-        root.extended_public_key.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.epk_label)
+        root.extended_public_key.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.epk_label)*/
 
         root.start_recovery_wallet.setOnClickListener {
             val intent = Intent(Constants.ACTION_SETTINGS_HIDE_BAR)

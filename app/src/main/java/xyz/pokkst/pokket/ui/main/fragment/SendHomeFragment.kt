@@ -57,6 +57,6 @@ class SendHomeFragment : Fragment() {
     }
 
     private fun isValidPaymentType(address: String): Boolean {
-        return address.contains("http") || Address.isValidPaymentCode(address) || Address.isValidSlpAddress(WalletManager.parameters, address) || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)
+        return address.contains("?r=") || Address.isValidPaymentCode(address) || Address.isValidSlpAddress(WalletManager.parameters, address) || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)
     }
 }
