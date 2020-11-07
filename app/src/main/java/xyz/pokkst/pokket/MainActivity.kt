@@ -58,20 +58,19 @@ class MainActivity : AppCompatActivity() {
             val keysLength = keys.size - 1
             for(x in 0..keysLength) {
                 val deterministicKey = DeterministicKey.deserializeB58(keys[x], WalletManager.parameters).setPath(DeterministicKeyChain.BIP44_ACCOUNT_ZERO_PATH)
-                println("Adding deterministic key: ${deterministicKey.serializePubB58(WalletManager.parameters)}")
                 followingKeys.add(deterministicKey)
             }
             m = extras.getInt("m")
         }
 
-        if(!newUser) {
+        if(!newUser && seed == null) {
             val multisigWalletFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}_multisig.wallet")
             isMultisig = multisigWalletFile.exists()
         }
 
         prepareViews(newUser)
         setListeners()
-        println("Is Multisig: $isMultisig")
+
         if(isMultisig) {
             WalletManager.startMultisigWallet(this, seed, newUser, followingKeys, m)
         } else {

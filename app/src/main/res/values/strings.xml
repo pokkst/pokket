@@ -362,10 +362,12 @@
     <string name="epk_label">extended public key</string>
     <string name="view_tokens">view tokens</string>
     <string name="utxo">utxo</string>
-    <string name="create_multisig_wallet">Create multisig wallet</string>
+    <string name="create_multisig_wallet">create multisig wallet</string>
     <string name="multisig_my_key_instruction">this is your cosigner key, share this with the other users you are creating a multisig wallet with</string>
     <string name="payload_instructions">click to copy payload, or have next cosigner scan qr</string>
     <string name="close">close</string>
     <string name="cosigner_entry_hint">xpub6D8moZFXekCQbKZpsFUSN9NkhtgjWsdF7uExVEUP9Rvkv4RJFXPxs57Nmf59Vmxv3X7X9efYFog83YhwQP2Zfc6pU6bD7LXTA3Qw5ye3VMB</string>
+    <string name="restore_multisig_wallet">restore multisig wallet</string>
+    <string name="you_are_creating_a_m_of_n_multisig_wallet">you are creating a %1$d-of-%2$d multisig wallet</string>
 
 </resources>

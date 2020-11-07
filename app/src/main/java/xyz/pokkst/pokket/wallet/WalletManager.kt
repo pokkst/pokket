@@ -49,6 +49,7 @@ class WalletManager {
                     wallet().addCoinsSentEventListener { wallet, tx, prevBalance, newBalance ->
                         refresh(activity)
                     }
+                    wallet().saveToFile(vWalletFile)
                 }
             }
 
@@ -64,7 +65,7 @@ class WalletManager {
                 }
             })
 
-            val creationDate = if(newUser) System.currentTimeMillis() / 1000L else 1554163098L
+            val creationDate = if(newUser) System.currentTimeMillis() / 1000L else 1604647474L
             if (seed != null) {
                 val deterministicSeed = DeterministicSeed(seed, null, "", creationDate)
                 walletKit?.restoreWalletFromSeed(deterministicSeed)
@@ -92,6 +93,7 @@ class WalletManager {
                     wallet().addCoinsSentEventListener { wallet, tx, prevBalance, newBalance ->
                         refresh(activity)
                     }
+                    wallet().saveToFile(vWalletFile)
                 }
             }
 
@@ -107,7 +109,7 @@ class WalletManager {
                 }
             })
 
-            val creationDate = if(newUser) System.currentTimeMillis() / 1000L else 1554163098L
+            val creationDate = if(newUser) System.currentTimeMillis() / 1000L else 1604647474L
             if (seed != null) {
                 val deterministicSeed = DeterministicSeed(seed, null, "", creationDate)
                 multisigWalletKit?.restoreWalletFromSeed(deterministicSeed)

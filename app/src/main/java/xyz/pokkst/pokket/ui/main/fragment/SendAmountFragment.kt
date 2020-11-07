@@ -270,7 +270,6 @@ class SendAmountFragment : Fragment() {
 
                     val toAddress = AddressFactory.create().getAddress(WalletManager.parameters, address)
                     val myTx = WalletManager.multisigWalletKit?.makeIndividualMultisigTransaction(toAddress, Coin.parseCoin(bchToSend))
-                    println(myTx.toString())
                     val multisigInputs = ArrayList<MultisigInput>()
                     var needsMoreSigs = false
 
@@ -314,14 +313,6 @@ class SendAmountFragment : Fragment() {
                                     )
                                 )
                                 multisigInputs.add(multisigInput)
-                            } else {
-                                val rawTxBytes: ByteArray = myTx.bitcoinSerialize()
-                                val rawTx = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                                    String(Hex.encode(rawTxBytes), StandardCharsets.UTF_8)
-                                } else {
-                                    ""
-                                }
-                                println("Raw tx: $rawTx")
                             }
                         }
                     }
@@ -333,6 +324,23 @@ class SendAmountFragment : Fragment() {
                         payload.inputs = multisigInputs
                         val json: String = Gson().toJson(payload)
                         showPayload(json)
+                    } else {
+                        val req = SendRequest.forTx(myTx)
+                        val sendResult = WalletManager.wallet?.sendCoins(req)
+                        Futures.addCallback(
+                            sendResult?.broadcastComplete,
+                            object : FutureCallback<Transaction?> {
+                                override fun onSuccess(@Nullable result: Transaction?) {
+                                    showToast("coins sent!")
+                                    (activity as? MainActivity)?.toggleSendScreen(false)
+                                }
+
+                                override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
+
+                                }
+                            },
+                            MoreExecutors.directExecutor()
+                        )
                     }
                 }
             }
@@ -388,16 +396,6 @@ class SendAmountFragment : Fragment() {
                         )
                     )
                     multisigPayload.inputs[input.index] = multisigInput
-                } else {
-                    val rawTxBytes: ByteArray = cosignerTx.bitcoinSerialize()
-                    val rawTx =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                            String(Hex.encode(rawTxBytes), StandardCharsets.UTF_8)
-                        } else {
-                            ""
-                        }
-                    println(rawTx)
-                    return
                 }
             }
         }
@@ -405,6 +403,23 @@ class SendAmountFragment : Fragment() {
         if(needsMoreSigs) {
             val newPayloadJson: String = Gson().toJson(multisigPayload)
             showPayload(newPayloadJson)
+        } else {
+            val req = SendRequest.forTx(cosignerTx)
+            val sendResult = WalletManager.wallet?.sendCoins(req)
+            Futures.addCallback(
+                sendResult?.broadcastComplete,
+                object : FutureCallback<Transaction?> {
+                    override fun onSuccess(@Nullable result: Transaction?) {
+                        showToast("coins sent!")
+                        (activity as? MainActivity)?.toggleSendScreen(false)
+                    }
+
+                    override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
+
+                    }
+                },
+                MoreExecutors.directExecutor()
+            )
         }
     }
 
@@ -419,7 +434,7 @@ class SendAmountFragment : Fragment() {
             copyToClipboard(payloadJson)
         }
         closeButton?.setOnClickListener {
-            dialog?.dismiss()
+            dialog.dismiss()
         }
         dialog?.show()
     }

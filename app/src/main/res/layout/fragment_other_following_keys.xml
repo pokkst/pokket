@@ -80,22 +80,26 @@
             android:layout_below="@+id/m_edittext"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
-            android:text="you are creating a m-of-n multisig wallet"
+            android:text="@string/you_are_creating_a_m_of_n_multisig_wallet"
             android:textColor="@color/dark_grey"
             android:textSize="17sp" />
 
-        <LinearLayout
-            android:id="@+id/cosigner_keys_layout"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/m_of_n_textview"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/clickable_layout"
-            android:clickable="false"
-            android:orientation="vertical">
+            android:layout_centerVertical="true">
+            <LinearLayout
+                android:id="@+id/cosigner_keys_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/clickable_layout"
+                android:clickable="false"
+                android:orientation="vertical">
 
-        </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
 
         <Button
             android:id="@+id/continue_button"

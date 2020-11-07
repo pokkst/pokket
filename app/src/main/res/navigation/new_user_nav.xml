@@ -34,7 +34,20 @@
         android:id="@+id/restoreWalletFragment"
         android:name="xyz.pokkst.pokket.ui.main.fragment.RestoreWalletFragment"
         android:label="fragment_new_wallet"
-        tools:layout="@layout/fragment_restore_wallet" />
+        tools:layout="@layout/fragment_restore_wallet">
+        <action
+            android:id="@+id/nav_to_my_following_key"
+            app:destination="@id/my_following_key">
+            <argument
+                android:name="seed"
+                app:argType="string"
+                android:defaultValue="" />
+            <argument
+                android:name="restoring"
+                app:argType="boolean"
+                android:defaultValue="true" />
+        </action>
+    </fragment>
     <fragment
         android:id="@+id/generatedSeedFragment"
         android:name="xyz.pokkst.pokket.ui.main.fragment.GeneratedSeedFragment"
@@ -62,6 +75,10 @@
             android:name="seed"
             app:argType="string"
             android:defaultValue="" />
+        <argument
+            android:name="restoring"
+            app:argType="boolean"
+            android:defaultValue="false" />
         <action
             android:id="@+id/nav_to_other_following_keys"
             app:destination="@id/enter_other_following_keys">
@@ -73,6 +90,10 @@
                 android:name="my_key"
                 app:argType="string"
                 android:defaultValue="" />
+            <argument
+                android:name="restoring"
+                app:argType="boolean"
+                android:defaultValue="false" />
         </action>
     </fragment>
     <fragment
@@ -88,5 +109,9 @@
             android:name="my_key"
             app:argType="string"
             android:defaultValue="" />
+        <argument
+            android:name="restoring"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 </navigation>
