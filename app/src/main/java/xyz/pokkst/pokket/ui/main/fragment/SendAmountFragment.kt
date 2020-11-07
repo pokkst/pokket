@@ -325,22 +325,15 @@ class SendAmountFragment : Fragment() {
                         val json: String = Gson().toJson(payload)
                         showPayload(json)
                     } else {
-                        val req = SendRequest.forTx(myTx)
-                        val sendResult = WalletManager.wallet?.sendCoins(req)
-                        Futures.addCallback(
-                            sendResult?.broadcastComplete,
-                            object : FutureCallback<Transaction?> {
-                                override fun onSuccess(@Nullable result: Transaction?) {
-                                    showToast("coins sent!")
-                                    (activity as? MainActivity)?.toggleSendScreen(false)
-                                }
-
-                                override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
-
-                                }
-                            },
-                            MoreExecutors.directExecutor()
-                        )
+                        val peers = WalletManager.multisigWalletKit?.peerGroup()?.connectedPeers
+                        if (peers != null) {
+                            for(peer in peers) {
+                                println("Broadcasting...")
+                                peer.sendMessage(myTx)
+                                showToast("coins sent!")
+                                (activity as? MainActivity)?.toggleSendScreen(false)
+                            }
+                        }
                     }
                 }
             }
@@ -387,6 +380,7 @@ class SendAmountFragment : Fragment() {
                 )
                 input.scriptSig = inputScript
                 needsMoreSigs = needsMoreSigs(input, utxo)
+
                 if (needsMoreSigs) {
                     val multisigInput: MultisigInput = multisigPayload.inputs[input.index]
                     multisigInput.signatures.add(
@@ -404,22 +398,18 @@ class SendAmountFragment : Fragment() {
             val newPayloadJson: String = Gson().toJson(multisigPayload)
             showPayload(newPayloadJson)
         } else {
-            val req = SendRequest.forTx(cosignerTx)
-            val sendResult = WalletManager.wallet?.sendCoins(req)
-            Futures.addCallback(
-                sendResult?.broadcastComplete,
-                object : FutureCallback<Transaction?> {
-                    override fun onSuccess(@Nullable result: Transaction?) {
-                        showToast("coins sent!")
-                        (activity as? MainActivity)?.toggleSendScreen(false)
-                    }
-
-                    override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
-
-                    }
-                },
-                MoreExecutors.directExecutor()
-            )
+            val peers = WalletManager.multisigWalletKit?.peerGroup()?.connectedPeers
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                println(String(Hex.encode(cosignerTx?.bitcoinSerialize()), StandardCharsets.UTF_8))
+            }
+            if (peers != null) {
+                for(peer in peers) {
+                    println("Broadcasting...")
+                    peer.sendMessage(cosignerTx)
+                    showToast("coins sent!")
+                    (activity as? MainActivity)?.toggleSendScreen(false)
+                }
+            }
         }
     }
 
