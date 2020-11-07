@@ -3,6 +3,7 @@ package xyz.pokkst.pokket.ui.main.fragment
 import android.app.Activity
 import android.content.*
 import android.content.Context.CLIPBOARD_SERVICE
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,11 +14,14 @@ import com.google.gson.Gson
 import kotlinx.android.synthetic.main.fragment_send_home.view.*
 import org.bitcoinj.core.Address
 import org.bitcoinj.utils.MultisigPayload
+import org.bouncycastle.util.encoders.Base64
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.qr.QRHelper
 import xyz.pokkst.pokket.util.Constants
+import xyz.pokkst.pokket.util.PayloadHelper
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.lang.Exception
+import java.nio.charset.StandardCharsets
 
 /**
  * A placeholder fragment containing a simple view.
@@ -33,7 +37,7 @@ class SendHomeFragment : Fragment() {
         root.paste_address_button.setOnClickListener {
             val clipBoard= requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val pasteData = clipBoard.primaryClip?.getItemAt(0)?.text.toString()
-            if(isValidPaymentType(pasteData) || isMultisigPayload(pasteData)) {
+            if(isValidPaymentType(pasteData) || PayloadHelper.isMultisigPayload(pasteData)) {
                 findNavController().navigate(SendHomeFragmentDirections.navToSend(pasteData))
             }
         }
@@ -55,20 +59,11 @@ class SendHomeFragment : Fragment() {
             if (requestCode == Constants.REQUEST_CODE_SCAN_QR) {
                 if (data != null) {
                     val scanData = data.getStringExtra(Constants.QR_SCAN_RESULT)
-                    if(isValidPaymentType(scanData) || isMultisigPayload(scanData)) {
+                    if(isValidPaymentType(scanData) || PayloadHelper.isMultisigPayload(scanData)) {
                         findNavController().navigate(SendHomeFragmentDirections.navToSend(scanData))
                     }
                 }
             }
-        }
-    }
-
-    private fun isMultisigPayload(json: String): Boolean {
-        return try {
-            Gson().fromJson(json, MultisigPayload::class.java)
-            true
-        } catch (e: Exception) {
-            false
         }
     }
 

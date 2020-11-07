@@ -44,10 +44,7 @@ import org.bitcoinj.wallet.Wallet
 import org.bouncycastle.util.encoders.Hex
 import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.R
-import xyz.pokkst.pokket.util.BalanceFormatter
-import xyz.pokkst.pokket.util.Constants
-import xyz.pokkst.pokket.util.PriceHelper
-import xyz.pokkst.pokket.util.Toaster
+import xyz.pokkst.pokket.util.*
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ExecutionException
@@ -106,14 +103,17 @@ class SendAmountFragment : Fragment() {
 
         tokenId = arguments?.getString("tokenId", null)
         address = arguments?.getString("address", null)
-        val isMultisigPayload = address?.let { isMultisigPayload(it) }
+        val isMultisigPayload = address?.let { PayloadHelper.isMultisigPayload(it) }
         if(isMultisigPayload == true) {
             hasPayload = true
             root?.send_amount_input?.isEnabled = false
-            val payload = Gson().fromJson(address, MultisigPayload::class.java)
-            val payloadAddress = payload.address
-            root?.to_field_text?.text = "to: ${payloadAddress?.replace("bitcoincash:", "")}"
-            this.getPayloadData(root, payload)
+            val payloadJson = address?.let { PayloadHelper.decodeMultisigPayload(it) }
+            if(payloadJson?.isNotEmpty() == true) {
+                val payload = Gson().fromJson(payloadJson, MultisigPayload::class.java)
+                val payloadAddress = payload.address
+                root?.to_field_text?.text = "to: ${payloadAddress?.replace("bitcoincash:", "")}"
+                this.getPayloadData(root, payload)
+            }
         } else {
             hasPayload = false
             when {
@@ -327,11 +327,16 @@ class SendAmountFragment : Fragment() {
                     } else {
                         val peers = WalletManager.multisigWalletKit?.peerGroup()?.connectedPeers
                         if (peers != null) {
+                            var broadcasted = false
                             for(peer in peers) {
                                 println("Broadcasting...")
                                 peer.sendMessage(myTx)
-                                showToast("coins sent!")
-                                (activity as? MainActivity)?.toggleSendScreen(false)
+
+                                if(!broadcasted) {
+                                    showToast("coins sent!")
+                                    (activity as? MainActivity)?.toggleSendScreen(false)
+                                    broadcasted = true
+                                }
                             }
                         }
                     }
@@ -340,7 +345,11 @@ class SendAmountFragment : Fragment() {
         }
     }
 
-    private fun importMultisigPayload(json: String) {
+    private fun importMultisigPayload(base64Payload: String) {
+        val json = PayloadHelper.decodeMultisigPayload(base64Payload)
+        if(json.isEmpty()) {
+            return
+        }
         val multisigPayload: MultisigPayload = Gson().fromJson(json, MultisigPayload::class.java)
         val payloadAddress: Address = AddressFactory.create().getAddress(WalletManager.parameters, multisigPayload.address)
         val payloadAmount = Coin.parseCoin(multisigPayload.amount)
@@ -403,25 +412,35 @@ class SendAmountFragment : Fragment() {
                 println(String(Hex.encode(cosignerTx?.bitcoinSerialize()), StandardCharsets.UTF_8))
             }
             if (peers != null) {
+                var broadcasted = false
                 for(peer in peers) {
                     println("Broadcasting...")
                     peer.sendMessage(cosignerTx)
-                    showToast("coins sent!")
-                    (activity as? MainActivity)?.toggleSendScreen(false)
+
+                    if(!broadcasted) {
+                        showToast("coins sent!")
+                        (activity as? MainActivity)?.toggleSendScreen(false)
+                        broadcasted = true
+                    }
                 }
             }
         }
     }
 
     private fun showPayload(payloadJson: String) {
+        val payloadBase64 = PayloadHelper.encodeMultisigPayload(payloadJson)
         val dialog = activity?.let { Dialog(it) }
         dialog?.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog?.setContentView(R.layout.dialog_payload)
         val payloadQr = dialog?.findViewById<ImageView>(R.id.payload_qr)
+        val sharePayloadButton = dialog?.findViewById<Button>(R.id.share_payload_button)
         val closeButton = dialog?.findViewById<TextView>(R.id.payload_close)
-        payloadQr?.setImageBitmap(generateQR(payloadJson))
+        payloadQr?.setImageBitmap(generateQR(payloadBase64))
         payloadQr?.setOnClickListener {
-            copyToClipboard(payloadJson)
+            copyToClipboard(payloadBase64)
+        }
+        sharePayloadButton?.setOnClickListener {
+            sharePayload(payloadBase64)
         }
         closeButton?.setOnClickListener {
             dialog.dismiss()
@@ -724,28 +743,8 @@ class SendAmountFragment : Fragment() {
         }
     }
 
-    private fun isMultisigPayload(json: String): Boolean {
-        return try {
-            Gson().fromJson(json, MultisigPayload::class.java)
-            true
-        } catch (e: java.lang.Exception) {
-            false
-        }
-    }
-
     private fun showToast(message: String) {
         (activity as? MainActivity)?.let { Toaster.showMessage(it, message) }
-    }
-
-    private fun generateQR(payload: String?): Bitmap? {
-        return try {
-            val encoder = QRCode.from(payload).withSize(1024, 1024).withErrorCorrection(
-                ErrorCorrectionLevel.L)
-            encoder.bitmap()
-        } catch (e: WriterException) {
-            e.printStackTrace()
-            null
-        }
     }
 
     private fun copyToClipboard(text: String) {
@@ -753,5 +752,31 @@ class SendAmountFragment : Fragment() {
         val clip = ClipData.newPlainText("Multisig Payload", text)
         clipboard?.setPrimaryClip(clip)
         Toaster.showToastMessage(requireContext(), "copied")
+    }
+
+    private fun sharePayload(payloadJson: String) {
+        try {
+            val sendIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, payloadJson)
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            shareIntent?.let { startActivity(it) }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun generateQR(payload: String?): Bitmap? {
+        return try {
+            val encoder = QRCode.from(payload).withSize(1024, 1024).withErrorCorrection(
+                ErrorCorrectionLevel.L
+            )
+            encoder.bitmap()
+        } catch (e: WriterException) {
+            e.printStackTrace()
+            null
+        }
     }
 }
