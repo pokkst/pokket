@@ -11,7 +11,7 @@
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
         tools:src="@drawable/burger"
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
