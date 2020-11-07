@@ -22,7 +22,7 @@ class SettingsWipeFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_settings_wipe, container, false)
         root.continue_button.setOnClickListener {
             val seedEntered = root.editText_phrase.text.toString().trim()
-            val walletSeed = WalletManager.walletKit?.wallet()?.keyChainSeed?.mnemonicString
+            val walletSeed = WalletManager.wallet?.keyChainSeed?.mnemonicString
             if(seedEntered == walletSeed) {
                 val intent = Intent(requireContext(), NewUserActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)

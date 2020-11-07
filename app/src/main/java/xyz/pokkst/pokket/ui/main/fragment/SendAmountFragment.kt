@@ -1,16 +1,16 @@
 package xyz.pokkst.pokket.ui.main.fragment
 
-import android.content.BroadcastReceiver
+import android.app.Dialog
+import android.content.*
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
+import android.view.Window
+import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.Nullable
 import androidx.fragment.app.Fragment
@@ -21,20 +21,27 @@ import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.google.gson.Gson
+import com.google.zxing.WriterException
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import kotlinx.android.synthetic.main.component_input_numpad.view.*
 import kotlinx.android.synthetic.main.fragment_send_amount.view.*
 import kotlinx.android.synthetic.main.token_spinner_cell.view.*
-import org.bitcoinj.core.Address
-import org.bitcoinj.core.Coin
-import org.bitcoinj.core.InsufficientMoneyException
-import org.bitcoinj.core.Transaction
+import net.glxn.qrgen.android.QRCode
+import org.bitcoinj.core.*
 import org.bitcoinj.core.bip47.BIP47Channel
 import org.bitcoinj.core.slp.SlpTokenBalance
+import org.bitcoinj.crypto.MultisigSignature
+import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.protocols.payments.PaymentProtocol
 import org.bitcoinj.protocols.payments.PaymentProtocolException
 import org.bitcoinj.protocols.payments.PaymentSession
+import org.bitcoinj.script.Script
+import org.bitcoinj.utils.MultisigPayload
+import org.bitcoinj.wallet.RedeemData
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
+import org.bouncycastle.util.encoders.Hex
 import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.util.BalanceFormatter
@@ -42,9 +49,7 @@ import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.util.Toaster
 import xyz.pokkst.pokket.wallet.WalletManager
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.*
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.ExecutionException
 
 
@@ -62,12 +67,21 @@ class SendAmountFragment : Fragment() {
             if (Constants.ACTION_MAIN_ENABLE_PAGER == intent.action) {
                 this@SendAmountFragment.findNavController().popBackStack(R.id.sendHomeFragment, false)
             } else if (Constants.ACTION_FRAGMENT_SEND_SEND == intent.action) {
-                this@SendAmountFragment.send()
+                if(WalletManager.isMultisigKit) {
+                    if(hasPayload) {
+                        address?.let { this@SendAmountFragment.importMultisigPayload(it) }
+                    } else {
+                        this@SendAmountFragment.sendMultisig()
+                    }
+                } else {
+                    this@SendAmountFragment.send()
+                }
             }
         }
     }
 
     var bchIsSendType = true
+    var hasPayload = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,12 +106,27 @@ class SendAmountFragment : Fragment() {
 
         tokenId = arguments?.getString("tokenId", null)
         address = arguments?.getString("address", null)
-        when {
-            address?.contains("http") == true -> { this.getBIP70Data(root, address?.replace("bitcoincash:?r=", "")) }
-            address != null -> { root?.to_field_text?.text = "to: ${address?.replace("bitcoincash:", "")}" }
-            address == null -> {
-                root?.to_field_text?.visibility = View.GONE
-                root?.to_field_edit_text?.visibility = View.VISIBLE
+        val isMultisigPayload = address?.let { isMultisigPayload(it) }
+        if(isMultisigPayload == true) {
+            hasPayload = true
+            root?.send_amount_input?.isEnabled = false
+            val payload = Gson().fromJson(address, MultisigPayload::class.java)
+            val payloadAddress = payload.address
+            root?.to_field_text?.text = "to: ${payloadAddress?.replace("bitcoincash:", "")}"
+            this.getPayloadData(root, payload)
+        } else {
+            hasPayload = false
+            when {
+                address?.contains("http") == true -> {
+                    this.getBIP70Data(root, address?.replace("bitcoincash:?r=", ""))
+                }
+                address != null -> {
+                    root?.to_field_text?.text = "to: ${address?.replace("bitcoincash:", "")}"
+                }
+                address == null -> {
+                    root?.to_field_text?.visibility = View.GONE
+                    root?.to_field_edit_text?.visibility = View.VISIBLE
+                }
             }
         }
 
@@ -190,7 +219,7 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun send() {
-        if(WalletManager.walletKit?.wallet()?.getBalance(Wallet.BalanceType.ESTIMATED)?.isZero == false) {
+        if(WalletManager.wallet?.getBalance(Wallet.BalanceType.ESTIMATED)?.isZero == false) {
             if(address != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
                 if(address == null) address = root?.to_field_edit_text?.text?.toString()
                 if(address?.startsWith("http") == true) {
@@ -225,6 +254,174 @@ class SendAmountFragment : Fragment() {
         } else {
             (activity as? MainActivity)?.let { Toaster.showMessage(it, "wallet balance is zero") }
         }
+    }
+
+    private fun sendMultisig() {
+        if(WalletManager.wallet?.getBalance(Wallet.BalanceType.ESTIMATED)?.isZero == false) {
+            if (address != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
+                if (address == null) address = root?.to_field_edit_text?.text?.toString()
+
+                if(Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)) {
+                    val bchToSend = if (bchIsSendType) {
+                        root?.send_amount_input?.text.toString()
+                    } else {
+                        root?.alt_currency_display?.text.toString()
+                    }
+
+                    val toAddress = AddressFactory.create().getAddress(WalletManager.parameters, address)
+                    val myTx = WalletManager.multisigWalletKit?.makeIndividualMultisigTransaction(toAddress, Coin.parseCoin(bchToSend))
+                    println(myTx.toString())
+                    val multisigInputs = ArrayList<MultisigInput>()
+                    var needsMoreSigs = false
+
+                    myTx?.inputs?.forEach { input ->
+                        val bitcoinRedeemData: RedeemData? = input.getConnectedRedeemData(WalletManager.wallet)
+                        if(bitcoinRedeemData != null) {
+                            val utxo = input.connectedOutput
+                            val script: Script? = utxo?.scriptPubKey
+                            val redeemScriptProgram = bitcoinRedeemData.redeemScript.program
+                            val sigHash: Sha256Hash = myTx.hashForSignatureWitness(
+                                input.index,
+                                bitcoinRedeemData.redeemScript,
+                                input.connectedOutput!!.value,
+                                Transaction.SigHash.ALL,
+                                false
+                            )
+                            var inputScript = input.scriptSig
+
+                            val mySignature: TransactionSignature =
+                                myTx.calculateWitnessSignature(
+                                    input.index,
+                                    bitcoinRedeemData.fullKey,
+                                    redeemScriptProgram,
+                                    input.connectedOutput!!.value,
+                                    Transaction.SigHash.ALL,
+                                    false
+                                )
+                            val mySignatureIndex = input.scriptSig.getSigInsertionIndex(sigHash, bitcoinRedeemData.fullKey)
+
+                            inputScript = script?.getScriptSigWithSignature(inputScript, mySignature.encodeToBitcoin(), mySignatureIndex)
+                            input.scriptSig = inputScript
+
+                            needsMoreSigs = needsMoreSigs(input, utxo)
+
+                            if(needsMoreSigs) {
+                                val multisigInput = MultisigInput()
+                                multisigInput.signatures.add(
+                                    MultisigSignature(
+                                        mySignatureIndex,
+                                        mySignature.encodeToBitcoin()
+                                    )
+                                )
+                                multisigInputs.add(multisigInput)
+                            } else {
+                                val rawTxBytes: ByteArray = myTx.bitcoinSerialize()
+                                val rawTx = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                                    String(Hex.encode(rawTxBytes), StandardCharsets.UTF_8)
+                                } else {
+                                    ""
+                                }
+                                println("Raw tx: $rawTx")
+                            }
+                        }
+                    }
+
+                    if(needsMoreSigs) {
+                        val payload = MultisigPayload()
+                        payload.address = address.toString()
+                        payload.amount = Coin.parseCoin(bchToSend).toPlainString()
+                        payload.inputs = multisigInputs
+                        val json: String = Gson().toJson(payload)
+                        showPayload(json)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun importMultisigPayload(json: String) {
+        val multisigPayload: MultisigPayload = Gson().fromJson(json, MultisigPayload::class.java)
+        val payloadAddress: Address = AddressFactory.create().getAddress(WalletManager.parameters, multisigPayload.address)
+        val payloadAmount = Coin.parseCoin(multisigPayload.amount)
+        var needsMoreSigs = false
+
+        var cosignerTx = WalletManager.multisigWalletKit?.makeIndividualMultisigTransaction(payloadAddress, payloadAmount)
+        cosignerTx = WalletManager.multisigWalletKit?.addSignaturesToMultisigTransaction(cosignerTx, multisigPayload.inputs)
+
+        cosignerTx?.inputs?.forEach { input ->
+            val bitcoinRedeemData =
+                input.getConnectedRedeemData(WalletManager.wallet)
+            if (bitcoinRedeemData != null) {
+                val utxo = input.connectedOutput
+                val script: Script? = utxo?.scriptPubKey
+                val redeemScriptProgram = bitcoinRedeemData.redeemScript.program
+                val sigHash: Sha256Hash = cosignerTx.hashForSignatureWitness(
+                    input.index,
+                    bitcoinRedeemData.redeemScript,
+                    input.connectedOutput!!.value,
+                    Transaction.SigHash.ALL,
+                    false
+                )
+                var inputScript = input.scriptSig
+                val cosignerSignature: TransactionSignature = cosignerTx.calculateWitnessSignature(
+                    input.index,
+                    bitcoinRedeemData.fullKey,
+                    redeemScriptProgram,
+                    input.connectedOutput!!.value,
+                    Transaction.SigHash.ALL,
+                    false
+                )
+                val cosignerSignatureIndex = input.scriptSig.getSigInsertionIndex(sigHash, bitcoinRedeemData.fullKey)
+                inputScript = script?.getScriptSigWithSignature(
+                    inputScript,
+                    cosignerSignature.encodeToBitcoin(),
+                    cosignerSignatureIndex
+                )
+                input.scriptSig = inputScript
+                needsMoreSigs = needsMoreSigs(input, utxo)
+                if (needsMoreSigs) {
+                    val multisigInput: MultisigInput = multisigPayload.inputs[input.index]
+                    multisigInput.signatures.add(
+                        MultisigSignature(
+                            cosignerSignatureIndex,
+                            cosignerSignature.encodeToBitcoin()
+                        )
+                    )
+                    multisigPayload.inputs[input.index] = multisigInput
+                } else {
+                    val rawTxBytes: ByteArray = cosignerTx.bitcoinSerialize()
+                    val rawTx =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                            String(Hex.encode(rawTxBytes), StandardCharsets.UTF_8)
+                        } else {
+                            ""
+                        }
+                    println(rawTx)
+                    return
+                }
+            }
+        }
+
+        if(needsMoreSigs) {
+            val newPayloadJson: String = Gson().toJson(multisigPayload)
+            showPayload(newPayloadJson)
+        }
+    }
+
+    private fun showPayload(payloadJson: String) {
+        val dialog = activity?.let { Dialog(it) }
+        dialog?.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog?.setContentView(R.layout.dialog_payload)
+        val payloadQr = dialog?.findViewById<ImageView>(R.id.payload_qr)
+        val closeButton = dialog?.findViewById<TextView>(R.id.payload_close)
+        payloadQr?.setImageBitmap(generateQR(payloadJson))
+        payloadQr?.setOnClickListener {
+            copyToClipboard(payloadJson)
+        }
+        closeButton?.setOnClickListener {
+            dialog?.dismiss()
+        }
+        dialog?.show()
     }
 
     private fun attemptBip47Payment() {
@@ -328,13 +525,13 @@ class SendAmountFragment : Fragment() {
 
                     val req = session.sendRequest
                     req.allowUnconfirmed()
-                    WalletManager.walletKit?.wallet()?.completeTx(req)
+                    WalletManager.wallet?.completeTx(req)
 
-                    val ack = session.sendPayment(ImmutableList.of(req.tx), WalletManager.walletKit?.wallet()?.freshReceiveAddress(), null)
+                    val ack = session.sendPayment(ImmutableList.of(req.tx), WalletManager.wallet?.freshReceiveAddress(), null)
                     if (ack != null) {
                         Futures.addCallback<PaymentProtocol.Ack>(ack, object : FutureCallback<PaymentProtocol.Ack> {
                             override fun onSuccess(ack: PaymentProtocol.Ack?) {
-                                WalletManager.walletKit?.wallet()?.commitTx(req.tx)
+                                WalletManager.wallet?.commitTx(req.tx)
                                 showToast("coins sent!")
                                 (activity as? MainActivity)?.toggleSendScreen(false)
                             }
@@ -366,7 +563,7 @@ class SendAmountFragment : Fragment() {
     private fun processSlpTransaction(address: String, tokenAmount: Double, tokenId: String) {
         val tx = WalletManager.walletKit?.createSlpTransaction(address, tokenId, tokenAmount, null)
         val req = SendRequest.forTx(tx)
-        val sendResult = WalletManager.walletKit?.wallet()?.sendCoins(req)
+        val sendResult = WalletManager.wallet?.sendCoins(req)
         Futures.addCallback(
             sendResult?.broadcastComplete,
             object : FutureCallback<Transaction?> {
@@ -404,7 +601,7 @@ class SendAmountFragment : Fragment() {
             override fun run() {
                 try {
                     val req: SendRequest =
-                        if (coinToSend == WalletManager.walletKit?.wallet()?.let { WalletManager.getBalance(it) }) {
+                        if (coinToSend == WalletManager.wallet?.let { WalletManager.getBalance(it) }) {
                             SendRequest.emptyWallet(WalletManager.parameters, address)
                         } else {
                             SendRequest.to(WalletManager.parameters, address, coinToSend)
@@ -413,7 +610,7 @@ class SendAmountFragment : Fragment() {
                     req.allowUnconfirmed()
                     req.ensureMinRequiredFee = false
                     req.feePerKb = Coin.valueOf(2L * 1000L)
-                    val sendResult = WalletManager.walletKit?.wallet()?.sendCoins(req)
+                    val sendResult = WalletManager.wallet?.sendCoins(req)
                     Futures.addCallback(
                         sendResult?.broadcastComplete,
                         object : FutureCallback<Transaction?> {
@@ -483,7 +680,73 @@ class SendAmountFragment : Fragment() {
         }.start()
     }
 
+    fun getPayloadData(root: View?, payload: MultisigPayload) {
+        object : Thread() {
+            override fun run() {
+                try {
+                    val amountWanted = Coin.parseCoin(payload.amount)
+                    val amountFormatted = BalanceFormatter.formatBalance(amountWanted.toPlainString().toDouble(), "#.########")
+                    activity?.runOnUiThread {
+                        val bchValue = amountFormatted.toDouble()
+                        val price = PriceHelper.price
+                        val fiatValue = bchValue * price
+                        if (bchIsSendType) {
+                            root?.send_amount_input?.setText(BalanceFormatter.formatBalance(bchValue, "#.########"))
+                            root?.alt_currency_display?.text = BalanceFormatter.formatBalance(fiatValue, "0.00")
+                        } else {
+                            root?.send_amount_input?.setText(BalanceFormatter.formatBalance(fiatValue, "0.00"))
+                            root?.alt_currency_display?.text = BalanceFormatter.formatBalance(bchValue, "#.########")
+                        }
+                    }
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                } catch (e: ExecutionException) {
+                    e.printStackTrace()
+                } catch (e: PaymentProtocolException) {
+                    e.printStackTrace()
+                }
+
+            }
+        }.start()
+    }
+
+    fun needsMoreSigs(input: TransactionInput, utxo: TransactionOutput?): Boolean {
+        return try {
+            input.verify(utxo)
+            false
+        } catch (e: Exception) {
+            true
+        }
+    }
+
+    private fun isMultisigPayload(json: String): Boolean {
+        return try {
+            Gson().fromJson(json, MultisigPayload::class.java)
+            true
+        } catch (e: java.lang.Exception) {
+            false
+        }
+    }
+
     private fun showToast(message: String) {
         (activity as? MainActivity)?.let { Toaster.showMessage(it, message) }
+    }
+
+    private fun generateQR(payload: String?): Bitmap? {
+        return try {
+            val encoder = QRCode.from(payload).withSize(1024, 1024).withErrorCorrection(
+                ErrorCorrectionLevel.L)
+            encoder.bitmap()
+        } catch (e: WriterException) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun copyToClipboard(text: String) {
+        val clipboard: ClipboardManager? = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+        val clip = ClipData.newPlainText("Multisig Payload", text)
+        clipboard?.setPrimaryClip(clip)
+        Toaster.showToastMessage(requireContext(), "copied")
     }
 }

@@ -34,7 +34,7 @@ class TransactionReceivedFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.transaction_item_expanded_received, container, false)
         val txid = arguments?.getString("txid", "")
-        val tx = WalletManager.walletKit?.wallet()?.getTransaction(Sha256Hash.wrap(txid))
+        val tx = WalletManager.wallet?.getTransaction(Sha256Hash.wrap(txid))
         val args = arguments
         if(args != null)
             isSlp = args.getBoolean("slp", false)
@@ -85,9 +85,9 @@ class TransactionReceivedFragment : Fragment() {
         }
 
         val bchReceived = if(slpTx != null && slpToken != null) {
-            slpTx.getRawValue(WalletManager.walletKit?.wallet()).scaleByPowerOfTen(-slpToken.decimals).toDouble()
+            slpTx.getRawValue(WalletManager.wallet).scaleByPowerOfTen(-slpToken.decimals).toDouble()
         } else {
-            tx.getValueSentToMe(WalletManager.walletKit?.wallet()).toPlainString().toDouble()
+            tx.getValueSentToMe(WalletManager.wallet).toPlainString().toDouble()
         }
         root.tx_amount_text.text = if(slpTx != null && slpToken != null) {
             "${BalanceFormatter.formatBalance(bchReceived, "#.#########")} ${slpToken.ticker}"
@@ -141,10 +141,10 @@ class TransactionReceivedFragment : Fragment() {
         val slpTx = slpTransaction
         val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId)
         val txid = arguments?.getString("txid", "")
-        val tx = WalletManager.walletKit?.wallet()?.getTransaction(Sha256Hash.wrap(txid))
+        val tx = WalletManager.wallet?.getTransaction(Sha256Hash.wrap(txid))
         for (i in addresses.indices) {
             val utxoIsMine = if(tx != null) {
-                tx.outputs[i].isMine(WalletManager.walletKit?.wallet())
+                tx.outputs[i].isMine(WalletManager.wallet)
             } else {
                 false
             }

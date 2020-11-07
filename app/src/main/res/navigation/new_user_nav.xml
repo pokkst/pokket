@@ -23,7 +23,12 @@
         tools:layout="@layout/fragment_new_wallet">
         <action
             android:id="@+id/nav_to_generated_seed"
-            app:destination="@id/generatedSeedFragment" />
+            app:destination="@id/generatedSeedFragment">
+            <argument
+                android:name="multisig"
+                app:argType="boolean"
+                android:defaultValue="false" />
+        </action>
     </fragment>
     <fragment
         android:id="@+id/restoreWalletFragment"
@@ -35,5 +40,53 @@
         android:name="xyz.pokkst.pokket.ui.main.fragment.GeneratedSeedFragment"
         android:label="fragment_new_wallet"
         tools:layout="@layout/fragment_generated_seed">
+        <argument
+            android:name="multisig"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <action
+            android:id="@+id/nav_to_my_following_key"
+            app:destination="@id/my_following_key">
+            <argument
+                android:name="seed"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/my_following_key"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.MyFollowingKeyFragment"
+        android:label="fragment_new_wallet"
+        tools:layout="@layout/fragment_my_following_key">
+        <argument
+            android:name="seed"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/nav_to_other_following_keys"
+            app:destination="@id/enter_other_following_keys">
+            <argument
+                android:name="seed"
+                app:argType="string"
+                android:defaultValue="" />
+            <argument
+                android:name="my_key"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/enter_other_following_keys"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.OtherFollowingKeysFragment"
+        android:label="fragment_new_wallet"
+        tools:layout="@layout/fragment_other_following_keys">
+        <argument
+            android:name="seed"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="my_key"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 </navigation>

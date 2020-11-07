@@ -12,12 +12,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.tabs.TabLayout
 import kotlinx.android.synthetic.main.activity_main.*
+import org.bitcoinj.crypto.DeterministicKey
+import org.bitcoinj.wallet.DeterministicKeyChain
 import xyz.pokkst.pokket.ui.ToggleViewPager
 import xyz.pokkst.pokket.ui.main.SectionsPagerAdapter
 import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
+import java.io.File
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
@@ -40,18 +43,40 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        WalletManager.walletDir = File(applicationInfo.dataDir)
         val extras = intent.extras
         var seed: String? = null
         var newUser: Boolean = false
+        var isMultisig: Boolean = false
+        val followingKeys = ArrayList<DeterministicKey>()
+        var m = 0
         if (extras != null) {
             seed = extras.getString("seed")
             newUser = extras.getBoolean("new")
+            isMultisig = extras.getBoolean("multisig")
+            val keys = extras.getStringArrayList("followingKeys") ?: ArrayList()
+            val keysLength = keys.size - 1
+            for(x in 0..keysLength) {
+                val deterministicKey = DeterministicKey.deserializeB58(keys[x], WalletManager.parameters).setPath(DeterministicKeyChain.BIP44_ACCOUNT_ZERO_PATH)
+                println("Adding deterministic key: ${deterministicKey.serializePubB58(WalletManager.parameters)}")
+                followingKeys.add(deterministicKey)
+            }
+            m = extras.getInt("m")
+        }
+
+        if(!newUser) {
+            val multisigWalletFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}_multisig.wallet")
+            isMultisig = multisigWalletFile.exists()
         }
 
         prepareViews(newUser)
         setListeners()
-
-        WalletManager.startWallet(this, seed, newUser)
+        println("Is Multisig: $isMultisig")
+        if(isMultisig) {
+            WalletManager.startMultisigWallet(this, seed, newUser, followingKeys, m)
+        } else {
+            WalletManager.startWallet(this, seed, newUser)
+        }
     }
 
     private fun prepareViews(newUser: Boolean) {
@@ -111,7 +136,7 @@ class MainActivity : AppCompatActivity() {
             object : Thread() {
                 override fun run() {
                     super.run()
-                    val bch = WalletManager.walletKit?.wallet()?.let { WalletManager.getBalance(it).toPlainString() }
+                    val bch = WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
                     bch?.let {
                         val fiat = bch.toDouble() * PriceHelper.price
                         val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
@@ -132,7 +157,7 @@ class MainActivity : AppCompatActivity() {
             object : Thread() {
                 override fun run() {
                     super.run()
-                    val bch = WalletManager.walletKit?.wallet()?.let { WalletManager.getBalance(it).toPlainString() }
+                    val bch = WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
                     bch?.let {
                         val fiat = bch.toDouble() * PriceHelper.price
                         val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")

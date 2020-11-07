@@ -42,18 +42,18 @@ class SettingsTransactionsFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_settings_transactions, container, false)
         sentColor = Color.parseColor("#FF5454")
         receivedColor = Color.parseColor("#00BF00")
-        this.setArrayAdapter(root, WalletManager.walletKit?.wallet())
+        this.setArrayAdapter(root, WalletManager.wallet)
         root.transactions_list.setOnItemClickListener { parent, view, position, id ->
             (activity as? SettingsActivity)?.adjustDeepMenu(1)
             val txid = txList[position]
-            val tx = WalletManager.walletKit?.wallet()?.getTransaction(Sha256Hash.wrap(txid))
-            val amount = tx?.getValue(WalletManager.walletKit?.wallet())
+            val tx = WalletManager.wallet?.getTransaction(Sha256Hash.wrap(txid))
+            val amount = tx?.getValue(WalletManager.wallet)
             val isSlp = SlpOpReturn.isSlpTx(tx)
             val slpAmount = if(isSlp) {
                 val slpTx = SlpTransaction(tx)
                 val slpToken = WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
                 if(slpToken != null) {
-                    val slpAmount = slpTx.getRawValue(WalletManager.walletKit?.wallet())
+                    val slpAmount = slpTx.getRawValue(WalletManager.wallet)
                         .scaleByPowerOfTen(-slpToken.decimals).toDouble()
                     slpAmount
                 } else {
@@ -99,7 +99,7 @@ class SettingsTransactionsFragment : Fragment() {
                                     val slpToken = WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
                                     if(slpToken != null) {
                                         ticker = slpToken.ticker
-                                        val slpAmount = slpTx.getRawValue(WalletManager.walletKit?.wallet())
+                                        val slpAmount = slpTx.getRawValue(WalletManager.wallet)
                                             .scaleByPowerOfTen(-slpToken.decimals).toDouble()
                                         BalanceFormatter.formatBalance(slpAmount, "#.#########")
                                     } else {

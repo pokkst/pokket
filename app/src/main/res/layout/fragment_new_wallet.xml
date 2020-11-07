@@ -67,6 +67,25 @@
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_below="@+id/intro_new_wallet_generate"
+                android:layout_centerHorizontal="true">
+                <CheckBox
+                    android:id="@+id/multsig_checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/white"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_multisig_wallet"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"/>
+            </LinearLayout>
         </RelativeLayout>
 
 

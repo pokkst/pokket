@@ -9,12 +9,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.fragment_send_home.view.*
 import org.bitcoinj.core.Address
+import org.bitcoinj.utils.MultisigPayload
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.qr.QRHelper
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.wallet.WalletManager
+import java.lang.Exception
 
 /**
  * A placeholder fragment containing a simple view.
@@ -30,13 +33,17 @@ class SendHomeFragment : Fragment() {
         root.paste_address_button.setOnClickListener {
             val clipBoard= requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val pasteData = clipBoard.primaryClip?.getItemAt(0)?.text.toString()
-            if(isValidPaymentType(pasteData)) {
+            if(isValidPaymentType(pasteData) || isMultisigPayload(pasteData)) {
                 findNavController().navigate(SendHomeFragmentDirections.navToSend(pasteData))
             }
         }
 
         root.view_tokens_button.setOnClickListener {
             findNavController().navigate(SendHomeFragmentDirections.navToTokens())
+        }
+
+        if(WalletManager.isMultisigKit) {
+            root.view_tokens_button.visibility = View.GONE
         }
 
         return root
@@ -48,7 +55,7 @@ class SendHomeFragment : Fragment() {
             if (requestCode == Constants.REQUEST_CODE_SCAN_QR) {
                 if (data != null) {
                     val scanData = data.getStringExtra(Constants.QR_SCAN_RESULT)
-                    if(isValidPaymentType(scanData)) {
+                    if(isValidPaymentType(scanData) || isMultisigPayload(scanData)) {
                         findNavController().navigate(SendHomeFragmentDirections.navToSend(scanData))
                     }
                 }
@@ -56,7 +63,20 @@ class SendHomeFragment : Fragment() {
         }
     }
 
+    private fun isMultisigPayload(json: String): Boolean {
+        return try {
+            Gson().fromJson(json, MultisigPayload::class.java)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     private fun isValidPaymentType(address: String): Boolean {
-        return address.contains("?r=") || Address.isValidPaymentCode(address) || Address.isValidSlpAddress(WalletManager.parameters, address) || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)
+        return if(WalletManager.isMultisigKit) {
+            Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)
+        } else {
+            address.contains("?r=") || Address.isValidPaymentCode(address) || Address.isValidSlpAddress(WalletManager.parameters, address) || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)
+        }
     }
 }

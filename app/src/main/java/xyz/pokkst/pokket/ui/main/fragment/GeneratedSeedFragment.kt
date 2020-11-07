@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import kotlinx.android.synthetic.main.fragment_generated_seed.view.*
 import org.bitcoinj.crypto.MnemonicCode
 import org.bitcoinj.crypto.MnemonicException
@@ -23,6 +24,8 @@ import java.security.SecureRandom
  * A placeholder fragment containing a simple view.
  */
 class GeneratedSeedFragment : Fragment() {
+    val args: GeneratedSeedFragmentArgs by navArgs()
+
     private val entropy: ByteArray
         get() = getEntropy(SecureRandom())
 
@@ -34,6 +37,7 @@ class GeneratedSeedFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_generated_seed, container, false)
+        val isMultisig = args.multisig
 
         val decorView = requireActivity().window.decorView
         var flags = decorView.systemUiVisibility
@@ -66,12 +70,19 @@ class GeneratedSeedFragment : Fragment() {
         root.the_phrase.text = seedStr
 
         root.continue_button.setOnClickListener {
-            val intent = Intent(requireActivity(), MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-            println(seedStr)
-            intent.putExtra("seed", seedStr)
-            intent.putExtra("new", true)
-            startActivity(intent)
+            if(isMultisig) {
+                val action = GeneratedSeedFragmentDirections.navToMyFollowingKey(seedStr)
+                findNavController().navigate(action)
+                this.setStatusBarColor(requireActivity(), R.color.extra_light_grey)
+            } else {
+                val intent = Intent(requireActivity(), MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                println(seedStr)
+                intent.putExtra("seed", seedStr)
+                intent.putExtra("new", true)
+                intent.putExtra("multisig", isMultisig)
+                startActivity(intent)
+            }
         }
 
         root.back_button.setOnClickListener {

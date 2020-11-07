@@ -1,5 +1,6 @@
 package xyz.pokkst.pokket.ui.main
 
+import android.app.Dialog
 import android.content.*
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -10,6 +11,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -48,7 +50,7 @@ class MainFragment : Fragment() {
                 when(currentAddressViewType) {
                     AddressViewType.SLP -> { refresh(WalletManager.walletKit?.currentSlpReceiveAddress().toString(), true) }
                     AddressViewType.BIP47 -> { refresh(WalletManager.walletKit?.paymentCode, false) }
-                    AddressViewType.CASH -> { refresh(WalletManager.walletKit?.wallet()?.currentReceiveAddress()?.toCash().toString(), false) }
+                    AddressViewType.CASH -> { refresh(WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(), false) }
                 }
             }
         }
@@ -104,11 +106,16 @@ class MainFragment : Fragment() {
                         AddressViewType.BIP47
                     }
                     AddressViewType.BIP47 -> {
-                        refresh(WalletManager.walletKit?.wallet()?.currentReceiveAddress()?.toCash().toString(), false)
+                        refresh(WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(), false)
                         AddressViewType.CASH
                     }
                 }
             }
+
+            if(WalletManager.isMultisigKit) {
+                swapAddressButton?.visibility = View.GONE
+            }
+
             sendScreen.visibility = View.GONE
             receiveScreen.visibility = View.VISIBLE
         }

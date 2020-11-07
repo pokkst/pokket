@@ -7,9 +7,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.core.listeners.DownloadProgressTracker
-import org.bitcoinj.kits.SlpAppKit
-import org.bitcoinj.kits.SlpBIP47AppKit
-import org.bitcoinj.kits.WalletAppKit
+import org.bitcoinj.crypto.DeterministicKey
+import org.bitcoinj.kits.*
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.script.Script
 import org.bitcoinj.utils.Threading
@@ -25,15 +24,22 @@ class WalletManager {
     companion object {
         lateinit var walletDir: File
         var walletKit: SlpBIP47AppKit? = null
+        var multisigWalletKit: MultisigAppKit? = null
+        val wallet: Wallet?
+            get() {
+                return walletKit?.wallet() ?: multisigWalletKit?.wallet()
+            }
+        val isMultisigKit: Boolean
+            get() {
+                return multisigWalletKit != null && walletKit == null
+            }
         val parameters: NetworkParameters = MainNetParams.get()
         val walletFileName = "pokket"
         fun startWallet(activity: Activity, seed: String?, newUser: Boolean) {
-            walletDir = File(activity.applicationInfo.dataDir)
             setBitcoinSDKThread()
 
             walletKit = object : SlpBIP47AppKit(parameters, Script.ScriptType.P2PKH, KeyChainGroupStructure.SLP, walletDir, walletFileName) {
                 override fun onSetupCompleted() {
-                    println("STARTED wallet...")
                     wallet().isAcceptRiskyTransactions = true
                     wallet().allowSpendingUnconfirmedTransactions()
                     refresh(activity, 0)
@@ -49,7 +55,6 @@ class WalletManager {
             walletKit?.setDownloadListener(object : DownloadProgressTracker() {
                 override fun doneDownload() {
                     super.doneDownload()
-                    println("DONE DOWNLOAD")
                     refresh(activity, 100)
                 }
                 override fun progress(pct: Double, blocksSoFar: Int, date: Date?) {
@@ -71,6 +76,49 @@ class WalletManager {
 
             println("Starting wallet...")
             walletKit?.startAsync()
+        }
+
+        fun startMultisigWallet(activity: Activity, seed: String?, newUser: Boolean, followingKeys: List<DeterministicKey>, m: Int) {
+            setBitcoinSDKThread()
+
+            multisigWalletKit = object : MultisigAppKit(parameters, walletDir, "${walletFileName}_multisig", followingKeys, m) {
+                override fun onSetupCompleted() {
+                    wallet().isAcceptRiskyTransactions = true
+                    wallet().allowSpendingUnconfirmedTransactions()
+                    refresh(activity, 0)
+                    wallet().addCoinsReceivedEventListener { wallet, tx, prevBalance, newBalance ->
+                        refresh(activity)
+                    }
+                    wallet().addCoinsSentEventListener { wallet, tx, prevBalance, newBalance ->
+                        refresh(activity)
+                    }
+                }
+            }
+
+            multisigWalletKit?.setDownloadListener(object : DownloadProgressTracker() {
+                override fun doneDownload() {
+                    super.doneDownload()
+                    refresh(activity, 100)
+                }
+                override fun progress(pct: Double, blocksSoFar: Int, date: Date?) {
+                    super.progress(pct, blocksSoFar, date)
+                    refresh(activity, pct.toInt())
+                    println(pct)
+                }
+            })
+
+            val creationDate = if(newUser) System.currentTimeMillis() / 1000L else 1554163098L
+            if (seed != null) {
+                val deterministicSeed = DeterministicSeed(seed, null, "", creationDate)
+                multisigWalletKit?.restoreWalletFromSeed(deterministicSeed)
+            }
+
+            multisigWalletKit?.setBlockingStartup(false)
+            val checkpointsInputStream = activity.assets.open("checkpoints.txt")
+            multisigWalletKit?.setCheckpoints(checkpointsInputStream)
+
+            println("Starting multisig wallet...")
+            multisigWalletKit?.startAsync()
         }
 
         fun getBalance(wallet: Wallet): Coin {

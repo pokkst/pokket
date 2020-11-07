@@ -21,17 +21,16 @@ class NewWalletFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_new_wallet, container, false)
         root.intro_new_wallet_generate.setOnClickListener {
-            //val username = root.new_cash_acct_name.text.toString()
-            //if(username.isNotEmpty()) {
-                if (root.seed_warning_screen.visibility != View.VISIBLE) {
-                    this.setStatusBarColor(requireActivity(), R.color.purple_dark)
-                    root.seed_warning_screen.visibility = View.VISIBLE
-                }
-            //}
+            if (root.seed_warning_screen.visibility != View.VISIBLE) {
+                this.setStatusBarColor(requireActivity(), R.color.purple_dark)
+                root.seed_warning_screen.visibility = View.VISIBLE
+            }
         }
 
         root.intro_warning_show_button.setOnClickListener {
-            findNavController().navigate(R.id.nav_to_generated_seed)
+            val isMultisigChecked = root.multsig_checkbox.isChecked
+            val action = NewWalletFragmentDirections.navToGeneratedSeed(isMultisigChecked)
+            findNavController().navigate(action)
             this.setStatusBarColor(requireActivity(), R.color.extra_light_grey)
         }
 

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.main.fragment.NewWalletFragment">
+
+    <include
+        layout="@layout/fragment_intro_bg_gray"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/textFlow2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="120dp"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:text="@string/multisig_my_key_instruction"
+            android:textColor="@color/dark_grey"
+            android:textSize="17sp" />
+
+        <LinearLayout
+            android:id="@+id/phrase_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:background="@drawable/clickable_layout"
+            android:clickable="false"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/separator1"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/separator_height"
+                android:layout_marginBottom="10dp"
+                android:background="@color/gray" />
+
+            <TextView
+                android:id="@+id/the_phrase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:gravity="center"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_size" />
+
+            <RelativeLayout
+                android:id="@+id/separator2"
+                android:layout_width="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_height="@dimen/separator_height"
+                android:background="@color/gray" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/continue_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="20dp"
+            android:background="@android:color/transparent"
+            android:text="@string/next"
+            android:textColor="@color/dark_blue"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/step1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/phrase_layout"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp" />
+
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/navigationback" />
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
