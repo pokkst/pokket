@@ -677,7 +677,13 @@ class SendAmountFragment : Fragment() {
         object : Thread() {
             override fun run() {
                 try {
-                    val amountWanted = tx.outputSum
+                    var amount = 0L
+                    for(output in tx.outputs) {
+                        if(!output.isMineOrWatched(WalletManager.wallet)) {
+                            amount += output.value.value
+                        }
+                    }
+                    val amountWanted = Coin.valueOf(amount)
                     val amountFormatted = BalanceFormatter.formatBalance(amountWanted.toPlainString().toDouble(), "#.########")
                     activity?.runOnUiThread {
                         val bchValue = amountFormatted.toDouble()
