@@ -61,8 +61,10 @@ class SendHomeFragment : Fragment() {
             if (requestCode == Constants.REQUEST_CODE_SCAN_QR) {
                 if (data != null) {
                     val scanData = data.getStringExtra(Constants.QR_SCAN_RESULT)
-                    if(isValidPaymentType(scanData) || PayloadHelper.isMultisigPayload(scanData)) {
-                        findNavController().navigate(SendHomeFragmentDirections.navToSend(scanData))
+                    if(scanData != null) {
+                        if(isValidPaymentType(scanData) || PayloadHelper.isMultisigPayload(scanData)) {
+                            findNavController().navigate(SendHomeFragmentDirections.navToSend(scanData))
+                        }
                     }
                 }
             }

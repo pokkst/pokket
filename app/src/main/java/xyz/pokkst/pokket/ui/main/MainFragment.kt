@@ -22,6 +22,7 @@ import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import net.glxn.qrgen.android.QRCode
 import xyz.pokkst.pokket.R
+import xyz.pokkst.pokket.util.ClipboardHelper
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.Toaster
 import xyz.pokkst.pokket.wallet.WalletManager
@@ -90,10 +91,10 @@ class MainFragment : Fragment() {
             swapAddressButton = root.findViewById(R.id.swap_address_button)
 
             receiveText?.setOnClickListener {
-                copyToClipboard(receiveText?.text.toString())
+                ClipboardHelper.copyToClipboard(activity, receiveText?.text.toString())
             }
             receiveQr?.setOnClickListener {
-                copyToClipboard(receiveText?.text.toString())
+                ClipboardHelper.copyToClipboard(activity, receiveText?.text.toString())
             }
             swapAddressButton?.setOnClickListener {
                 currentAddressViewType = when(currentAddressViewType) {
@@ -121,13 +122,6 @@ class MainFragment : Fragment() {
         }
 
         return root
-    }
-
-    private fun copyToClipboard(text: String) {
-        val clipboard: ClipboardManager? = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-        val clip = ClipData.newPlainText("Address", text)
-        clipboard?.setPrimaryClip(clip)
-        Toaster.showToastMessage(requireContext(), "copied")
     }
 
     private fun refresh(address: String?, slp: Boolean) {

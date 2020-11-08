@@ -51,24 +51,24 @@ import java.util.concurrent.ExecutionException
  * A placeholder fragment containing a simple view.
  */
 class SendAmountFragment : Fragment() {
-    //TODO add SLP sending
     var tokenId: String? = null
     var root: View? = null
-    var currentTokenId: String? = null
     var paymentContent: PaymentContent? = null
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_MAIN_ENABLE_PAGER == intent.action) {
                 this@SendAmountFragment.findNavController().popBackStack(R.id.sendHomeFragment, false)
             } else if (Constants.ACTION_FRAGMENT_SEND_SEND == intent.action) {
-                if(WalletManager.isMultisigKit) {
-                    if(paymentContent?.paymentType == PaymentType.MULTISIG_PAYLOAD) {
-                        paymentContent?.addressOrPayload?.let { this@SendAmountFragment.importMultisigPayload(it) }
+                if(getCoinAmount() != Coin.ZERO) {
+                    if(WalletManager.isMultisigKit) {
+                        if(paymentContent?.paymentType == PaymentType.MULTISIG_PAYLOAD) {
+                            paymentContent?.addressOrPayload?.let { this@SendAmountFragment.importMultisigPayload(it) }
+                        } else {
+                            this@SendAmountFragment.sendMultisig()
+                        }
                     } else {
-                        this@SendAmountFragment.sendMultisig()
+                        this@SendAmountFragment.send()
                     }
-                } else {
-                    this@SendAmountFragment.send()
                 }
             }
         }
@@ -112,8 +112,8 @@ class SendAmountFragment : Fragment() {
         } else {
             if(paymentContent != null) {
                 when (paymentContent?.paymentType) {
-                    PaymentType.BIP70 -> this.getBIP70Data(root, paymentContent?.addressOrPayload?.replace("bitcoincash:?r=", ""))
-                    else -> root?.to_field_text?.text = "to: ${paymentContent?.addressOrPayload?.replace("bitcoincash:", "")}"
+                    PaymentType.BIP70 -> this.getBIP70Data(root, paymentContent?.addressOrPayload)
+                    else -> root?.to_field_text?.text = "to: ${paymentContent?.addressOrPayload}"
                 }
 
                 if(paymentContent?.amount != null) {
@@ -239,6 +239,7 @@ class SendAmountFragment : Fragment() {
                             this.processSlpTransaction(destination, amount, slpTokenId)
                         }
                     }
+                    PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
                     null -> showToast("please enter a valid destination")
                 }
             } else {
@@ -253,14 +254,8 @@ class SendAmountFragment : Fragment() {
         if(WalletManager.wallet?.getBalance(Wallet.BalanceType.ESTIMATED)?.isZero == false) {
             if (paymentContent != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
                 if(paymentContent?.paymentType == PaymentType.ADDRESS) {
-                    val bchToSend = if (bchIsSendType) {
-                        root?.send_amount_input?.text.toString()
-                    } else {
-                        root?.alt_currency_display?.text.toString()
-                    }
-
                     val toAddress = AddressFactory.create().getAddress(WalletManager.parameters, paymentContent?.addressOrPayload)
-                    val myTx = WalletManager.multisigWalletKit?.makeIndividualMultisigTransaction(toAddress, Coin.parseCoin(bchToSend))
+                    val myTx = WalletManager.multisigWalletKit?.makeIndividualMultisigTransaction(toAddress, getCoinAmount())
                     var needsMoreSigs = false
 
                     myTx?.inputs?.forEach { input ->
@@ -398,7 +393,7 @@ class SendAmountFragment : Fragment() {
         val closeButton = dialog?.findViewById<TextView>(R.id.payload_close)
         payloadQr?.setImageBitmap(generateQR(payloadBase64))
         payloadQr?.setOnClickListener {
-            copyToClipboard(payloadBase64)
+            ClipboardHelper.copyToClipboard(activity, payloadBase64)
         }
         sharePayloadButton?.setOnClickListener {
             sharePayload(payloadBase64)
@@ -475,16 +470,13 @@ class SendAmountFragment : Fragment() {
 
                         val price = PriceHelper.price
 
-                        if (bchIsSendType) {
-                            val fiatValue = value * price
-                            activity?.runOnUiThread {
-                                root.alt_currency_display.text = BalanceFormatter.formatBalance(fiatValue, "0.00")
-                            }
-                        } else {
-                            val bchValue = value / price
-                            activity?.runOnUiThread {
-                                root.alt_currency_display.text =
-                                    BalanceFormatter.formatBalance(bchValue, "#.########")
+                        activity?.runOnUiThread {
+                            root.alt_currency_display.text = if (bchIsSendType) {
+                                val fiatValue = value * price
+                                BalanceFormatter.formatBalance(fiatValue, "0.00")
+                            } else {
+                                val bchValue = value / price
+                                BalanceFormatter.formatBalance(bchValue, "#.########")
                             }
                         }
                     } else {
@@ -571,26 +563,19 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun processNormalTransaction(address: String?) {
-        val bchToSend = if (bchIsSendType) {
-            root?.send_amount_input?.text.toString()
-        } else {
-            root?.alt_currency_display?.text.toString()
-        }
+        val bchToSend = getCoinAmount()
         address?.let { this.processNormalTransaction(it, bchToSend) }
     }
 
-    private fun processNormalTransaction(address: String, bchAmount: String) {
-        val bchToSend = BalanceFormatter.formatBalance(bchAmount.toDouble(), "#.########")
-        val coinToSend = Coin.parseCoin(bchToSend)
-
+    private fun processNormalTransaction(address: String, bchAmount: Coin) {
         object : Thread() {
             override fun run() {
                 try {
                     val req: SendRequest =
-                        if (coinToSend == WalletManager.wallet?.let { WalletManager.getBalance(it) }) {
+                        if (bchAmount == WalletManager.wallet?.let { WalletManager.getBalance(it) }) {
                             SendRequest.emptyWallet(WalletManager.parameters, address)
                         } else {
-                            SendRequest.to(WalletManager.parameters, address, coinToSend)
+                            SendRequest.to(WalletManager.parameters, address, bchAmount)
                         }
 
                     req.allowUnconfirmed()
@@ -678,6 +663,19 @@ class SendAmountFragment : Fragment() {
         }.start()
     }
 
+    private fun getCoinAmount(): Coin {
+        val bchToSend = if (bchIsSendType) {
+            root?.send_amount_input?.text.toString()
+        } else {
+            root?.alt_currency_display?.text.toString()
+        }
+
+        if(bchToSend.isEmpty())
+            return Coin.ZERO
+
+        return Coin.parseCoin(bchToSend)
+    }
+
     private fun setCoinAmount(coin: Coin?) {
         val amountFormatted = coin?.toPlainString()?.toDouble()?.let { BalanceFormatter.formatBalance(it, "#.########") }
         activity?.runOnUiThread {
@@ -705,13 +703,6 @@ class SendAmountFragment : Fragment() {
 
     private fun showToast(message: String) {
         (activity as? MainActivity)?.let { Toaster.showMessage(it, message) }
-    }
-
-    private fun copyToClipboard(text: String?) {
-        val clipboard: ClipboardManager? = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-        val clip = ClipData.newPlainText("Multisig Payload", text)
-        clipboard?.setPrimaryClip(clip)
-        Toaster.showToastMessage(requireContext(), "copied")
     }
 
     private fun sharePayload(payloadJson: String?) {
