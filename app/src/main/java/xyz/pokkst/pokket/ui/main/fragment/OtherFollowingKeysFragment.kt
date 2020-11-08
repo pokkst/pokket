@@ -80,7 +80,7 @@ class OtherFollowingKeysFragment : Fragment() {
         root.m_of_n_textview.text = resources.getString(R.string.you_are_creating_a_m_of_n_multisig_wallet, mCurrent, nCurrent)
 
         root.continue_button.setOnClickListener {
-            if(mCurrent != 0 && nCurrent != 0 && nCurrent < mCurrent) {
+            if(mCurrent != 0 && nCurrent != 0 && mCurrent <= nCurrent) {
                 val followingKeys = ArrayList<String>()
                 val keysLength = cosignerKeysList.childCount - 1
                 for (x in 0..keysLength) {
