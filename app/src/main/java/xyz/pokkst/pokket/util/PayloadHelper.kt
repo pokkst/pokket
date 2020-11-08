@@ -10,27 +10,27 @@ class PayloadHelper {
             return try {
                 val json = decodeMultisigPayload(base64Payload)
                 Gson().fromJson(json, MultisigPayload::class.java)
-                true
+                json != null
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()
                 false
             }
         }
 
-        fun decodeMultisigPayload(base64Payload: String): String {
+        fun decodeMultisigPayload(base64Payload: String): String? {
             return try {
                 CompressionHelper.decompress(Base64.decode(base64Payload))
             } catch (e: java.lang.Exception) {
-                ""
+                null
             }
         }
 
-        fun encodeMultisigPayload(json: String): String {
+        fun encodeMultisigPayload(json: String): String? {
             return try {
                 val compressedBytes = CompressionHelper.compress(json)
                 return Base64.toBase64String(compressedBytes)
             } catch (e: java.lang.Exception) {
-                ""
+                null
             }
         }
     }
