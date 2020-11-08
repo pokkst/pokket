@@ -74,7 +74,7 @@ class OtherFollowingKeysFragment : Fragment() {
             val m = if(text.isNullOrEmpty()) 0 else text.toString().toInt()
             mCurrent = m
 
-            root.m_of_n_textview.text = resources.getString(R.string.you_are_creating_a_m_of_n_multisig_wallet, mCurrent, nCurrent + 1)
+            root.m_of_n_textview.text = resources.getString(R.string.you_are_creating_a_m_of_n_multisig_wallet, mCurrent, nCurrent)
         }
 
         root.m_of_n_textview.text = resources.getString(R.string.you_are_creating_a_m_of_n_multisig_wallet, mCurrent, nCurrent)
