@@ -65,9 +65,9 @@ class OtherFollowingKeysFragment : Fragment() {
                 nPrevious = n
             }
 
-            nCurrent = n
+            nCurrent = n + 1
 
-            root.m_of_n_textview.text = resources.getString(R.string.you_are_creating_a_m_of_n_multisig_wallet, mCurrent, nCurrent + 1)
+            root.m_of_n_textview.text = resources.getString(R.string.you_are_creating_a_m_of_n_multisig_wallet, mCurrent, nCurrent)
         }
 
         root.m_edittext.doAfterTextChanged { text ->
