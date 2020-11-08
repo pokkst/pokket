@@ -19,6 +19,8 @@ import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.qr.QRHelper
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.PayloadHelper
+import xyz.pokkst.pokket.util.PaymentType
+import xyz.pokkst.pokket.util.UriHelper
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.lang.Exception
 import java.nio.charset.StandardCharsets
@@ -69,9 +71,9 @@ class SendHomeFragment : Fragment() {
 
     private fun isValidPaymentType(address: String): Boolean {
         return if(WalletManager.isMultisigKit) {
-            Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)
+            UriHelper.parse(address)?.paymentType == PaymentType.ADDRESS
         } else {
-            address.contains("?r=") || Address.isValidPaymentCode(address) || Address.isValidSlpAddress(WalletManager.parameters, address) || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)
+            UriHelper.parse(address) != null
         }
     }
 }

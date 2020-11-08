@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.*
 import android.content.Context
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -53,18 +52,18 @@ import java.util.concurrent.ExecutionException
  */
 class SendAmountFragment : Fragment() {
     //TODO add SLP sending
-    var address: String? = null
     var tokenId: String? = null
     var root: View? = null
     var currentTokenId: String? = null
+    var paymentContent: PaymentContent? = null
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_MAIN_ENABLE_PAGER == intent.action) {
                 this@SendAmountFragment.findNavController().popBackStack(R.id.sendHomeFragment, false)
             } else if (Constants.ACTION_FRAGMENT_SEND_SEND == intent.action) {
                 if(WalletManager.isMultisigKit) {
-                    if(hasPayload) {
-                        address?.let { this@SendAmountFragment.importMultisigPayload(it) }
+                    if(paymentContent?.paymentType == PaymentType.MULTISIG_PAYLOAD) {
+                        paymentContent?.addressOrPayload?.let { this@SendAmountFragment.importMultisigPayload(it) }
                     } else {
                         this@SendAmountFragment.sendMultisig()
                     }
@@ -76,7 +75,6 @@ class SendAmountFragment : Fragment() {
     }
 
     var bchIsSendType = true
-    var hasPayload = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,36 +98,35 @@ class SendAmountFragment : Fragment() {
         root?.input_type_toggle?.isChecked = true
 
         tokenId = arguments?.getString("tokenId", null)
-        address = arguments?.getString("address", null)
-        val isMultisigPayload = address?.let { PayloadHelper.isMultisigPayload(it) }
-        if(isMultisigPayload == true) {
-            hasPayload = true
+        paymentContent = arguments?.getString("address", null)?.let { UriHelper.parse(it) }
+        if(paymentContent?.paymentType == PaymentType.MULTISIG_PAYLOAD) {
             root?.send_amount_input?.isEnabled = false
-            val payloadJson = address?.let { PayloadHelper.decodeMultisigPayload(it) }
+            val payloadJson = paymentContent?.addressOrPayload?.let { PayloadHelper.decodeMultisigPayload(it) }
             if(payloadJson?.isNotEmpty() == true) {
                 val payload = Gson().fromJson(payloadJson, MultisigPayload::class.java)
                 val tx = Transaction(WalletManager.parameters, Hex.decode(payload.hex))
                 val payloadAddress = tx.getOutput(0).scriptPubKey.getToAddress(WalletManager.parameters).toCash().toString()
                 root?.to_field_text?.text = "to: ${payloadAddress?.replace("bitcoincash:", "")}"
-                this.getPayloadData(root, tx)
+                this.getPayloadData(tx)
             }
         } else {
-            hasPayload = false
-            when {
-                address?.contains("http") == true -> {
-                    this.getBIP70Data(root, address?.replace("bitcoincash:?r=", ""))
+            if(paymentContent != null) {
+                when (paymentContent?.paymentType) {
+                    PaymentType.BIP70 -> this.getBIP70Data(root, paymentContent?.addressOrPayload?.replace("bitcoincash:?r=", ""))
+                    else -> root?.to_field_text?.text = "to: ${paymentContent?.addressOrPayload?.replace("bitcoincash:", "")}"
                 }
-                address != null -> {
-                    root?.to_field_text?.text = "to: ${address?.replace("bitcoincash:", "")}"
+
+                if(paymentContent?.amount != null) {
+                    root?.send_amount_input?.isEnabled = false
+                    setCoinAmount(paymentContent?.amount)
                 }
-                address == null -> {
-                    root?.to_field_text?.visibility = View.GONE
-                    root?.to_field_edit_text?.visibility = View.VISIBLE
-                }
+            } else {
+                root?.to_field_text?.visibility = View.GONE
+                root?.to_field_edit_text?.visibility = View.VISIBLE
             }
         }
 
-        if(tokenId != null || Address.isValidSlpAddress(WalletManager.parameters, address)) {
+        if(tokenId != null || paymentContent?.paymentType == PaymentType.SLP_ADDRESS) {
             val items = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
             val adapter = object : ArrayAdapter<SlpTokenBalance>(requireContext(), R.layout.token_spinner_cell, items) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -219,33 +216,30 @@ class SendAmountFragment : Fragment() {
 
     private fun send() {
         if(WalletManager.wallet?.getBalance(Wallet.BalanceType.ESTIMATED)?.isZero == false) {
-            if(address != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
-                if(address == null) address = root?.to_field_edit_text?.text?.toString()
-                if(address?.startsWith("http") == true) {
-                    address?.let {
-                        this.processBIP70(it)
-                    }
-                } else {
-                    if(address?.contains("#") == true || Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)) {
-                        this.processNormalTransaction()
-                    } else if(Address.isValidPaymentCode(address)) {
-                        val canSendToPaymentCode = WalletManager.walletKit?.canSendToPaymentCode(address)
+            if(paymentContent != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
+                val destination = paymentContent?.addressOrPayload
+                when(paymentContent?.paymentType) {
+                    PaymentType.BIP70 -> destination?.let { this.processBIP70(it) }
+                    PaymentType.CASH_ACCOUNT, PaymentType.ADDRESS -> this.processNormalTransaction()
+                    PaymentType.PAYMENT_CODE -> {
+                        val canSendToPaymentCode = WalletManager.walletKit?.canSendToPaymentCode(destination)
                         if(canSendToPaymentCode == true) {
                             this.attemptBip47Payment()
                         } else {
-                            val notification = WalletManager.walletKit?.makeNotificationTransaction(address, true)
+                            val notification = WalletManager.walletKit?.makeNotificationTransaction(destination, true)
                             WalletManager.walletKit?.broadcastTransaction(notification?.tx)
-                            WalletManager.walletKit?.putPaymenCodeStatusSent(address, notification?.tx)
+                            WalletManager.walletKit?.putPaymenCodeStatusSent(destination, notification?.tx)
                             this.attemptBip47Payment()
                         }
-                    } else if(Address.isValidSlpAddress(WalletManager.parameters, address)) {
+                    }
+                    PaymentType.SLP_ADDRESS -> {
                         val amount = root?.send_amount_input?.text?.toString()?.toDouble() ?: 0.0
-                        val slpAddress = address
                         val slpTokenId = tokenId
-                        if(slpAddress != null && slpTokenId != null) {
-                            this.processSlpTransaction(slpAddress, amount, slpTokenId)
+                        if(destination != null && slpTokenId != null) {
+                            this.processSlpTransaction(destination, amount, slpTokenId)
                         }
                     }
+                    null -> showToast("please enter a valid destination")
                 }
             } else {
                 (activity as? MainActivity)?.let { Toaster.showMessage(it, "please enter an address") }
@@ -257,17 +251,15 @@ class SendAmountFragment : Fragment() {
 
     private fun sendMultisig() {
         if(WalletManager.wallet?.getBalance(Wallet.BalanceType.ESTIMATED)?.isZero == false) {
-            if (address != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
-                if (address == null) address = root?.to_field_edit_text?.text?.toString()
-
-                if(Address.isValidCashAddr(WalletManager.parameters, address) || Address.isValidLegacyAddress(WalletManager.parameters, address)) {
+            if (paymentContent != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
+                if(paymentContent?.paymentType == PaymentType.ADDRESS) {
                     val bchToSend = if (bchIsSendType) {
                         root?.send_amount_input?.text.toString()
                     } else {
                         root?.alt_currency_display?.text.toString()
                     }
 
-                    val toAddress = AddressFactory.create().getAddress(WalletManager.parameters, address)
+                    val toAddress = AddressFactory.create().getAddress(WalletManager.parameters, paymentContent?.addressOrPayload)
                     val myTx = WalletManager.multisigWalletKit?.makeIndividualMultisigTransaction(toAddress, Coin.parseCoin(bchToSend))
                     var needsMoreSigs = false
 
@@ -418,7 +410,8 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun attemptBip47Payment() {
-        val paymentChannel: BIP47Channel? = WalletManager.walletKit?.getBip47MetaForPaymentCode(address)
+        val destination = paymentContent?.addressOrPayload
+        val paymentChannel: BIP47Channel? = WalletManager.walletKit?.getBip47MetaForPaymentCode(destination)
         var depositAddress: String? = null
         if (paymentChannel != null) {
             if(paymentChannel.isNotificationTransactionSent) {
@@ -430,9 +423,9 @@ class SendAmountFragment : Fragment() {
                     this.processNormalTransaction(depositAddress)
                 }
             } else {
-                val notification = WalletManager.walletKit?.makeNotificationTransaction(address, true)
+                val notification = WalletManager.walletKit?.makeNotificationTransaction(destination, true)
                 WalletManager.walletKit?.broadcastTransaction(notification?.tx)
-                WalletManager.walletKit?.putPaymenCodeStatusSent(address, notification?.tx)
+                WalletManager.walletKit?.putPaymenCodeStatusSent(destination, notification?.tx)
                 this.attemptBip47Payment()
             }
         }
@@ -574,7 +567,7 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun processNormalTransaction() {
-        address?.let { this.processNormalTransaction(it) }
+        paymentContent?.addressOrPayload?.let { this.processNormalTransaction(it) }
     }
 
     private fun processNormalTransaction(address: String?) {
@@ -644,23 +637,11 @@ class SendAmountFragment : Fragment() {
                     val future: ListenableFuture<PaymentSession> = PaymentSession.createFromUrl(url)
                     val session = future.get()
                     val amountWanted = session.value
-                    val amountFormatted = BalanceFormatter.formatBalance(amountWanted.toPlainString().toDouble(), "#.########")
+                    setCoinAmount(amountWanted)
                     activity?.runOnUiThread {
-                        val bchValue = amountFormatted.toDouble()
-                        val price = PriceHelper.price
-                        val fiatValue = bchValue * price
-                        if (bchIsSendType) {
-                            root?.send_amount_input?.setText(BalanceFormatter.formatBalance(bchValue, "#.########"))
-                            root?.alt_currency_display?.text = BalanceFormatter.formatBalance(fiatValue, "0.00")
-                        } else {
-                            root?.send_amount_input?.setText(BalanceFormatter.formatBalance(fiatValue, "0.00"))
-                            root?.alt_currency_display?.text = BalanceFormatter.formatBalance(bchValue, "#.########")
-                        }
-
                         root?.send_amount_input?.isEnabled = false
                         root?.to_field_text?.text = session.memo
                     }
-                    address = url
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 } catch (e: ExecutionException) {
@@ -673,7 +654,7 @@ class SendAmountFragment : Fragment() {
         }.start()
     }
 
-    fun getPayloadData(root: View?, tx: Transaction) {
+    fun getPayloadData(tx: Transaction) {
         object : Thread() {
             override fun run() {
                 try {
@@ -684,19 +665,7 @@ class SendAmountFragment : Fragment() {
                         }
                     }
                     val amountWanted = Coin.valueOf(amount)
-                    val amountFormatted = BalanceFormatter.formatBalance(amountWanted.toPlainString().toDouble(), "#.########")
-                    activity?.runOnUiThread {
-                        val bchValue = amountFormatted.toDouble()
-                        val price = PriceHelper.price
-                        val fiatValue = bchValue * price
-                        if (bchIsSendType) {
-                            root?.send_amount_input?.setText(BalanceFormatter.formatBalance(bchValue, "#.########"))
-                            root?.alt_currency_display?.text = BalanceFormatter.formatBalance(fiatValue, "0.00")
-                        } else {
-                            root?.send_amount_input?.setText(BalanceFormatter.formatBalance(fiatValue, "0.00"))
-                            root?.alt_currency_display?.text = BalanceFormatter.formatBalance(bchValue, "#.########")
-                        }
-                    }
+                    setCoinAmount(amountWanted)
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 } catch (e: ExecutionException) {
@@ -707,6 +676,22 @@ class SendAmountFragment : Fragment() {
 
             }
         }.start()
+    }
+
+    private fun setCoinAmount(coin: Coin?) {
+        val amountFormatted = coin?.toPlainString()?.toDouble()?.let { BalanceFormatter.formatBalance(it, "#.########") }
+        activity?.runOnUiThread {
+            val bchValue = amountFormatted?.toDouble() ?: 0.0
+            val price = PriceHelper.price
+            val fiatValue = bchValue * price
+            if (bchIsSendType) {
+                root?.send_amount_input?.setText(BalanceFormatter.formatBalance(bchValue, "#.########"))
+                root?.alt_currency_display?.text = BalanceFormatter.formatBalance(fiatValue, "0.00")
+            } else {
+                root?.send_amount_input?.setText(BalanceFormatter.formatBalance(fiatValue, "0.00"))
+                root?.alt_currency_display?.text = BalanceFormatter.formatBalance(bchValue, "#.########")
+            }
+        }
     }
 
     fun needsMoreSigs(input: TransactionInput, utxo: TransactionOutput?): Boolean {
