@@ -314,7 +314,6 @@ class SendAmountFragment : Fragment() {
                         if (peers != null) {
                             var broadcasted = false
                             for(peer in peers) {
-                                println("Broadcasting...")
                                 peer.sendMessage(myTx)
 
                                 if(!broadcasted) {
@@ -339,7 +338,6 @@ class SendAmountFragment : Fragment() {
         var needsMoreSigs = false
 
         val cosignerTx = WalletManager.multisigWalletKit?.importMultisigPayload(multisigPayload.hex)
-        println("Cosigner tx: ${cosignerTx.toString()}")
         cosignerTx?.inputs?.forEach { input ->
             val bitcoinRedeemData =
                 input.getConnectedRedeemData(WalletManager.wallet)
@@ -383,12 +381,9 @@ class SendAmountFragment : Fragment() {
             showPayload(newPayloadJson)
         } else {
             val peers = WalletManager.multisigWalletKit?.peerGroup()?.connectedPeers
-            println("Peers: $peers")
-            println("Raw hex: ${Hex.toHexString(cosignerTx?.bitcoinSerialize())}")
             if (peers != null) {
                 var broadcasted = false
                 for(peer in peers) {
-                    println("Broadcasting...")
                     peer.sendMessage(cosignerTx)
 
                     if(!broadcasted) {
