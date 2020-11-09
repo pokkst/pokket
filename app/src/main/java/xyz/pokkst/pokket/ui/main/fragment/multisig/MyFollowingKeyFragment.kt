@@ -1,4 +1,4 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.multisig
 
 import android.content.ClipData
 import android.content.ClipboardManager

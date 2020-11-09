@@ -1,4 +1,4 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.transaction
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,16 +11,12 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.transaction_item_expanded_received.view.*
 import org.bitcoinj.core.*
 import org.bitcoinj.core.slp.SlpTransaction
-import org.bitcoinj.script.Script
-import org.bitcoinj.script.ScriptException
 import org.bitcoinj.script.ScriptPattern
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.lang.Exception
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
 import java.util.*
 
 

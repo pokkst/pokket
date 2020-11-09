@@ -1,20 +1,15 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.send
 
 import android.app.Activity
 import android.content.*
 import android.content.Context.CLIPBOARD_SERVICE
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.google.gson.Gson
 import kotlinx.android.synthetic.main.fragment_send_home.view.*
-import org.bitcoinj.core.Address
-import org.bitcoinj.utils.MultisigPayload
-import org.bouncycastle.util.encoders.Base64
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.qr.QRHelper
 import xyz.pokkst.pokket.util.Constants
@@ -22,8 +17,6 @@ import xyz.pokkst.pokket.util.PayloadHelper
 import xyz.pokkst.pokket.util.PaymentType
 import xyz.pokkst.pokket.util.UriHelper
 import xyz.pokkst.pokket.wallet.WalletManager
-import java.lang.Exception
-import java.nio.charset.StandardCharsets
 
 /**
  * A placeholder fragment containing a simple view.
@@ -40,7 +33,11 @@ class SendHomeFragment : Fragment() {
             val clipBoard= requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val pasteData = clipBoard.primaryClip?.getItemAt(0)?.text.toString()
             if(isValidPaymentType(pasteData) || PayloadHelper.isMultisigPayload(pasteData)) {
-                findNavController().navigate(SendHomeFragmentDirections.navToSend(pasteData))
+                findNavController().navigate(
+                    SendHomeFragmentDirections.navToSend(
+                        pasteData
+                    )
+                )
             }
         }
 
@@ -63,7 +60,11 @@ class SendHomeFragment : Fragment() {
                     val scanData = data.getStringExtra(Constants.QR_SCAN_RESULT)
                     if(scanData != null) {
                         if(isValidPaymentType(scanData) || PayloadHelper.isMultisigPayload(scanData)) {
-                            findNavController().navigate(SendHomeFragmentDirections.navToSend(scanData))
+                            findNavController().navigate(
+                                SendHomeFragmentDirections.navToSend(
+                                    scanData
+                                )
+                            )
                         }
                     }
                 }

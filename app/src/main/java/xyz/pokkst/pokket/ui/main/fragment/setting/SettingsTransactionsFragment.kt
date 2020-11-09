@@ -1,18 +1,15 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.setting
 
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RelativeLayout
 import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_settings_home.view.*
+import kotlinx.android.synthetic.main.fragment_settings_transactions.view.*
 import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.core.slp.SlpOpReturn
 import org.bitcoinj.core.slp.SlpTransaction
@@ -20,13 +17,9 @@ import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.SettingsActivity
 import xyz.pokkst.pokket.util.BalanceFormatter
-import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.DateFormatter
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -34,38 +27,16 @@ import kotlin.collections.HashMap
 /**
  * A placeholder fragment containing a simple view.
  */
-class SettingsHomeFragment : Fragment() {
+class SettingsTransactionsFragment : Fragment() {
     private var sentColor = 0
     private var receivedColor = 0
     private var txList = ArrayList<String>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val root = inflater.inflate(R.layout.fragment_settings_home, container, false)
+        val root = inflater.inflate(R.layout.fragment_settings_transactions, container, false)
         sentColor = Color.parseColor("#FF5454")
         receivedColor = Color.parseColor("#00BF00")
         this.setArrayAdapter(root, WalletManager.wallet)
-
-        root.about.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
-            navigate(R.id.nav_to_about)
-        }
-        root.about.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.about)
-
-        root.recovery_phrase.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
-            navigate(R.id.nav_to_phrase)
-        }
-        root.recovery_phrase.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.recovery_phrase_label)
-
-        /*root.extended_public_key.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
-            val intent = Intent(Constants.ACTION_SETTINGS_HIDE_BAR)
-            LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
-            findNavController().navigate(R.id.nav_to_phrase)
-        }
-        root.extended_public_key.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.epk_label)*/
-
-        root.start_recovery_wallet.setOnClickListener {
-            navigate(R.id.nav_to_wipe)
-        }
-
         root.transactions_list.setOnItemClickListener { parent, view, position, id ->
             (activity as? SettingsActivity)?.adjustDeepMenu(1)
             val txid = txList[position]
@@ -86,23 +57,24 @@ class SettingsHomeFragment : Fragment() {
                 0.0
             }
             if(amount?.isPositive!! || slpAmount > 0) {
-                findNavController().navigate(SettingsHomeFragmentDirections.navToTxReceived(txid, isSlp))
+                findNavController().navigate(
+                    SettingsTransactionsFragmentDirections.navToTxReceived(
+                        txid,
+                        isSlp
+                    )
+                )
             } else if(amount.isNegative) {
-                findNavController().navigate(SettingsHomeFragmentDirections.navToTxSent(txid, isSlp))
+                findNavController().navigate(
+                    SettingsTransactionsFragmentDirections.navToTxSent(
+                        txid,
+                        isSlp
+                    )
+                )
             }
         }
-
-        root.more_transactions.setOnClickListener {
-            navigate(R.id.nav_to_tx_list)
-        }
-
         return root
     }
 
-    private fun navigate(navResId: Int) {
-        (activity as? SettingsActivity)?.adjustDeepMenu(1)
-        findNavController().navigate(navResId)
-    }
     private fun setArrayAdapter(root: View, wallet: Wallet?) {
         setListViewShit(root, wallet)
     }
@@ -111,19 +83,13 @@ class SettingsHomeFragment : Fragment() {
         object : Thread() {
             override fun run() {
                 if (wallet != null) {
-                    val txListFromWallet = wallet.getRecentTransactions(5, false)
-                    val actualTxCount = wallet.getRecentTransactions(0, false).size
+                    val txListFromWallet = wallet.getRecentTransactions(0, false)
                     txList = ArrayList<String>()
 
                     if (txListFromWallet != null && txListFromWallet.size != 0) {
                         val txListFormatted = ArrayList<Map<String, String>>()
 
                         if (txListFromWallet.size > 0) {
-                            requireActivity().runOnUiThread {
-                                if(actualTxCount > 5) { root.more_transactions.visibility = View.VISIBLE }
-                                root.no_transactions.visibility = View.GONE
-                            }
-
                             for (x in 0 until txListFromWallet.size) {
                                 val tx = txListFromWallet[x]
                                 val isSlp = SlpOpReturn.isSlpTx(tx)
@@ -200,18 +166,6 @@ class SettingsHomeFragment : Fragment() {
                                 }
                             }
                             requireActivity().runOnUiThread { root.transactions_list.adapter = itemsAdapter }
-                        } else {
-                            requireActivity().runOnUiThread {
-                                root.space.visibility = View.GONE
-                                root.transactions_list.visibility = View.GONE
-                                root.no_transactions.visibility = View.VISIBLE
-                            }
-                        }
-                    } else {
-                        requireActivity().runOnUiThread {
-                            root.space.visibility = View.GONE
-                            root.transactions_list.visibility = View.GONE
-                            root.no_transactions.visibility = View.VISIBLE
                         }
                     }
                 }

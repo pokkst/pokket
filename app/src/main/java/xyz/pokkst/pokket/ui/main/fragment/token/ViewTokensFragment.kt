@@ -1,4 +1,4 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.token
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -17,20 +17,12 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.luminiasoft.ethereum.blockiesandroid.BlockiesIdenticon
-import org.bitcoinj.utils.MonetaryFormat
-import org.bitcoinj.wallet.SendRequest
-import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.ui.NonScrollListView
 import xyz.pokkst.pokket.util.Constants
-import xyz.pokkst.pokket.util.PriceHelper
-import xyz.pokkst.pokket.util.Toaster
 import xyz.pokkst.pokket.wallet.WalletManager
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
 import java.util.*
-import java.util.concurrent.ExecutionException
 
 
 /**

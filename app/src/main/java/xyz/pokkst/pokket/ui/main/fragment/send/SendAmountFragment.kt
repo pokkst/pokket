@@ -1,4 +1,4 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.send
 
 import android.app.Dialog
 import android.content.*
