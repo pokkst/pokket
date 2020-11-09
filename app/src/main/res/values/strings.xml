@@ -85,7 +85,7 @@
     <!-- checked -->
     <string name="settingsall_rescan_instructions">rescan blockchain if you think you may have missing transactions, or are having trouble sending (rescanning can take several minutes)</string>
     <!-- checked -->
-    <string name="wipewallet_instructions">Enter this wallet\'s recovery phrase to wipe it and start/recover another. Your current balance remains on this phrase.</string>
+    <string name="wipewallet_instructions">enter this wallet\'s recovery phrase to wipe it and start/recover another. your current balance remains on this phrase.</string>
     <!-- checked -->
     <string name="dialog_recovery_phrase_warning">if you ever lose your phone, you will need this phrase to recover your wallet</string>
     <!-- checked -->
