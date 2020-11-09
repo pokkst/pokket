@@ -40,9 +40,13 @@ class SettingsWipeFragment : Fragment() {
 
     private fun wipeAndRestart(intent: Intent) {
         val walletFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}.wallet")
+        val multisigWalletFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}_multisig.wallet")
         val spvChainFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}.spvchain")
+        val multisigSpvChainFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}_multisig.spvchain")
         walletFile.delete()
+        multisigWalletFile.delete()
         spvChainFile.delete()
+        multisigSpvChainFile.delete()
         startActivity(intent)
     }
 }
