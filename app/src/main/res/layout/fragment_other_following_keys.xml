@@ -100,7 +100,7 @@
             android:layout_below="@+id/m_of_n_textview"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
-            android:text="please enter the other user watching keys here:"
+            android:text="@string/multisig_key_instructions"
             android:textColor="@color/dark_grey"
             android:textSize="17sp" />
 
@@ -132,14 +132,6 @@
             android:text="@string/next"
             android:textColor="@color/dark_blue"
             android:textSize="18sp" />
-
-        <TextView
-            android:id="@+id/step1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/phrase_layout"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp" />
 
         <Button
             android:id="@+id/back_button"
