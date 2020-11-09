@@ -23,7 +23,7 @@
             android:layout_marginTop="80dp"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
-            android:text="please enter the type of multisig wallet you are creating, this must match for all other users"
+            android:text="@string/multisig_instructions"
             android:textColor="@color/dark_grey"
             android:textSize="17sp" />
 

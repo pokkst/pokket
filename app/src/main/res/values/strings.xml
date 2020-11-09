@@ -371,5 +371,6 @@
     <string name="you_are_creating_a_m_of_n_multisig_wallet">you are creating a %1$d-of-%2$d multisig wallet</string>
     <string name="copy_payload">copy payload</string>
     <string name="share_payload">share payload</string>
+    <string name="multisig_instructions">please enter the type of multisig wallet you are creating, this must match for all other users</string>
 
 </resources>
