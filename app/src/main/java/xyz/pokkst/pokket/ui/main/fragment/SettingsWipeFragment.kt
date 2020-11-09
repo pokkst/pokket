@@ -24,6 +24,7 @@ class SettingsWipeFragment : Fragment() {
             val seedEntered = root.editText_phrase.text.toString().trim()
             val walletSeed = WalletManager.wallet?.keyChainSeed?.mnemonicString
             if(seedEntered == walletSeed) {
+                WalletManager.stopWallets()
                 val intent = Intent(requireContext(), NewUserActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                 wipeAndRestart(intent)

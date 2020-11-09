@@ -143,5 +143,14 @@ class WalletManager {
             val intent = Intent(Constants.ACTION_UPDATE_REFRESH)
             LocalBroadcastManager.getInstance(activity).sendBroadcast(intent)
         }
+
+        fun stopWallets() {
+            walletKit?.stopAsync()
+            multisigWalletKit?.stopAsync()
+            walletKit?.awaitTerminated()
+            multisigWalletKit?.awaitTerminated()
+            walletKit = null
+            multisigWalletKit = null
+        }
     }
 }
