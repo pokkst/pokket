@@ -1,23 +1,10 @@
 package xyz.pokkst.pokket
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.android.synthetic.main.activity_settings.appbar_title
-import kotlinx.android.synthetic.main.activity_settings.settings_button
-import xyz.pokkst.pokket.util.BalanceFormatter
-import xyz.pokkst.pokket.util.Constants
-import xyz.pokkst.pokket.util.PriceHelper
-import xyz.pokkst.pokket.wallet.WalletManager
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.*
+import kotlinx.android.synthetic.main.activity_settings.*
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -29,7 +16,7 @@ class SettingsActivity : AppCompatActivity() {
         val settingsButton: ImageView = findViewById(R.id.settings_button)
         settingsButton.setOnClickListener {
             deepMenuCount.value?.let {
-                if(it > 0) {
+                if (it > 0) {
                     onBackPressed()
                 } else {
                     finish()
@@ -38,8 +25,8 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         deepMenuCount.observe(this, androidx.lifecycle.Observer { count ->
-            if(count <= 0) {
-                if(count < 0)
+            if (count <= 0) {
+                if (count < 0)
                     deepMenuCount.value = 0
 
                 settings_button.setImageResource(R.drawable.x)
@@ -53,7 +40,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-         adjustDeepMenu(-1)
+        adjustDeepMenu(-1)
     }
 
     fun adjustDeepMenu(byAmount: Int) {

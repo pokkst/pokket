@@ -26,7 +26,11 @@ class OtherFollowingKeysFragment : Fragment() {
     var nPrevious = 0
     var nCurrent = 0
     var mCurrent = 0
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val root = inflater.inflate(R.layout.fragment_other_following_keys, container, false)
         val seed = args.seed
         val restoring = args.restoring
@@ -35,19 +39,22 @@ class OtherFollowingKeysFragment : Fragment() {
         val cosignerKeysList = root.cosigner_keys_layout
 
         root.n_edittext.doAfterTextChanged { text ->
-            val n = if(text.isNullOrEmpty()) 0 else text.toString().toInt()
-            if(n != nPrevious) {
+            val n = if (text.isNullOrEmpty()) 0 else text.toString().toInt()
+            if (n != nPrevious) {
                 val difference = n - nPrevious
-                if(difference > 0) {
+                if (difference > 0) {
                     val fixedDifference = difference - 2
-                    for(x in 0..fixedDifference) {
+                    for (x in 0..fixedDifference) {
                         val cosignerKeyInputLayout =
-                            cosignerInflater?.inflate(R.layout.fragment_component_cosigner_entry, null) as ConstraintLayout
+                            cosignerInflater?.inflate(
+                                R.layout.fragment_component_cosigner_entry,
+                                null
+                            ) as ConstraintLayout
                         cosignerKeysList.addView(cosignerKeyInputLayout)
                     }
                 } else {
                     val differenceAbsolute = difference * -1
-                    for(x in 0..differenceAbsolute) {
+                    for (x in 0..differenceAbsolute) {
                         val length = cosignerKeysList.childCount
                         val viewToRemove = cosignerKeysList.getChildAt(length - 1)
                         cosignerKeysList.removeView(viewToRemove)
@@ -58,20 +65,32 @@ class OtherFollowingKeysFragment : Fragment() {
 
             nCurrent = n
 
-            root.m_of_n_textview.text = resources.getString(R.string.you_are_creating_a_m_of_n_multisig_wallet, mCurrent, nCurrent)
+            root.m_of_n_textview.text = resources.getString(
+                R.string.you_are_creating_a_m_of_n_multisig_wallet,
+                mCurrent,
+                nCurrent
+            )
         }
 
         root.m_edittext.doAfterTextChanged { text ->
-            val m = if(text.isNullOrEmpty()) 0 else text.toString().toInt()
+            val m = if (text.isNullOrEmpty()) 0 else text.toString().toInt()
             mCurrent = m
 
-            root.m_of_n_textview.text = resources.getString(R.string.you_are_creating_a_m_of_n_multisig_wallet, mCurrent, nCurrent)
+            root.m_of_n_textview.text = resources.getString(
+                R.string.you_are_creating_a_m_of_n_multisig_wallet,
+                mCurrent,
+                nCurrent
+            )
         }
 
-        root.m_of_n_textview.text = resources.getString(R.string.you_are_creating_a_m_of_n_multisig_wallet, mCurrent, nCurrent)
+        root.m_of_n_textview.text = resources.getString(
+            R.string.you_are_creating_a_m_of_n_multisig_wallet,
+            mCurrent,
+            nCurrent
+        )
 
         root.continue_button.setOnClickListener {
-            if(mCurrent != 0 && nCurrent != 0 && mCurrent <= nCurrent) {
+            if (mCurrent != 0 && nCurrent != 0 && mCurrent <= nCurrent) {
                 val followingKeys = ArrayList<String>()
                 val keysLength = cosignerKeysList.childCount - 1
                 for (x in 0..keysLength) {
@@ -82,7 +101,7 @@ class OtherFollowingKeysFragment : Fragment() {
                 }
 
                 val keysEntered = followingKeys.none { it.isEmpty() }
-                if(keysEntered) {
+                if (keysEntered) {
                     val intent = Intent(requireActivity(), MainActivity::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                     intent.putExtra("seed", seed)

@@ -13,7 +13,11 @@ import xyz.pokkst.pokket.R
  * A placeholder fragment containing a simple view.
  */
 class NewUserFragment : Fragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val root = inflater.inflate(R.layout.fragment_new_user, container, false)
         root.intro_new_wallet.setOnClickListener {
             findNavController().navigate(R.id.nav_to_new_wallet)

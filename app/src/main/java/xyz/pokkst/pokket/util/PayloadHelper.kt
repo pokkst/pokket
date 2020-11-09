@@ -18,7 +18,10 @@ class PayloadHelper {
 
         fun decodeMultisigPayload(base64Payload: String): MultisigPayload? {
             return try {
-                Gson().fromJson(CompressionHelper.decompress(Base64.decode(base64Payload)), MultisigPayload::class.java)
+                Gson().fromJson(
+                    CompressionHelper.decompress(Base64.decode(base64Payload)),
+                    MultisigPayload::class.java
+                )
             } catch (e: java.lang.Exception) {
                 null
             }

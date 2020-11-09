@@ -7,9 +7,10 @@ class PriceHelper {
         val price: Double
             get() {
                 val currentTime = System.currentTimeMillis() / 1000L
-                if(cachedPrice == 0.0 || currentTime - lastChecked >= 300L) {
+                if (cachedPrice == 0.0 || currentTime - lastChecked >= 300L) {
                     lastChecked = currentTime
-                    cachedPrice = readPriceFromUrl("https://api.cryptowat.ch/markets/coinbase-pro/bchusd/price")
+                    cachedPrice =
+                        readPriceFromUrl("https://api.cryptowat.ch/markets/coinbase-pro/bchusd/price")
                 }
                 return cachedPrice
             }

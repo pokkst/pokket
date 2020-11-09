@@ -21,8 +21,6 @@ import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.DateFormatter
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 /**
@@ -33,7 +31,11 @@ class SettingsHomeFragment : Fragment() {
     private var receivedColor = 0
     private var txList = ArrayList<String>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_home, container, false)
         sentColor = Color.parseColor("#FF5454")
         receivedColor = Color.parseColor("#00BF00")
@@ -42,12 +44,14 @@ class SettingsHomeFragment : Fragment() {
         root.about.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
             navigate(R.id.nav_to_about)
         }
-        root.about.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.about)
+        root.about.findViewById<TextView>(R.id.setting_label).text =
+            resources.getString(R.string.about)
 
         root.recovery_phrase.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
             navigate(R.id.nav_to_phrase)
         }
-        root.recovery_phrase.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.recovery_phrase_label)
+        root.recovery_phrase.findViewById<TextView>(R.id.setting_label).text =
+            resources.getString(R.string.recovery_phrase_label)
 
         /*root.extended_public_key.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
             val intent = Intent(Constants.ACTION_SETTINGS_HIDE_BAR)
@@ -66,10 +70,10 @@ class SettingsHomeFragment : Fragment() {
             val tx = WalletManager.wallet?.getTransaction(Sha256Hash.wrap(txid))
             val amount = tx?.getValue(WalletManager.wallet)
             val isSlp = SlpOpReturn.isSlpTx(tx)
-            val slpAmount = if(isSlp) {
+            val slpAmount = if (isSlp) {
                 val slpTx = SlpTransaction(tx)
                 val slpToken = WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
-                if(slpToken != null) {
+                if (slpToken != null) {
                     val slpAmount = slpTx.getRawValue(WalletManager.wallet)
                         .scaleByPowerOfTen(-slpToken.decimals).toDouble()
                     slpAmount
@@ -79,14 +83,14 @@ class SettingsHomeFragment : Fragment() {
             } else {
                 0.0
             }
-            if(amount?.isPositive == true || slpAmount > 0) {
+            if (amount?.isPositive == true || slpAmount > 0) {
                 findNavController().navigate(
                     SettingsHomeFragmentDirections.navToTxReceived(
                         txid,
                         isSlp
                     )
                 )
-            } else if(amount?.isNegative == true) {
+            } else if (amount?.isNegative == true) {
                 findNavController().navigate(
                     SettingsHomeFragmentDirections.navToTxSent(
                         txid,
@@ -107,6 +111,7 @@ class SettingsHomeFragment : Fragment() {
         (activity as? SettingsActivity)?.adjustDeepMenu(1)
         findNavController().navigate(navResId)
     }
+
     private fun setArrayAdapter(root: View, wallet: Wallet?) {
         setListViewShit(root, wallet)
     }
@@ -124,7 +129,9 @@ class SettingsHomeFragment : Fragment() {
 
                         if (txListFromWallet.size > 0) {
                             requireActivity().runOnUiThread {
-                                if(actualTxCount > 5) { root.more_transactions.visibility = View.VISIBLE }
+                                if (actualTxCount > 5) {
+                                    root.more_transactions.visibility = View.VISIBLE
+                                }
                                 root.no_transactions.visibility = View.GONE
                             }
 
@@ -136,10 +143,11 @@ class SettingsHomeFragment : Fragment() {
                                 val timestamp = tx.updateTime.time.toString()
                                 val datum = HashMap<String, String>()
                                 var ticker = ""
-                                val amountStr = if(isSlp) {
+                                val amountStr = if (isSlp) {
                                     val slpTx = SlpTransaction(tx)
-                                    val slpToken = WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
-                                    if(slpToken != null) {
+                                    val slpToken =
+                                        WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
+                                    if (slpToken != null) {
                                         ticker = slpToken.ticker
                                         val slpAmount = slpTx.getRawValue(WalletManager.wallet)
                                             .scaleByPowerOfTen(-slpToken.decimals).toDouble()
@@ -151,21 +159,26 @@ class SettingsHomeFragment : Fragment() {
                                     value.toPlainString()
                                 }
 
-                                datum["action"] = if(value.isPositive || amountStr.toDouble() > 0) {
-                                    "received"
-                                } else {
-                                    "sent"
-                                }
+                                datum["action"] =
+                                    if (value.isPositive || amountStr.toDouble() > 0) {
+                                        "received"
+                                    } else {
+                                        "sent"
+                                    }
 
                                 datum["ticker"] = ticker
-                                datum["slp"] = if(isSlp) "true" else "false"
+                                datum["slp"] = if (isSlp) "true" else "false"
                                 datum["amount"] = amountStr
-                                datum["fiatAmount"] = BalanceFormatter.formatBalance((amountStr.toDouble() * PriceHelper.price), "0.00")
+                                datum["fiatAmount"] = BalanceFormatter.formatBalance(
+                                    (amountStr.toDouble() * PriceHelper.price),
+                                    "0.00"
+                                )
                                 datum["timestamp"] = timestamp
 
                                 when {
                                     confirmations == 0 -> datum["confirmations"] = "0/unconfirmed"
-                                    confirmations < 6 -> datum["confirmations"] = "$confirmations/6 confirmations"
+                                    confirmations < 6 -> datum["confirmations"] =
+                                        "$confirmations/6 confirmations"
                                     else -> datum["confirmations"] = "6+ confirmations"
                                 }
 
@@ -173,14 +186,29 @@ class SettingsHomeFragment : Fragment() {
                                 txListFormatted.add(datum)
                             }
 
-                            val itemsAdapter = object : SimpleAdapter(requireContext(), txListFormatted, R.layout.transaction_list_item, null, null) {
-                                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            val itemsAdapter = object : SimpleAdapter(
+                                requireContext(),
+                                txListFormatted,
+                                R.layout.transaction_list_item,
+                                null,
+                                null
+                            ) {
+                                override fun getView(
+                                    position: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup
+                                ): View {
                                     // Get the Item from ListView
-                                    val view = LayoutInflater.from(requireContext()).inflate(R.layout.transaction_list_item, null)
-                                    val sentReceivedTextView = view.findViewById<TextView>(R.id.transaction_sent_received_label)
-                                    val dateTextView = view.findViewById<TextView>(R.id.transaction_date)
-                                    val bitsMoved = view.findViewById<TextView>(R.id.transaction_amount_bits)
-                                    val dollarsMoved = view.findViewById<TextView>(R.id.transaction_amount_dollars)
+                                    val view = LayoutInflater.from(requireContext())
+                                        .inflate(R.layout.transaction_list_item, null)
+                                    val sentReceivedTextView =
+                                        view.findViewById<TextView>(R.id.transaction_sent_received_label)
+                                    val dateTextView =
+                                        view.findViewById<TextView>(R.id.transaction_date)
+                                    val bitsMoved =
+                                        view.findViewById<TextView>(R.id.transaction_amount_bits)
+                                    val dollarsMoved =
+                                        view.findViewById<TextView>(R.id.transaction_amount_dollars)
 
                                     val ticker = txListFormatted[position]["ticker"]
                                     val isSlp = txListFormatted[position]["slp"]
@@ -189,20 +217,37 @@ class SettingsHomeFragment : Fragment() {
                                     val amount = txListFormatted[position]["amount"]
                                     val fiatAmount = txListFormatted[position]["fiatAmount"]
                                     val confirmations = txListFormatted[position]["confirmations"]
-                                    val timestamp = txListFormatted[position]["timestamp"]?.let { java.lang.Long.parseLong(it) }
+                                    val timestamp = txListFormatted[position]["timestamp"]?.let {
+                                        java.lang.Long.parseLong(it)
+                                    }
                                     sentReceivedTextView.setBackgroundResource(if (received) R.drawable.received_label else R.drawable.sent_label)
                                     sentReceivedTextView.setTextColor(if (received) receivedColor else sentColor)
                                     sentReceivedTextView.text = action
-                                    bitsMoved.text = if(isSlp == "true" && ticker != "") "$amount $ticker" else resources.getString(R.string.tx_amount_moved, amount)
-                                    dollarsMoved.text = if(isSlp == "true" && ticker != "") null else "($$fiatAmount)"
+                                    bitsMoved.text =
+                                        if (isSlp == "true" && ticker != "") "$amount $ticker" else resources.getString(
+                                            R.string.tx_amount_moved,
+                                            amount
+                                        )
+                                    dollarsMoved.text =
+                                        if (isSlp == "true" && ticker != "") null else "($$fiatAmount)"
                                     dateTextView.text = if (timestamp != 0L) {
-                                        timestamp?.let { DateFormatter.getFormattedDateFromLong(requireActivity(), it) }
-                                    } else DateFormatter.getFormattedDateFromLong(requireActivity(), System.currentTimeMillis())
+                                        timestamp?.let {
+                                            DateFormatter.getFormattedDateFromLong(
+                                                requireActivity(),
+                                                it
+                                            )
+                                        }
+                                    } else DateFormatter.getFormattedDateFromLong(
+                                        requireActivity(),
+                                        System.currentTimeMillis()
+                                    )
                                     // Generate ListView Item using TextView
                                     return view
                                 }
                             }
-                            requireActivity().runOnUiThread { root.transactions_list.adapter = itemsAdapter }
+                            requireActivity().runOnUiThread {
+                                root.transactions_list.adapter = itemsAdapter
+                            }
                         } else {
                             requireActivity().runOnUiThread {
                                 root.space.visibility = View.GONE

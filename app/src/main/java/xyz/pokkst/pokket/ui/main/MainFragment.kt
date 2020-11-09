@@ -1,6 +1,9 @@
 package xyz.pokkst.pokket.ui.main
 
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,20 +34,34 @@ class MainFragment : Fragment() {
     var receiveQrCoinIcon: ImageView? = null
     var receiveText: TextView? = null
     var swapAddressButton: ImageView? = null
+
     enum class AddressViewType {
         CASH,
         SLP,
         BIP47
     }
+
     var currentAddressViewType: AddressViewType = AddressViewType.CASH
 
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_UPDATE_REFRESH == intent.action) {
-                when(currentAddressViewType) {
-                    AddressViewType.SLP -> { refresh(WalletManager.walletKit?.currentSlpReceiveAddress().toString(), true) }
-                    AddressViewType.BIP47 -> { refresh(WalletManager.walletKit?.paymentCode, false) }
-                    AddressViewType.CASH -> { refresh(WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(), false) }
+                when (currentAddressViewType) {
+                    AddressViewType.SLP -> {
+                        refresh(
+                            WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
+                            true
+                        )
+                    }
+                    AddressViewType.BIP47 -> {
+                        refresh(WalletManager.walletKit?.paymentCode, false)
+                    }
+                    AddressViewType.CASH -> {
+                        refresh(
+                            WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
+                            false
+                        )
+                    }
                 }
             }
         }
@@ -69,28 +86,46 @@ class MainFragment : Fragment() {
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_main, container, false)
         val sendScreen: LinearLayout = root.findViewById(R.id.send_screen)
         val receiveScreen: LinearLayout = root.findViewById(R.id.receive_screen)
-        if(page == 1) {
+        if (page == 1) {
             sendScreen.visibility = View.VISIBLE
             receiveScreen.visibility = View.GONE
-        } else if(page == 2) {
+        } else if (page == 2) {
             receiveQr = root.findViewById(R.id.receive_qr)
             receiveQrCoinIcon = root.findViewById(R.id.receive_qr_coin_icon)
             receiveText = root.findViewById(R.id.main_address_text)
             swapAddressButton = root.findViewById(R.id.swap_address_button)
 
-            receiveText?.setOnClickListener { ClipboardHelper.copyToClipboard(activity, receiveText?.text.toString()) }
-            receiveQr?.setOnClickListener { ClipboardHelper.copyToClipboard(activity, receiveText?.text.toString()) }
-            receiveQrCoinIcon?.setOnClickListener { ClipboardHelper.copyToClipboard(activity, receiveText?.text.toString()) }
+            receiveText?.setOnClickListener {
+                ClipboardHelper.copyToClipboard(
+                    activity,
+                    receiveText?.text.toString()
+                )
+            }
+            receiveQr?.setOnClickListener {
+                ClipboardHelper.copyToClipboard(
+                    activity,
+                    receiveText?.text.toString()
+                )
+            }
+            receiveQrCoinIcon?.setOnClickListener {
+                ClipboardHelper.copyToClipboard(
+                    activity,
+                    receiveText?.text.toString()
+                )
+            }
             swapAddressButton?.setOnClickListener {
-                currentAddressViewType = when(currentAddressViewType) {
+                currentAddressViewType = when (currentAddressViewType) {
                     AddressViewType.CASH -> {
-                        refresh(WalletManager.walletKit?.currentSlpReceiveAddress().toString(), true)
+                        refresh(
+                            WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
+                            true
+                        )
                         AddressViewType.SLP
                     }
                     AddressViewType.SLP -> {
@@ -98,13 +133,16 @@ class MainFragment : Fragment() {
                         AddressViewType.BIP47
                     }
                     AddressViewType.BIP47 -> {
-                        refresh(WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(), false)
+                        refresh(
+                            WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
+                            false
+                        )
                         AddressViewType.CASH
                     }
                 }
             }
 
-            if(WalletManager.isMultisigKit) {
+            if (WalletManager.isMultisigKit) {
                 swapAddressButton?.visibility = View.GONE
             }
 
@@ -122,7 +160,8 @@ class MainFragment : Fragment() {
     private fun generateQR(address: String?, slp: Boolean) {
 
         try {
-            val encoder = QRCode.from(address).withSize(1024, 1024).withErrorCorrection(ErrorCorrectionLevel.H)
+            val encoder = QRCode.from(address).withSize(1024, 1024)
+                .withErrorCorrection(ErrorCorrectionLevel.H)
             val qrCode = encoder.bitmap()
             val coinLogo: Int = if (!slp)
                 R.drawable.logo_bch
@@ -131,7 +170,8 @@ class MainFragment : Fragment() {
 
             receiveQrCoinIcon?.setImageResource(coinLogo)
             receiveQr?.setImageBitmap(qrCode)
-            receiveText?.text = address?.replace("${WalletManager.parameters.cashAddrPrefix}:", "")?.replace("${WalletManager.parameters.simpleledgerPrefix}:", "")
+            receiveText?.text = address?.replace("${WalletManager.parameters.cashAddrPrefix}:", "")
+                ?.replace("${WalletManager.parameters.simpleledgerPrefix}:", "")
         } catch (e: WriterException) {
             e.printStackTrace()
         }

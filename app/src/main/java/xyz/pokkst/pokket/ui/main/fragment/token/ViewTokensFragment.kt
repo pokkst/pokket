@@ -10,7 +10,9 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageView
+import android.widget.SimpleAdapter
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -38,7 +40,8 @@ class ViewTokensFragment : Fragment() {
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_MAIN_ENABLE_PAGER == intent.action) {
-                this@ViewTokensFragment.findNavController().popBackStack(R.id.sendHomeFragment, false)
+                this@ViewTokensFragment.findNavController()
+                    .popBackStack(R.id.sendHomeFragment, false)
             }
         }
     }
@@ -52,7 +55,11 @@ class ViewTokensFragment : Fragment() {
         })
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         root = inflater.inflate(R.layout.fragment_view_tokens, container, false)
         (activity as? MainActivity)?.enableTokensScreen()
         val filter = IntentFilter()
@@ -64,7 +71,12 @@ class ViewTokensFragment : Fragment() {
         this.slpList?.setOnItemClickListener { parent, view, position, id ->
             val tokenBalance = WalletManager.walletKit?.slpBalances?.get(position)
             val tokenId = tokenBalance?.tokenId
-            findNavController().navigate(ViewTokensFragmentDirections.navToSendFromViewTokens(null, tokenId))
+            findNavController().navigate(
+                ViewTokensFragmentDirections.navToSendFromViewTokens(
+                    null,
+                    tokenId
+                )
+            )
         }
 
         refresh()
@@ -99,7 +111,7 @@ class ViewTokensFragment : Fragment() {
         tokenList.clear()
 
         val walletKit = WalletManager.walletKit
-        if(walletKit != null) {
+        if (walletKit != null) {
             for (tokenBalance in walletKit.slpBalances) {
                 val slpToken = walletKit.getSlpToken(tokenBalance.tokenId)
 
@@ -115,7 +127,7 @@ class ViewTokensFragment : Fragment() {
                 tokenList.add(datum)
             }
 
-            if(tokenList.isNotEmpty()) {
+            if (tokenList.isNotEmpty()) {
                 root?.findViewById<TextView>(R.id.loading_tokens_view)?.visibility = View.GONE
                 root?.findViewById<TextView>(R.id.no_tokens_view)?.visibility = View.GONE
                 slpList?.visibility = View.VISIBLE

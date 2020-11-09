@@ -16,7 +16,6 @@ import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
-import java.lang.Exception
 import java.util.*
 
 
@@ -27,27 +26,31 @@ class TransactionSentFragment : Fragment() {
     var isSlp: Boolean = false
     var slpTransaction: SlpTransaction? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val root = inflater.inflate(R.layout.transaction_item_expanded_sent, container, false)
         val txid = arguments?.getString("txid", "")
         val tx = WalletManager.wallet?.getTransaction(Sha256Hash.wrap(txid))
         val args = arguments
-        if(args != null)
+        if (args != null)
             isSlp = args.getBoolean("slp", false)
 
-        if(isSlp) {
+        if (isSlp) {
             slpTransaction = SlpTransaction(tx)
         }
         root.tx_hash_text.text = txid
 
-        root.tx_status_text.text = if(tx?.confidence?.depthInBlocks!! > 0) {
+        root.tx_status_text.text = if (tx?.confidence?.depthInBlocks!! > 0) {
             "confirmed in block #${tx.confidence.appearedAtChainHeight}"
         } else {
             "verified, waiting for confirmation"
         }
 
         val fromAddresses = ArrayList<String>()
-        for(x in tx.inputs.indices) {
+        for (x in tx.inputs.indices) {
             fromAddresses.add(tx.inputs[x].outpoint.toString())
         }
         setSentFromAddresses(root.general_tx_from_layout, fromAddresses)
@@ -56,8 +59,8 @@ class TransactionSentFragment : Fragment() {
         val toAmounts = ArrayList<Long>()
         val slpTx = slpTransaction
         val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId)
-        for(x in tx.outputs.indices) {
-            val slpUtxo = if(slpTx != null) {
+        for (x in tx.outputs.indices) {
+            val slpUtxo = if (slpTx != null) {
                 try {
                     slpTx.slpUtxos[x - 1]
                 } catch (e: Exception) {
@@ -67,42 +70,52 @@ class TransactionSentFragment : Fragment() {
                 null
             }
 
-            if(ScriptPattern.isOpReturn(tx.outputs[x].scriptPubKey)) {
+            if (ScriptPattern.isOpReturn(tx.outputs[x].scriptPubKey)) {
                 toAddresses.add("OP_RETURN")
             } else {
-                val address = if(isSlp && (slpUtxo != null || x == slpTx?.slpOpReturn?.mintingBatonVout) && slpToken != null) {
-                    tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toSlp().toString()
-                } else {
-                    tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash().toString()
-                }
+                val address =
+                    if (isSlp && (slpUtxo != null || x == slpTx?.slpOpReturn?.mintingBatonVout) && slpToken != null) {
+                        tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toSlp()
+                            .toString()
+                    } else {
+                        tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash()
+                            .toString()
+                    }
                 toAddresses.add(address)
             }
 
             toAmounts.add(tx.outputs[x].value.value)
         }
 
-        val bchSent = if(slpTx != null && slpToken != null) {
-            -slpTx.getRawValue(WalletManager.wallet).scaleByPowerOfTen(-slpToken.decimals).toDouble()
+        val bchSent = if (slpTx != null && slpToken != null) {
+            -slpTx.getRawValue(WalletManager.wallet).scaleByPowerOfTen(-slpToken.decimals)
+                .toDouble()
         } else {
             -tx.getValueSentFromMe(WalletManager.wallet).toPlainString().toDouble()
         }
-        val bchFee = if(tx.fee != null) {
+        val bchFee = if (tx.fee != null) {
             tx.fee.toPlainString().toDouble()
         } else {
             0.0
         }
-        root.tx_to_fee_amount_text.text = resources.getString(R.string.tx_amount_moved, "-${BalanceFormatter.formatBalance(bchFee, "#.########")}")
-        root.tx_amount_text.text = if(slpTx != null && slpToken != null) {
-            if(bchSent > 0) {
+        root.tx_to_fee_amount_text.text = resources.getString(
+            R.string.tx_amount_moved,
+            "-${BalanceFormatter.formatBalance(bchFee, "#.########")}"
+        )
+        root.tx_amount_text.text = if (slpTx != null && slpToken != null) {
+            if (bchSent > 0) {
                 "-${BalanceFormatter.formatBalance(bchSent, "#.#########")} ${slpToken.ticker}"
             } else {
                 "${BalanceFormatter.formatBalance(-bchSent, "#.#########")} ${slpToken.ticker}"
             }
         } else {
-            resources.getString(R.string.tx_amount_moved, BalanceFormatter.formatBalance(bchSent, "#.########"))
+            resources.getString(
+                R.string.tx_amount_moved,
+                BalanceFormatter.formatBalance(bchSent, "#.########")
+            )
         }
 
-        if(!isSlp || slpToken == null) {
+        if (!isSlp || slpToken == null) {
             object : Thread() {
                 override fun run() {
                     val fiatValue = bchSent.times(PriceHelper.price)
@@ -154,13 +167,13 @@ class TransactionSentFragment : Fragment() {
         val txid = arguments?.getString("txid", "")
         val tx = WalletManager.wallet?.getTransaction(Sha256Hash.wrap(txid))
         for (i in addresses.indices) {
-            val utxoIsMine = if(tx != null) {
+            val utxoIsMine = if (tx != null) {
                 tx.outputs[i].isMine(WalletManager.wallet)
             } else {
                 false
             }
 
-            val slpUtxo = if(slpTx != null) {
+            val slpUtxo = if (slpTx != null) {
                 try {
                     slpTx.slpUtxos[i - 1]
                 } catch (e: Exception) {
@@ -183,26 +196,33 @@ class TransactionSentFragment : Fragment() {
                 addressBlock.findViewById<View>(R.id.tx_to_exchange_text) as TextView
             if (addresses[i] != null && addresses[i]!!.isNotEmpty()) {
                 txTo.text = addresses[i]
-                if(addresses[i] == "OP_RETURN") {
+                if (addresses[i] == "OP_RETURN") {
                     txToDescription.text = getString(R.string.op_return_address)
                 } else {
                     txToDescription.text = getString(R.string.payment_address)
                 }
-                val amountInBch = if(slpUtxo != null && slpToken != null) {
-                    slpUtxo.tokenAmountRaw.toBigDecimal().scaleByPowerOfTen(-slpToken.decimals).toDouble()
+                val amountInBch = if (slpUtxo != null && slpToken != null) {
+                    slpUtxo.tokenAmountRaw.toBigDecimal().scaleByPowerOfTen(-slpToken.decimals)
+                        .toDouble()
                 } else {
                     amounts[i] / 100000000.0
                 }
 
-                txToAmount.text = if(slpUtxo != null && slpToken != null) {
-                    if(utxoIsMine) {
-                        "${BalanceFormatter.formatBalance(amountInBch, "#.#########")} ${slpToken.ticker}"
+                txToAmount.text = if (slpUtxo != null && slpToken != null) {
+                    if (utxoIsMine) {
+                        "${BalanceFormatter.formatBalance(
+                            amountInBch,
+                            "#.#########"
+                        )} ${slpToken.ticker}"
                     } else {
-                        "-${BalanceFormatter.formatBalance(amountInBch, "#.#########")} ${slpToken.ticker}"
+                        "-${BalanceFormatter.formatBalance(
+                            amountInBch,
+                            "#.#########"
+                        )} ${slpToken.ticker}"
                     }
                 } else {
-                    if(utxoIsMine) {
-                        if(i == slpTx?.slpOpReturn?.mintingBatonVout && isSlp && slpTx.slpOpReturn?.hasMintingBaton()!! && slpToken != null) {
+                    if (utxoIsMine) {
+                        if (i == slpTx?.slpOpReturn?.mintingBatonVout && isSlp && slpTx.slpOpReturn?.hasMintingBaton()!! && slpToken != null) {
                             "Minting Baton"
                         } else {
                             resources.getString(
@@ -211,7 +231,7 @@ class TransactionSentFragment : Fragment() {
                             )
                         }
                     } else {
-                        if(i == slpTx?.slpOpReturn?.mintingBatonVout && isSlp && slpTx.slpOpReturn?.hasMintingBaton()!! && slpToken != null) {
+                        if (i == slpTx?.slpOpReturn?.mintingBatonVout && isSlp && slpTx.slpOpReturn?.hasMintingBaton()!! && slpToken != null) {
                             "Minting Baton"
                         } else {
                             resources.getString(
@@ -221,10 +241,10 @@ class TransactionSentFragment : Fragment() {
                         }
                     }
                 }
-                txToExchange.text = if(slpUtxo != null && slpToken != null) {
+                txToExchange.text = if (slpUtxo != null && slpToken != null) {
                     null
                 } else {
-                    if(i == slpTx?.slpOpReturn?.mintingBatonVout && slpTx.slpOpReturn?.hasMintingBaton()!! && slpToken != null) {
+                    if (i == slpTx?.slpOpReturn?.mintingBatonVout && slpTx.slpOpReturn?.hasMintingBaton()!! && slpToken != null) {
                         null
                     } else {
                         val amountInFiat = amountInBch * PriceHelper.price
@@ -236,7 +256,7 @@ class TransactionSentFragment : Fragment() {
                     }
                 }
 
-                if(utxoIsMine) {
+                if (utxoIsMine) {
                     txToAmount.setTextColor(resources.getColor(R.color.black))
                     txToExchange.setTextColor(resources.getColor(R.color.black))
                 }

@@ -8,7 +8,8 @@ import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.crypto.DeterministicKey
-import org.bitcoinj.kits.*
+import org.bitcoinj.kits.MultisigAppKit
+import org.bitcoinj.kits.SlpBIP47AppKit
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.script.Script
 import org.bitcoinj.utils.Threading
@@ -39,7 +40,13 @@ class WalletManager {
         fun startWallet(activity: Activity, seed: String?, newUser: Boolean) {
             setBitcoinSDKThread()
 
-            walletKit = object : SlpBIP47AppKit(parameters, Script.ScriptType.P2PKH, KeyChainGroupStructure.SLP, walletDir, walletFileName) {
+            walletKit = object : SlpBIP47AppKit(
+                parameters,
+                Script.ScriptType.P2PKH,
+                KeyChainGroupStructure.SLP,
+                walletDir,
+                walletFileName
+            ) {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
                     wallet().allowSpendingUnconfirmedTransactions()
@@ -59,6 +66,7 @@ class WalletManager {
                     super.doneDownload()
                     refresh(activity, 100)
                 }
+
                 override fun progress(pct: Double, blocksSoFar: Int, date: Date?) {
                     super.progress(pct, blocksSoFar, date)
                     refresh(activity, pct.toInt())
@@ -66,7 +74,7 @@ class WalletManager {
                 }
             })
 
-            val creationDate = if(newUser) System.currentTimeMillis() / 1000L else 1604647474L
+            val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1604647474L
             if (seed != null) {
                 val deterministicSeed = DeterministicSeed(seed, null, "", creationDate)
                 walletKit?.restoreWalletFromSeed(deterministicSeed)
@@ -80,10 +88,17 @@ class WalletManager {
             walletKit?.startAsync()
         }
 
-        fun startMultisigWallet(activity: Activity, seed: String?, newUser: Boolean, followingKeys: List<DeterministicKey>, m: Int) {
+        fun startMultisigWallet(
+            activity: Activity,
+            seed: String?,
+            newUser: Boolean,
+            followingKeys: List<DeterministicKey>,
+            m: Int
+        ) {
             setBitcoinSDKThread()
 
-            multisigWalletKit = object : MultisigAppKit(parameters, walletDir, multisigWalletFileName, followingKeys, m) {
+            multisigWalletKit = object :
+                MultisigAppKit(parameters, walletDir, multisigWalletFileName, followingKeys, m) {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
                     wallet().allowSpendingUnconfirmedTransactions()
@@ -103,6 +118,7 @@ class WalletManager {
                     super.doneDownload()
                     refresh(activity, 100)
                 }
+
                 override fun progress(pct: Double, blocksSoFar: Int, date: Date?) {
                     super.progress(pct, blocksSoFar, date)
                     refresh(activity, pct.toInt())
@@ -110,7 +126,7 @@ class WalletManager {
                 }
             })
 
-            val creationDate = if(newUser) System.currentTimeMillis() / 1000L else 1604647474L
+            val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1604647474L
             if (seed != null) {
                 val deterministicSeed = DeterministicSeed(seed, null, "", creationDate)
                 multisigWalletKit?.restoreWalletFromSeed(deterministicSeed)

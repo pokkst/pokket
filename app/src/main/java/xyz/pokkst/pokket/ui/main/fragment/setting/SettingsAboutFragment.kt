@@ -12,7 +12,11 @@ import xyz.pokkst.pokket.R
  * A placeholder fragment containing a simple view.
  */
 class SettingsAboutFragment : Fragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_about, container, false)
         return root
     }

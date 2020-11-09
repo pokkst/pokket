@@ -1,8 +1,5 @@
 package xyz.pokkst.pokket.ui.main.fragment.multisig
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +12,6 @@ import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.util.ClipboardHelper
-import xyz.pokkst.pokket.util.Toaster
 import xyz.pokkst.pokket.wallet.WalletManager
 
 /**
@@ -24,11 +20,16 @@ import xyz.pokkst.pokket.wallet.WalletManager
 class MyFollowingKeyFragment : Fragment() {
     val args: MyFollowingKeyFragmentArgs by navArgs()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val root = inflater.inflate(R.layout.fragment_my_following_key, container, false)
         val seed = args.seed
         val restoring = args.restoring
-        val tempWallet = Wallet.fromSeed(WalletManager.parameters, DeterministicSeed(seed, null, "", 0))
+        val tempWallet =
+            Wallet.fromSeed(WalletManager.parameters, DeterministicSeed(seed, null, "", 0))
         val xpub = tempWallet.watchingKey.serializePubB58(WalletManager.parameters)
 
         root.the_phrase.text = xpub
@@ -38,7 +39,8 @@ class MyFollowingKeyFragment : Fragment() {
         }
 
         root.continue_button.setOnClickListener {
-            val action = MyFollowingKeyFragmentDirections.navToOtherFollowingKeys(seed, xpub, restoring)
+            val action =
+                MyFollowingKeyFragmentDirections.navToOtherFollowingKeys(seed, xpub, restoring)
             findNavController().navigate(action)
         }
 

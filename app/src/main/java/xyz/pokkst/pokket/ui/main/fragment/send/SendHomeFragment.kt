@@ -1,8 +1,9 @@
 package xyz.pokkst.pokket.ui.main.fragment.send
 
 import android.app.Activity
-import android.content.*
+import android.content.ClipboardManager
 import android.content.Context.CLIPBOARD_SERVICE
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +23,11 @@ import xyz.pokkst.pokket.wallet.WalletManager
  * A placeholder fragment containing a simple view.
  */
 class SendHomeFragment : Fragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val root = inflater.inflate(R.layout.fragment_send_home, container, false)
 
         root.scan_qr_code_button.setOnClickListener {
@@ -30,9 +35,10 @@ class SendHomeFragment : Fragment() {
         }
 
         root.paste_address_button.setOnClickListener {
-            val clipBoard= requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+            val clipBoard =
+                requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val pasteData = clipBoard.primaryClip?.getItemAt(0)?.text.toString()
-            if(isValidPaymentType(pasteData) || PayloadHelper.isMultisigPayload(pasteData)) {
+            if (isValidPaymentType(pasteData) || PayloadHelper.isMultisigPayload(pasteData)) {
                 findNavController().navigate(
                     SendHomeFragmentDirections.navToSend(
                         pasteData
@@ -45,7 +51,7 @@ class SendHomeFragment : Fragment() {
             findNavController().navigate(SendHomeFragmentDirections.navToTokens())
         }
 
-        if(WalletManager.isMultisigKit) {
+        if (WalletManager.isMultisigKit) {
             root.view_tokens_button.visibility = View.GONE
         }
 
@@ -54,12 +60,12 @@ class SendHomeFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
             if (requestCode == Constants.REQUEST_CODE_SCAN_QR) {
                 if (data != null) {
                     val scanData = data.getStringExtra(Constants.QR_SCAN_RESULT)
-                    if(scanData != null) {
-                        if(isValidPaymentType(scanData) || PayloadHelper.isMultisigPayload(scanData)) {
+                    if (scanData != null) {
+                        if (isValidPaymentType(scanData) || PayloadHelper.isMultisigPayload(scanData)) {
                             findNavController().navigate(
                                 SendHomeFragmentDirections.navToSend(
                                     scanData
@@ -73,7 +79,7 @@ class SendHomeFragment : Fragment() {
     }
 
     private fun isValidPaymentType(address: String): Boolean {
-        return if(WalletManager.isMultisigKit) {
+        return if (WalletManager.isMultisigKit) {
             UriHelper.parse(address)?.paymentType == PaymentType.ADDRESS
         } else {
             UriHelper.parse(address) != null

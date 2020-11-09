@@ -1,13 +1,11 @@
 package xyz.pokkst.pokket.ui.main.fragment.setup
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -17,6 +15,7 @@ import org.bitcoinj.crypto.MnemonicException
 import org.bitcoinj.wallet.DeterministicSeed
 import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.R
+import xyz.pokkst.pokket.util.StatusBarHelper
 import java.security.SecureRandom
 
 
@@ -35,7 +34,11 @@ class GeneratedSeedFragment : Fragment() {
         return seed
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val root = inflater.inflate(R.layout.fragment_generated_seed, container, false)
         val isMultisig = args.multisig
 
@@ -70,10 +73,10 @@ class GeneratedSeedFragment : Fragment() {
         root.the_phrase.text = seedStr
 
         root.continue_button.setOnClickListener {
-            if(isMultisig) {
+            if (isMultisig) {
                 val action = GeneratedSeedFragmentDirections.navToMyFollowingKey(seedStr)
                 findNavController().navigate(action)
-                this.setStatusBarColor(requireActivity(), R.color.extra_light_grey)
+                StatusBarHelper.setStatusBarColor(activity, R.color.extra_light_grey)
             } else {
                 val intent = Intent(requireActivity(), MainActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -86,18 +89,10 @@ class GeneratedSeedFragment : Fragment() {
         }
 
         root.back_button.setOnClickListener {
-            setStatusBarColor(requireActivity(), R.color.purple)
+            StatusBarHelper.setStatusBarColor(activity, R.color.purple)
             findNavController().popBackStack()
         }
 
         return root
-    }
-
-    fun setStatusBarColor(activity: Activity, color: Int) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val window = activity.window
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.statusBarColor = activity.resources.getColor(color)
-        }
     }
 }

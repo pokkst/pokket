@@ -10,7 +10,7 @@ class JSONHelper {
     fun getJsonObject(url: String): JSONObject? {
         var `is`: InputStream? = null
         try {
-            `is` =  URL(url).openConnection().getInputStream()
+            `is` = URL(url).openConnection().getInputStream()
         } catch (e: IOException) {
             e.printStackTrace()
             return null

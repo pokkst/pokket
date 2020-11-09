@@ -7,7 +7,6 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.tabs.TabLayout
@@ -21,8 +20,6 @@ import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.io.File
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -30,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_UPDATE_REFRESH == intent.action) {
-                if(intent.extras?.containsKey("sync") == true) {
+                if (intent.extras?.containsKey("sync") == true) {
                     val pct = intent.extras?.getInt("sync")
                     this@MainActivity.refresh(pct)
                 } else {
@@ -56,22 +53,25 @@ class MainActivity : AppCompatActivity() {
             isMultisig = extras.getBoolean("multisig")
             val keys = extras.getStringArrayList("followingKeys") ?: ArrayList()
             val keysLength = keys.size - 1
-            for(x in 0..keysLength) {
-                val deterministicKey = DeterministicKey.deserializeB58(keys[x], WalletManager.parameters).setPath(DeterministicKeyChain.BIP44_ACCOUNT_ZERO_PATH)
+            for (x in 0..keysLength) {
+                val deterministicKey =
+                    DeterministicKey.deserializeB58(keys[x], WalletManager.parameters)
+                        .setPath(DeterministicKeyChain.BIP44_ACCOUNT_ZERO_PATH)
                 followingKeys.add(deterministicKey)
             }
             m = extras.getInt("m")
         }
 
-        if(!newUser && seed == null) {
-            val multisigWalletFile = File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.wallet")
+        if (!newUser && seed == null) {
+            val multisigWalletFile =
+                File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.wallet")
             isMultisig = multisigWalletFile.exists()
         }
 
         prepareViews(newUser)
         setListeners()
 
-        if(isMultisig) {
+        if (isMultisig) {
             WalletManager.startMultisigWallet(this, seed, newUser, followingKeys, m)
         } else {
             WalletManager.startWallet(this, seed, newUser)
@@ -95,7 +95,9 @@ class MainActivity : AppCompatActivity() {
 
         val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
         view_pager.adapter = sectionsPagerAdapter
-        if(newUser) { view_pager.currentItem = 2 }
+        if (newUser) {
+            view_pager.currentItem = 2
+        }
         tabs.setupWithViewPager(view_pager)
     }
 
@@ -107,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         settings_button.setOnClickListener {
-            if(view_pager.isPagingEnabled()) {
+            if (view_pager.isPagingEnabled()) {
                 val intentSettings = Intent(this, SettingsActivity::class.java)
                 startActivity(intentSettings)
             } else {
@@ -121,7 +123,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if(!inFragment) {
+        if (!inFragment) {
             val a = Intent(Intent.ACTION_MAIN)
             a.addCategory(Intent.CATEGORY_HOME)
             a.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -134,7 +136,7 @@ class MainActivity : AppCompatActivity() {
     private fun refresh(sync: Int?) {
         refresh()
         if (sync != null) {
-            sync_progress_bar.visibility = if(sync == 100) View.INVISIBLE else View.VISIBLE
+            sync_progress_bar.visibility = if (sync == 100) View.INVISIBLE else View.VISIBLE
             sync_progress_bar.progress = sync
         }
     }
@@ -148,7 +150,8 @@ class MainActivity : AppCompatActivity() {
                     val fiat = bch.toDouble() * PriceHelper.price
                     val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
                     this@MainActivity.runOnUiThread {
-                        appbar_title.text = "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
+                        appbar_title.text =
+                            "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
                     }
                 }
             }
@@ -159,14 +162,14 @@ class MainActivity : AppCompatActivity() {
         val viewPager: ToggleViewPager = findViewById(R.id.view_pager)
         val tabs: TabLayout = findViewById(R.id.tabs)
         viewPager.setPagingEnabled(!status)
-        val imgResId = if(status) R.drawable.navigationback else R.drawable.burger
+        val imgResId = if (status) R.drawable.navigationback else R.drawable.burger
         settings_button.setImageResource(imgResId)
-        pay_button.visibility = if(status) View.VISIBLE else View.GONE
+        pay_button.visibility = if (status) View.VISIBLE else View.GONE
         pay_button.isEnabled = status
-        tabs.visibility = if(status) View.GONE else View.VISIBLE
+        tabs.visibility = if (status) View.GONE else View.VISIBLE
         inFragment = status
 
-        if(!status) {
+        if (!status) {
             val intent = Intent(Constants.ACTION_MAIN_ENABLE_PAGER)
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
         }
