@@ -1,6 +1,5 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.setting
 
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +9,6 @@ import android.widget.RelativeLayout
 import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_settings_home.view.*
 import org.bitcoinj.core.Sha256Hash
@@ -20,13 +18,9 @@ import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.SettingsActivity
 import xyz.pokkst.pokket.util.BalanceFormatter
-import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.DateFormatter
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -85,10 +79,20 @@ class SettingsHomeFragment : Fragment() {
             } else {
                 0.0
             }
-            if(amount?.isPositive!! || slpAmount > 0) {
-                findNavController().navigate(SettingsHomeFragmentDirections.navToTxReceived(txid, isSlp))
-            } else if(amount.isNegative) {
-                findNavController().navigate(SettingsHomeFragmentDirections.navToTxSent(txid, isSlp))
+            if(amount?.isPositive == true || slpAmount > 0) {
+                findNavController().navigate(
+                    SettingsHomeFragmentDirections.navToTxReceived(
+                        txid,
+                        isSlp
+                    )
+                )
+            } else if(amount?.isNegative == true) {
+                findNavController().navigate(
+                    SettingsHomeFragmentDirections.navToTxSent(
+                        txid,
+                        isSlp
+                    )
+                )
             }
         }
 
@@ -191,10 +195,9 @@ class SettingsHomeFragment : Fragment() {
                                     sentReceivedTextView.text = action
                                     bitsMoved.text = if(isSlp == "true" && ticker != "") "$amount $ticker" else resources.getString(R.string.tx_amount_moved, amount)
                                     dollarsMoved.text = if(isSlp == "true" && ticker != "") null else "($$fiatAmount)"
-                                    dateTextView.text = if (timestamp != 0L) DateFormatter.getFormattedDateFromLong(
-                                        requireActivity(),
-                                        timestamp!!
-                                    ) else DateFormatter.getFormattedDateFromLong(requireActivity(), System.currentTimeMillis())
+                                    dateTextView.text = if (timestamp != 0L) {
+                                        timestamp?.let { DateFormatter.getFormattedDateFromLong(requireActivity(), it) }
+                                    } else DateFormatter.getFormattedDateFromLong(requireActivity(), System.currentTimeMillis())
                                     // Generate ListView Item using TextView
                                     return view
                                 }

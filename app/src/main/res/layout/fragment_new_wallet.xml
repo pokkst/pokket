@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/AppTheme.NoActionBar"
-    tools:context=".ui.main.fragment.NewWalletFragment">
+    tools:context=".ui.main.fragment.setup.NewWalletFragment">
 
     <include
         layout="@layout/fragment_intro_bg"/>

@@ -1,4 +1,4 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.setup
 
 import android.app.Activity
 import android.content.Intent
@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.common.base.Splitter
 import kotlinx.android.synthetic.main.fragment_intro_bg.view.*
-import kotlinx.android.synthetic.main.fragment_new_wallet.view.*
 import kotlinx.android.synthetic.main.fragment_restore_wallet.view.*
 import kotlinx.android.synthetic.main.fragment_restore_wallet.view.multsig_checkbox
 import org.bitcoinj.crypto.MnemonicCode

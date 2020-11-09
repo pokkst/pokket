@@ -1,4 +1,4 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.setup
 
 import android.app.Activity
 import android.os.Build
@@ -29,7 +29,10 @@ class NewWalletFragment : Fragment() {
 
         root.intro_warning_show_button.setOnClickListener {
             val isMultisigChecked = root.multsig_checkbox.isChecked
-            val action = NewWalletFragmentDirections.navToGeneratedSeed(isMultisigChecked)
+            val action =
+                NewWalletFragmentDirections.navToGeneratedSeed(
+                    isMultisigChecked
+                )
             findNavController().navigate(action)
             this.setStatusBarColor(requireActivity(), R.color.extra_light_grey)
         }

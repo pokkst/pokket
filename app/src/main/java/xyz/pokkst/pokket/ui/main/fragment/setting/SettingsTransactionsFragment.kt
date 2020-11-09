@@ -1,6 +1,5 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.setting
 
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_settings_transactions.view.*
 import org.bitcoinj.core.Sha256Hash
@@ -19,13 +17,9 @@ import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.SettingsActivity
 import xyz.pokkst.pokket.util.BalanceFormatter
-import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.DateFormatter
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -62,10 +56,20 @@ class SettingsTransactionsFragment : Fragment() {
             } else {
                 0.0
             }
-            if(amount?.isPositive!! || slpAmount > 0) {
-                findNavController().navigate(SettingsTransactionsFragmentDirections.navToTxReceived(txid, isSlp))
-            } else if(amount.isNegative) {
-                findNavController().navigate(SettingsTransactionsFragmentDirections.navToTxSent(txid, isSlp))
+            if(amount?.isPositive == true || slpAmount > 0) {
+                findNavController().navigate(
+                    SettingsTransactionsFragmentDirections.navToTxReceived(
+                        txid,
+                        isSlp
+                    )
+                )
+            } else if(amount?.isNegative == true) {
+                findNavController().navigate(
+                    SettingsTransactionsFragmentDirections.navToTxSent(
+                        txid,
+                        isSlp
+                    )
+                )
             }
         }
         return root
@@ -89,7 +93,6 @@ class SettingsTransactionsFragment : Fragment() {
                             for (x in 0 until txListFromWallet.size) {
                                 val tx = txListFromWallet[x]
                                 val isSlp = SlpOpReturn.isSlpTx(tx)
-                                val confirmations = tx.confidence.depthInBlocks
                                 val value = tx.getValue(wallet)
                                 val timestamp = tx.updateTime.time.toString()
                                 val datum = HashMap<String, String>()
@@ -121,12 +124,6 @@ class SettingsTransactionsFragment : Fragment() {
                                 datum["fiatAmount"] = BalanceFormatter.formatBalance((amountStr.toDouble() * PriceHelper.price), "0.00")
                                 datum["timestamp"] = timestamp
 
-                                when {
-                                    confirmations == 0 -> datum["confirmations"] = "0/unconfirmed"
-                                    confirmations < 6 -> datum["confirmations"] = "$confirmations/6 confirmations"
-                                    else -> datum["confirmations"] = "6+ confirmations"
-                                }
-
                                 txList.add(tx.txId.toString())
                                 txListFormatted.add(datum)
                             }
@@ -146,17 +143,15 @@ class SettingsTransactionsFragment : Fragment() {
                                     val received = action == "received"
                                     val amount = txListFormatted[position]["amount"]
                                     val fiatAmount = txListFormatted[position]["fiatAmount"]
-                                    val confirmations = txListFormatted[position]["confirmations"]
                                     val timestamp = txListFormatted[position]["timestamp"]?.let { java.lang.Long.parseLong(it) }
                                     sentReceivedTextView.setBackgroundResource(if (received) R.drawable.received_label else R.drawable.sent_label)
                                     sentReceivedTextView.setTextColor(if (received) receivedColor else sentColor)
                                     sentReceivedTextView.text = action
                                     bitsMoved.text = if(isSlp == "true" && ticker != "") "$amount $ticker" else resources.getString(R.string.tx_amount_moved, amount)
                                     dollarsMoved.text = if(isSlp == "true" && ticker != "") null else "($$fiatAmount)"
-                                    dateTextView.text = if (timestamp != 0L) DateFormatter.getFormattedDateFromLong(
-                                        requireActivity(),
-                                        timestamp!!
-                                    ) else DateFormatter.getFormattedDateFromLong(requireActivity(), System.currentTimeMillis())
+                                    dateTextView.text = if (timestamp != 0L) {
+                                        timestamp?.let { DateFormatter.getFormattedDateFromLong(requireActivity(), it) }
+                                    } else DateFormatter.getFormattedDateFromLong(requireActivity(), System.currentTimeMillis())
                                     // Generate ListView Item using TextView
                                     return view
                                 }

@@ -1,4 +1,4 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.setup
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -1,4 +1,4 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.setting
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_settings_wipe.view.*
-import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.NewUserActivity
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.wallet.WalletManager

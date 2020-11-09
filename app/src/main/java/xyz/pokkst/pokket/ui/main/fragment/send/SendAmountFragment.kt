@@ -1,4 +1,4 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.send
 
 import android.app.Dialog
 import android.content.*
@@ -35,6 +35,7 @@ import org.bitcoinj.protocols.payments.PaymentProtocol
 import org.bitcoinj.protocols.payments.PaymentProtocolException
 import org.bitcoinj.protocols.payments.PaymentSession
 import org.bitcoinj.script.Script
+import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.utils.MultisigPayload
 import org.bitcoinj.wallet.RedeemData
 import org.bitcoinj.wallet.SendRequest
@@ -104,7 +105,7 @@ class SendAmountFragment : Fragment() {
             val payload = paymentContent?.addressOrPayload?.let { PayloadHelper.decodeMultisigPayload(it) }
             if(payload != null) {
                 val tx = Transaction(WalletManager.parameters, Hex.decode(payload.hex))
-                val payloadAddress = tx.getOutput(0).scriptPubKey.getToAddress(WalletManager.parameters).toCash().toString()
+                val payloadAddress = fetchMultisigPayloadDestination(tx)
                 root?.to_field_text?.text = "to: ${payloadAddress?.replace("bitcoincash:", "")}"
                 this.getPayloadData(tx)
             }
@@ -171,8 +172,10 @@ class SendAmountFragment : Fragment() {
 
     private fun setListeners() {
         root?.input_type_toggle?.setOnClickListener {
-            bchIsSendType = !bchIsSendType
-            swapSendTypes(root)
+            if(PriceHelper.price != 0.0) {
+                bchIsSendType = !bchIsSendType
+                swapSendTypes(root)
+            }
         }
 
         val charInputListener = View.OnClickListener { v ->
@@ -729,5 +732,14 @@ class SendAmountFragment : Fragment() {
             e.printStackTrace()
             null
         }
+    }
+
+    private fun fetchMultisigPayloadDestination(tx: Transaction): String? {
+        for(utxo in tx.outputs) {
+            if(!ScriptPattern.isOpReturn(utxo.scriptPubKey) && !utxo.isMineOrWatched(WalletManager.wallet))
+                return utxo.scriptPubKey.getToAddress(WalletManager.parameters).toCash().toString()
+        }
+
+        return null
     }
 }

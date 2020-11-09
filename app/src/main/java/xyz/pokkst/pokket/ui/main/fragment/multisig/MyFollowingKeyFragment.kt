@@ -1,4 +1,4 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.multisig
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.fragment_my_following_key.view.*
 import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.R
+import xyz.pokkst.pokket.util.ClipboardHelper
 import xyz.pokkst.pokket.util.Toaster
 import xyz.pokkst.pokket.wallet.WalletManager
 
@@ -33,7 +34,7 @@ class MyFollowingKeyFragment : Fragment() {
         root.the_phrase.text = xpub
 
         root.the_phrase.setOnClickListener {
-            copyToClipboard(xpub)
+            ClipboardHelper.copyToClipboard(activity, xpub)
         }
 
         root.continue_button.setOnClickListener {
@@ -46,12 +47,5 @@ class MyFollowingKeyFragment : Fragment() {
         }
 
         return root
-    }
-
-    private fun copyToClipboard(text: String) {
-        val clipboard: ClipboardManager? = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-        val clip = ClipData.newPlainText("Key", text)
-        clipboard?.setPrimaryClip(clip)
-        Toaster.showToastMessage(requireContext(), "copied")
     }
 }

@@ -1,30 +1,21 @@
-package xyz.pokkst.pokket.ui.main.fragment
+package xyz.pokkst.pokket.ui.main.fragment.multisig
 
-import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.EditText
-import android.widget.RelativeLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import kotlinx.android.synthetic.main.fragment_generated_seed.view.*
 import kotlinx.android.synthetic.main.fragment_generated_seed.view.back_button
 import kotlinx.android.synthetic.main.fragment_generated_seed.view.continue_button
 import kotlinx.android.synthetic.main.fragment_other_following_keys.view.*
-import org.bitcoinj.crypto.MnemonicCode
-import org.bitcoinj.crypto.MnemonicException
-import org.bitcoinj.wallet.DeterministicSeed
 import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.R
-import java.security.SecureRandom
 
 
 /**

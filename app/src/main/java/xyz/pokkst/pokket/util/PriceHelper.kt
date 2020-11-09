@@ -7,38 +7,20 @@ class PriceHelper {
         val price: Double
             get() {
                 val currentTime = System.currentTimeMillis() / 1000L
-                return if(cachedPrice == 0.0 || currentTime - lastChecked >= 300L) {
-                    println("Fetching new price data...")
-                    lastChecked = System.currentTimeMillis() / 1000L
+                if(cachedPrice == 0.0 || currentTime - lastChecked >= 300L) {
+                    lastChecked = currentTime
                     cachedPrice = readPriceFromUrl("https://api.cryptowat.ch/markets/coinbase-pro/bchusd/price")
-                    cachedPrice
-                } else {
-                    cachedPrice
                 }
+                return cachedPrice
             }
 
         private fun readPriceFromUrl(url: String): Double {
-            var price = 0.0
-
-            try {
+            return try {
                 val json = JSONHelper().getJsonObject(url)
-                val priceStr = when {
-                    url.contains("min-api.cryptocompare.com") -> {
-                        json!!.getDouble("AUD")
-                    }
-                    else -> {
-                        json!!.getJSONObject("result").getDouble("price")
-                    }
-                }
-
-                println(priceStr)
-                price = priceStr
+                json?.getJSONObject("result")?.getDouble("price") ?: 0.0
             } catch (e: Exception) {
-                e.printStackTrace()
-                price = 0.0
+                0.0
             }
-
-            return price
         }
 
     }
