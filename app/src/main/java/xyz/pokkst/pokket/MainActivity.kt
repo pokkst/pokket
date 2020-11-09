@@ -132,20 +132,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refresh(sync: Int?) {
-            object : Thread() {
-                override fun run() {
-                    super.run()
-                    val bch = WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
-                    bch?.let {
-                        val fiat = bch.toDouble() * PriceHelper.price
-                        val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
-                        this@MainActivity.runOnUiThread {
-                            appbar_title.text = "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
-                        }
-                    }
-                }
-            }.start()
-
+        refresh()
         if (sync != null) {
             sync_progress_bar.visibility = if(sync == 100) View.INVISIBLE else View.VISIBLE
             sync_progress_bar.progress = sync
@@ -153,19 +140,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
-            object : Thread() {
-                override fun run() {
-                    super.run()
-                    val bch = WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
-                    bch?.let {
-                        val fiat = bch.toDouble() * PriceHelper.price
-                        val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
-                        this@MainActivity.runOnUiThread {
-                            appbar_title.text = "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
-                        }
+        object : Thread() {
+            override fun run() {
+                super.run()
+                val bch = WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
+                bch?.let {
+                    val fiat = bch.toDouble() * PriceHelper.price
+                    val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
+                    this@MainActivity.runOnUiThread {
+                        appbar_title.text = "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
                     }
                 }
-            }.start()
+            }
+        }.start()
     }
 
     fun toggleSendScreen(status: Boolean) {
