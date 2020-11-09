@@ -101,9 +101,8 @@ class SendAmountFragment : Fragment() {
         paymentContent = arguments?.getString("address", null)?.let { UriHelper.parse(it) }
         if(paymentContent?.paymentType == PaymentType.MULTISIG_PAYLOAD) {
             root?.send_amount_input?.isEnabled = false
-            val payloadJson = paymentContent?.addressOrPayload?.let { PayloadHelper.decodeMultisigPayload(it) }
-            if(payloadJson?.isNotEmpty() == true) {
-                val payload = Gson().fromJson(payloadJson, MultisigPayload::class.java)
+            val payload = paymentContent?.addressOrPayload?.let { PayloadHelper.decodeMultisigPayload(it) }
+            if(payload != null) {
                 val tx = Transaction(WalletManager.parameters, Hex.decode(payload.hex))
                 val payloadAddress = tx.getOutput(0).scriptPubKey.getToAddress(WalletManager.parameters).toCash().toString()
                 root?.to_field_text?.text = "to: ${payloadAddress?.replace("bitcoincash:", "")}"
@@ -317,11 +316,7 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun importMultisigPayload(base64Payload: String) {
-        val json = PayloadHelper.decodeMultisigPayload(base64Payload)
-        if(json.isNullOrEmpty()) {
-            return
-        }
-        val multisigPayload: MultisigPayload = Gson().fromJson(json, MultisigPayload::class.java)
+        val multisigPayload = PayloadHelper.decodeMultisigPayload(base64Payload) ?: return
         var needsMoreSigs = false
 
         val cosignerTx = WalletManager.multisigWalletKit?.importMultisigPayload(multisigPayload.hex)

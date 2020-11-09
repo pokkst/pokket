@@ -8,18 +8,17 @@ class PayloadHelper {
     companion object {
         fun isMultisigPayload(base64Payload: String): Boolean {
             return try {
-                val json = decodeMultisigPayload(base64Payload)
-                Gson().fromJson(json, MultisigPayload::class.java)
-                json != null
+                val payload = decodeMultisigPayload(base64Payload)
+                payload != null
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()
                 false
             }
         }
 
-        fun decodeMultisigPayload(base64Payload: String): String? {
+        fun decodeMultisigPayload(base64Payload: String): MultisigPayload? {
             return try {
-                CompressionHelper.decompress(Base64.decode(base64Payload))
+                Gson().fromJson(CompressionHelper.decompress(Base64.decode(base64Payload)), MultisigPayload::class.java)
             } catch (e: java.lang.Exception) {
                 null
             }
