@@ -23,53 +23,58 @@
             android:layout_marginTop="80dp"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
-            android:text="please enter how many other users you are creating a wallet with, this must match all users"
+            android:text="please enter the type of multisig wallet you are creating, this must match for all other users"
             android:textColor="@color/dark_grey"
             android:textSize="17sp" />
 
-        <EditText
-            android:id="@+id/n_edittext"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/m_of_n_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textFlow2"
             android:layout_centerHorizontal="true"
-            android:layout_gravity="center"
-            android:fontFamily="sans-serif-light"
-            android:padding="20dp"
-            android:inputType="number"
-            android:hint="2"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/dark_grey"
-            android:textSize="17sp" />
+            android:orientation="horizontal"
+            android:gravity="center">
 
-        <TextView
-            android:id="@+id/m_description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_below="@+id/n_edittext"
-            android:fontFamily="sans-serif-medium"
-            android:gravity="center"
-            android:text="please enter the number of signatures required to spend coins, this must match for all users"
-            android:textColor="@color/dark_grey"
-            android:textSize="17sp" />
+            <EditText
+                android:id="@+id/m_edittext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="sans-serif-light"
+                android:padding="20dp"
+                android:inputType="number"
+                android:hint="2"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/dark_grey"
+                android:textSize="17sp" />
 
-        <EditText
-            android:id="@+id/m_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/m_description"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center"
-            android:fontFamily="sans-serif-light"
-            android:padding="20dp"
-            android:inputType="number"
-            android:hint="2"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/dark_grey"
-            android:textSize="17sp" />
+            <TextView
+                android:id="@+id/m_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:text="of"
+                android:textColor="@color/dark_grey"
+                android:textSize="17sp" />
 
+            <EditText
+                android:id="@+id/n_edittext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="sans-serif-light"
+                android:padding="20dp"
+                android:inputType="number"
+                android:hint="3"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/dark_grey"
+                android:textSize="17sp" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/m_of_n_textview"
@@ -77,17 +82,32 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_below="@+id/m_edittext"
+            android:layout_marginTop="16dp"
+            android:layout_below="@+id/m_of_n_layout"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:text="@string/you_are_creating_a_m_of_n_multisig_wallet"
             android:textColor="@color/dark_grey"
             android:textSize="17sp" />
 
+        <TextView
+            android:id="@+id/keys_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_below="@+id/m_of_n_textview"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:text="please enter the other user watching keys here:"
+            android:textColor="@color/dark_grey"
+            android:textSize="17sp" />
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/m_of_n_textview"
+            android:layout_below="@+id/keys_label"
             android:layout_centerVertical="true">
             <LinearLayout
                 android:id="@+id/cosigner_keys_layout"

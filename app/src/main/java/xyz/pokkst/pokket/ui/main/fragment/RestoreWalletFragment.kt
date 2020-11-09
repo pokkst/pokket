@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.fragment_intro_bg.view.*
 import kotlinx.android.synthetic.main.fragment_new_wallet.view.*
 import kotlinx.android.synthetic.main.fragment_restore_wallet.view.*
 import kotlinx.android.synthetic.main.fragment_restore_wallet.view.multsig_checkbox
+import org.bitcoinj.crypto.MnemonicCode
 import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.R
 
@@ -27,8 +28,7 @@ class RestoreWalletFragment : Fragment() {
 
         root.continue_button.setOnClickListener {
             val seedStr = root.recover_wallet_edit_text.text.toString().trim()
-            val length = Splitter.on(' ').splitToList(seedStr).size
-            if(length == 12) {
+            if(isMnemonicValid(seedStr)) {
                 val isMultisigChecked = root.multsig_checkbox.isChecked
                 if(isMultisigChecked) {
                     val action = RestoreWalletFragmentDirections.navToMyFollowingKey(seedStr, true)
@@ -52,6 +52,15 @@ class RestoreWalletFragment : Fragment() {
         return root
     }
 
+    private fun isMnemonicValid(seedStr: String): Boolean {
+        val seedList = Splitter.on(' ').splitToList(seedStr)
+        return try {
+            MnemonicCode().check(seedList)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
     fun setStatusBarColor(activity: Activity, color: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = activity.window

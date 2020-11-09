@@ -48,7 +48,7 @@ class OtherFollowingKeysFragment : Fragment() {
             if(n != nPrevious) {
                 val difference = n - nPrevious
                 if(difference > 0) {
-                    val fixedDifference = difference - 1
+                    val fixedDifference = difference - 2
                     for(x in 0..fixedDifference) {
                         val cosignerKeyInputLayout =
                             cosignerInflater?.inflate(R.layout.fragment_component_cosigner_entry, null) as ConstraintLayout
@@ -65,7 +65,7 @@ class OtherFollowingKeysFragment : Fragment() {
                 nPrevious = n
             }
 
-            nCurrent = n + 1
+            nCurrent = n
 
             root.m_of_n_textview.text = resources.getString(R.string.you_are_creating_a_m_of_n_multisig_wallet, mCurrent, nCurrent)
         }
@@ -90,14 +90,17 @@ class OtherFollowingKeysFragment : Fragment() {
                     followingKeys.add(key)
                 }
 
-                val intent = Intent(requireActivity(), MainActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.putExtra("seed", seed)
-                intent.putExtra("new", !restoring)
-                intent.putExtra("multisig", true)
-                intent.putExtra("followingKeys", followingKeys)
-                intent.putExtra("m", mCurrent)
-                startActivity(intent)
+                val keysEntered = followingKeys.none { it.isEmpty() }
+                if(keysEntered) {
+                    val intent = Intent(requireActivity(), MainActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    intent.putExtra("seed", seed)
+                    intent.putExtra("new", !restoring)
+                    intent.putExtra("multisig", true)
+                    intent.putExtra("followingKeys", followingKeys)
+                    intent.putExtra("m", mCurrent)
+                    startActivity(intent)
+                }
             }
         }
 
