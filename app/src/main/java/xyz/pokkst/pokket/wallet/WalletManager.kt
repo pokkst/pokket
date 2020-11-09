@@ -34,7 +34,8 @@ class WalletManager {
                 return multisigWalletKit != null && walletKit == null
             }
         val parameters: NetworkParameters = MainNetParams.get()
-        val walletFileName = "pokket"
+        const val walletFileName = "pokket"
+        const val multisigWalletFileName = "pokket_multisig"
         fun startWallet(activity: Activity, seed: String?, newUser: Boolean) {
             setBitcoinSDKThread()
 
@@ -82,7 +83,7 @@ class WalletManager {
         fun startMultisigWallet(activity: Activity, seed: String?, newUser: Boolean, followingKeys: List<DeterministicKey>, m: Int) {
             setBitcoinSDKThread()
 
-            multisigWalletKit = object : MultisigAppKit(parameters, walletDir, "${walletFileName}_multisig", followingKeys, m) {
+            multisigWalletKit = object : MultisigAppKit(parameters, walletDir, multisigWalletFileName, followingKeys, m) {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
                     wallet().allowSpendingUnconfirmedTransactions()

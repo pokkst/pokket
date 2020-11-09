@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         if(!newUser && seed == null) {
-            val multisigWalletFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}_multisig.wallet")
+            val multisigWalletFile = File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.wallet")
             isMultisig = multisigWalletFile.exists()
         }
 

@@ -25,7 +25,7 @@ class SplashActivity : AppCompatActivity() {
                     // fail silently
                 }
 
-                val newUser = !File(applicationInfo.dataDir, "${WalletManager.walletFileName}.wallet").exists() && !File(applicationInfo.dataDir, "${WalletManager.walletFileName}_multisig.wallet").exists()
+                val newUser = !File(applicationInfo.dataDir, "${WalletManager.walletFileName}.wallet").exists() && !File(applicationInfo.dataDir, "${WalletManager.multisigWalletFileName}.wallet").exists()
                 val intent = if(newUser) {
                     Intent(baseContext, NewUserActivity::class.java)
                 } else {
