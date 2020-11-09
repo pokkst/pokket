@@ -27,12 +27,6 @@ class SettingsWipeFragment : Fragment() {
                 val intent = Intent(requireContext(), NewUserActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                 wipeAndRestart(intent)
-            } else if(seedEntered.isNotEmpty()) {
-                val intent = Intent(requireActivity(), MainActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.putExtra("seed", seedEntered)
-                intent.putExtra("new", false)
-                wipeAndRestart(intent)
             }
         }
         return root
