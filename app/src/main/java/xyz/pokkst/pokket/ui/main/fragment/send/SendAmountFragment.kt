@@ -171,8 +171,10 @@ class SendAmountFragment : Fragment() {
 
     private fun setListeners() {
         root?.input_type_toggle?.setOnClickListener {
-            bchIsSendType = !bchIsSendType
-            swapSendTypes(root)
+            if(PriceHelper.price != 0.0) {
+                bchIsSendType = !bchIsSendType
+                swapSendTypes(root)
+            }
         }
 
         val charInputListener = View.OnClickListener { v ->
