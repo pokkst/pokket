@@ -216,30 +216,35 @@ class SendAmountFragment : Fragment() {
     private fun send() {
         if(WalletManager.wallet?.getBalance(Wallet.BalanceType.ESTIMATED)?.isZero == false) {
             if(paymentContent != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
+                if(paymentContent == null) paymentContent = root?.to_field_edit_text?.text?.toString()?.let { UriHelper.parse(it) }
                 val destination = paymentContent?.addressOrPayload
-                when(paymentContent?.paymentType) {
-                    PaymentType.BIP70 -> destination?.let { this.processBIP70(it) }
-                    PaymentType.CASH_ACCOUNT, PaymentType.ADDRESS -> this.processNormalTransaction()
-                    PaymentType.PAYMENT_CODE -> {
-                        val canSendToPaymentCode = WalletManager.walletKit?.canSendToPaymentCode(destination)
-                        if(canSendToPaymentCode == true) {
-                            this.attemptBip47Payment()
-                        } else {
-                            val notification = WalletManager.walletKit?.makeNotificationTransaction(destination, true)
-                            WalletManager.walletKit?.broadcastTransaction(notification?.tx)
-                            WalletManager.walletKit?.putPaymenCodeStatusSent(destination, notification?.tx)
-                            this.attemptBip47Payment()
+                if(tokenId == null) {
+                    when(paymentContent?.paymentType) {
+                        PaymentType.BIP70 -> destination?.let { this.processBIP70(it) }
+                        PaymentType.CASH_ACCOUNT, PaymentType.ADDRESS -> this.processNormalTransaction()
+                        PaymentType.PAYMENT_CODE -> {
+                            val canSendToPaymentCode = WalletManager.walletKit?.canSendToPaymentCode(destination)
+                            if(canSendToPaymentCode == true) {
+                                this.attemptBip47Payment()
+                            } else {
+                                val notification = WalletManager.walletKit?.makeNotificationTransaction(destination, true)
+                                WalletManager.walletKit?.broadcastTransaction(notification?.tx)
+                                WalletManager.walletKit?.putPaymenCodeStatusSent(destination, notification?.tx)
+                                this.attemptBip47Payment()
+                            }
                         }
+                        PaymentType.SLP_ADDRESS -> showToast("please choose slp token")
+                        PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
+                        null -> showToast("please enter a valid destination")
                     }
-                    PaymentType.SLP_ADDRESS -> {
+                } else {
+                    if(paymentContent?.paymentType == PaymentType.SLP_ADDRESS) {
                         val amount = root?.send_amount_input?.text?.toString()?.toDouble() ?: 0.0
                         val slpTokenId = tokenId
                         if(destination != null && slpTokenId != null) {
                             this.processSlpTransaction(destination, amount, slpTokenId)
                         }
                     }
-                    PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
-                    null -> showToast("please enter a valid destination")
                 }
             } else {
                 (activity as? MainActivity)?.let { Toaster.showMessage(it, "please enter an address") }
@@ -251,7 +256,7 @@ class SendAmountFragment : Fragment() {
 
     private fun sendMultisig() {
         if(WalletManager.wallet?.getBalance(Wallet.BalanceType.ESTIMATED)?.isZero == false) {
-            if (paymentContent != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
+            if (paymentContent != null) {
                 if(paymentContent?.paymentType == PaymentType.ADDRESS) {
                     val toAddress = AddressFactory.create().getAddress(WalletManager.parameters, paymentContent?.addressOrPayload)
                     val myTx = WalletManager.multisigWalletKit?.makeIndividualMultisigTransaction(toAddress, getCoinAmount())
