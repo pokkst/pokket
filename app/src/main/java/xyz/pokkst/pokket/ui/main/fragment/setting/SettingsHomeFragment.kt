@@ -79,14 +79,14 @@ class SettingsHomeFragment : Fragment() {
             } else {
                 0.0
             }
-            if(amount?.isPositive!! || slpAmount > 0) {
+            if(amount?.isPositive == true || slpAmount > 0) {
                 findNavController().navigate(
                     SettingsHomeFragmentDirections.navToTxReceived(
                         txid,
                         isSlp
                     )
                 )
-            } else if(amount.isNegative) {
+            } else if(amount?.isNegative == true) {
                 findNavController().navigate(
                     SettingsHomeFragmentDirections.navToTxSent(
                         txid,
@@ -195,10 +195,9 @@ class SettingsHomeFragment : Fragment() {
                                     sentReceivedTextView.text = action
                                     bitsMoved.text = if(isSlp == "true" && ticker != "") "$amount $ticker" else resources.getString(R.string.tx_amount_moved, amount)
                                     dollarsMoved.text = if(isSlp == "true" && ticker != "") null else "($$fiatAmount)"
-                                    dateTextView.text = if (timestamp != 0L) DateFormatter.getFormattedDateFromLong(
-                                        requireActivity(),
-                                        timestamp!!
-                                    ) else DateFormatter.getFormattedDateFromLong(requireActivity(), System.currentTimeMillis())
+                                    dateTextView.text = if (timestamp != 0L) {
+                                        timestamp?.let { DateFormatter.getFormattedDateFromLong(requireActivity(), it) }
+                                    } else DateFormatter.getFormattedDateFromLong(requireActivity(), System.currentTimeMillis())
                                     // Generate ListView Item using TextView
                                     return view
                                 }
