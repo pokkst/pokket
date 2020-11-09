@@ -1,17 +1,10 @@
 package xyz.pokkst.pokket.ui.main
 
-import android.app.Dialog
 import android.content.*
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Matrix
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -24,7 +17,6 @@ import net.glxn.qrgen.android.QRCode
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.util.ClipboardHelper
 import xyz.pokkst.pokket.util.Constants
-import xyz.pokkst.pokket.util.Toaster
 import xyz.pokkst.pokket.wallet.WalletManager
 
 
@@ -36,6 +28,7 @@ class MainFragment : Fragment() {
     private lateinit var pageViewModel: PageViewModel
     private var page: Int = 0
     var receiveQr: ImageView? = null
+    var receiveQrCoinIcon: ImageView? = null
     var receiveText: TextView? = null
     var swapAddressButton: ImageView? = null
     enum class AddressViewType {
@@ -87,15 +80,13 @@ class MainFragment : Fragment() {
             receiveScreen.visibility = View.GONE
         } else if(page == 2) {
             receiveQr = root.findViewById(R.id.receive_qr)
+            receiveQrCoinIcon = root.findViewById(R.id.receive_qr_coin_icon)
             receiveText = root.findViewById(R.id.main_address_text)
             swapAddressButton = root.findViewById(R.id.swap_address_button)
 
-            receiveText?.setOnClickListener {
-                ClipboardHelper.copyToClipboard(activity, receiveText?.text.toString())
-            }
-            receiveQr?.setOnClickListener {
-                ClipboardHelper.copyToClipboard(activity, receiveText?.text.toString())
-            }
+            receiveText?.setOnClickListener { ClipboardHelper.copyToClipboard(activity, receiveText?.text.toString()) }
+            receiveQr?.setOnClickListener { ClipboardHelper.copyToClipboard(activity, receiveText?.text.toString()) }
+            receiveQrCoinIcon?.setOnClickListener { ClipboardHelper.copyToClipboard(activity, receiveText?.text.toString()) }
             swapAddressButton?.setOnClickListener {
                 currentAddressViewType = when(currentAddressViewType) {
                     AddressViewType.CASH -> {
@@ -132,58 +123,18 @@ class MainFragment : Fragment() {
 
         try {
             val encoder = QRCode.from(address).withSize(1024, 1024).withErrorCorrection(ErrorCorrectionLevel.H)
-
             val qrCode = encoder.bitmap()
-            val coinLogo: Bitmap? = if (!slp)
-                drawableToBitmap(this.resources.getDrawable(R.drawable.logo_bch))
+            val coinLogo: Int = if (!slp)
+                R.drawable.logo_bch
             else
-                drawableToBitmap(this.resources.getDrawable(R.drawable.logo_slp))
+                R.drawable.logo_slp
 
-            val merge = overlayBitmapToCenter(qrCode, coinLogo!!)
-            receiveQr?.setImageBitmap(merge)
+            receiveQrCoinIcon?.setImageResource(coinLogo)
+            receiveQr?.setImageBitmap(qrCode)
             receiveText?.text = address?.replace("${WalletManager.parameters.cashAddrPrefix}:", "")?.replace("${WalletManager.parameters.simpleledgerPrefix}:", "")
         } catch (e: WriterException) {
             e.printStackTrace()
         }
-    }
-
-    /*
-    I'm absolutely terrible with Bitmap and image generation shit. Always have been.
-    Shout-out to StackOverflow for some of this.
-    */
-    private fun overlayBitmapToCenter(bitmap1: Bitmap, bitmap2: Bitmap): Bitmap {
-        val bitmap1Width = bitmap1.width
-        val bitmap1Height = bitmap1.height
-        val bitmap2Width = bitmap2.width
-        val bitmap2Height = bitmap2.height
-
-        val marginLeft = (bitmap1Width * 0.5 - bitmap2Width * 0.5).toFloat()
-        val marginTop = (bitmap1Height * 0.5 - bitmap2Height * 0.5).toFloat()
-
-        val overlayBitmap = Bitmap.createBitmap(bitmap1Width, bitmap1Height, bitmap1.config)
-        val canvas = Canvas(overlayBitmap)
-        canvas.drawBitmap(bitmap1, Matrix(), null)
-        canvas.drawBitmap(bitmap2, marginLeft, marginTop, null)
-        return overlayBitmap
-    }
-
-    private fun drawableToBitmap(drawable: Drawable): Bitmap? {
-        val bitmap: Bitmap? = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
-            Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888) // Single color bitmap will be created of 1x1 pixel
-        } else {
-            Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
-        }
-
-        if (drawable is BitmapDrawable) {
-            if (drawable.bitmap != null) {
-                return drawable.bitmap
-            }
-        }
-
-        val canvas = Canvas(bitmap!!)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        return bitmap
     }
 
     companion object {

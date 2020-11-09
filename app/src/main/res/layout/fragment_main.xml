@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:visibility="gone">
         <fragment
             android:id="@+id/nav_host_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
@@ -33,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/qr_image_address_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -48,46 +49,68 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/receive_money"
-                    android:textSize="@dimen/text_size" />
+                    android:textSize="@dimen/text_size"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/receive_qr"/>
 
                 <ImageView
                     android:id="@+id/receive_qr"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginTop="10dp" />
+                    android:layout_marginTop="10dp"
+                    android:adjustViewBounds="true"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/main_text_receive_money"
+                    app:layout_constraintBottom_toTopOf="@id/main_address_text"
+                    tools:src="@drawable/app_icon"/>
 
-                <RelativeLayout
-                    android:id="@+id/theAddressLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
+                <ImageView
+                    android:id="@+id/receive_qr_coin_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginTop="5dp"
-                    android:orientation="vertical">
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/receive_qr"
+                    app:layout_constraintBottom_toBottomOf="@id/receive_qr"
+                    tools:src="@drawable/logo_bch"/>
 
-                    <TextView
-                        android:id="@+id/main_address_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:gravity="center"
-                        android:padding="15dp"
-                        android:textColor="@color/dark_blue"
-                        android:textSize="14sp"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginEnd="20dp"
-                        android:singleLine="true"
-                        android:ellipsize="middle"
-                        android:text="address"/>
-                </RelativeLayout>
+                <TextView
+                    android:id="@+id/main_address_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:padding="15dp"
+                    android:textColor="@color/dark_blue"
+                    android:textSize="14sp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginTop="5dp"
+                    android:singleLine="true"
+                    android:ellipsize="middle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/receive_qr"
+                    app:layout_constraintBottom_toTopOf="@id/swap_address_button"
+                    android:text="address"/>
 
                 <ImageView
                     android:id="@+id/swap_address_button"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_swap_address"/>
-            </LinearLayout>
+                    android:src="@drawable/ic_swap_address"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/main_address_text"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
