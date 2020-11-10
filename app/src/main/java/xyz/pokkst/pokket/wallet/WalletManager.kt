@@ -3,6 +3,8 @@ package xyz.pokkst.pokket.wallet
 import android.app.Activity
 import android.content.Intent
 import android.os.Handler
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
@@ -17,6 +19,7 @@ import org.bitcoinj.utils.Threading
 import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.KeyChainGroupStructure
 import org.bitcoinj.wallet.Wallet
+import xyz.pokkst.pokket.livedata.Event
 import xyz.pokkst.pokket.util.Constants
 import java.io.File
 import java.util.*
@@ -36,6 +39,10 @@ class WalletManager {
                 return multisigWalletKit != null && walletKit == null
             }
         val parameters: NetworkParameters = MainNetParams.get()
+        private val _syncPercentage: MutableLiveData<Int> = MutableLiveData(0)
+        val syncPercentage: LiveData<Int> = _syncPercentage
+        private val _refreshEvents: MutableLiveData<Event<String>> = MutableLiveData()
+        val refreshEvents: LiveData<Event<String>> = _refreshEvents
         const val walletFileName = "pokket"
         const val multisigWalletFileName = "pokket_multisig"
         fun startWallet(activity: Activity, seed: String?, newUser: Boolean) {
@@ -51,12 +58,13 @@ class WalletManager {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
                     wallet().allowSpendingUnconfirmedTransactions()
-                    refresh(activity, 0)
+                    _syncPercentage.postValue(0)
+                    _refreshEvents.postValue(Event(""))
                     wallet().addCoinsReceivedEventListener { wallet, tx, prevBalance, newBalance ->
-                        refresh(activity)
+                        _refreshEvents.postValue(Event(tx.txId.toString()))
                     }
                     wallet().addCoinsSentEventListener { wallet, tx, prevBalance, newBalance ->
-                        refresh(activity)
+                        _refreshEvents.postValue(Event(tx.txId.toString()))
                     }
                     wallet().saveToFile(vWalletFile)
                 }
@@ -65,13 +73,12 @@ class WalletManager {
             walletKit?.setDownloadListener(object : DownloadProgressTracker() {
                 override fun doneDownload() {
                     super.doneDownload()
-                    refresh(activity, 100)
+                    _syncPercentage.postValue(100)
                 }
 
                 override fun progress(pct: Double, blocksSoFar: Int, date: Date?) {
                     super.progress(pct, blocksSoFar, date)
-                    refresh(activity, pct.toInt())
-                    println(pct)
+                    _syncPercentage.postValue(pct.toInt())
                 }
             })
 
@@ -103,12 +110,13 @@ class WalletManager {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
                     wallet().allowSpendingUnconfirmedTransactions()
-                    refresh(activity, 0)
+                    _syncPercentage.postValue(0)
+                    _refreshEvents.postValue(Event(""))
                     wallet().addCoinsReceivedEventListener { wallet, tx, prevBalance, newBalance ->
-                        refresh(activity)
+                        _refreshEvents.postValue(Event(tx.txId.toString()))
                     }
                     wallet().addCoinsSentEventListener { wallet, tx, prevBalance, newBalance ->
-                        refresh(activity)
+                        _refreshEvents.postValue(Event(tx.txId.toString()))
                     }
                     wallet().saveToFile(vWalletFile)
                 }
@@ -117,13 +125,12 @@ class WalletManager {
             multisigWalletKit?.setDownloadListener(object : DownloadProgressTracker() {
                 override fun doneDownload() {
                     super.doneDownload()
-                    refresh(activity, 100)
+                    _syncPercentage.postValue(100)
                 }
 
                 override fun progress(pct: Double, blocksSoFar: Int, date: Date?) {
                     super.progress(pct, blocksSoFar, date)
-                    refresh(activity, pct.toInt())
-                    println(pct)
+                    _syncPercentage.postValue(pct.toInt())
                 }
             })
 
@@ -149,17 +156,6 @@ class WalletManager {
         fun setBitcoinSDKThread() {
             val handler = Handler()
             Threading.USER_THREAD = Executor { handler.post(it) }
-        }
-
-        fun refresh(activity: Activity, sync: Int?) {
-            val intent = Intent(Constants.ACTION_UPDATE_REFRESH)
-            intent.putExtra("sync", sync)
-            LocalBroadcastManager.getInstance(activity).sendBroadcast(intent)
-        }
-
-        fun refresh(activity: Activity) {
-            val intent = Intent(Constants.ACTION_UPDATE_REFRESH)
-            LocalBroadcastManager.getInstance(activity).sendBroadcast(intent)
         }
 
         fun stopWallets() {

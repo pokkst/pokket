@@ -168,7 +168,9 @@
     <!-- checked -->
     <string name="address_already_in_your_wallet">this payment address is already in your wallet</string>
     <!-- checked -->
-    <string name="syncing">syncing...</string>
+    <string name="syncing">syncing…</string>
+    <!-- checked -->
+    <string name="synced">synced</string>
     <!-- checked -->
     <string name="payment_failed">couldn\'t make payment</string>
     <!-- checked -->
@@ -332,7 +334,7 @@
     <!-- android -->
     <string name="phrase_flow2">please write down your phrase.</string>
     <!-- android -->
-    <string name="syncing_in_progress">Syncing in progress..</string>
+    <string name="syncing_in_progress">syncing in progress..</string>
     <!-- android -->
     <string name="wait_for_sync_to_finish">Please wait for syncing to finish before sending funds.</string>
     <!-- android -->
@@ -373,5 +375,6 @@
     <string name="share_payload">share payload</string>
     <string name="multisig_instructions">please enter the type of multisig wallet you are creating, this must match for all other users</string>
     <string name="multisig_key_instructions">please enter the other user watching keys here:</string>
+    <string name="not_syncing">not syncing</string>
 
 </resources>

@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.zxing.WriterException
@@ -43,46 +44,12 @@ class MainFragment : Fragment() {
 
     var currentAddressViewType: AddressViewType = AddressViewType.CASH
 
-    private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (Constants.ACTION_UPDATE_REFRESH == intent.action) {
-                when (currentAddressViewType) {
-                    AddressViewType.SLP -> {
-                        refresh(
-                            WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
-                            true
-                        )
-                    }
-                    AddressViewType.BIP47 -> {
-                        refresh(WalletManager.walletKit?.paymentCode, false)
-                    }
-                    AddressViewType.CASH -> {
-                        refresh(
-                            WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
-                            false
-                        )
-                    }
-                }
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         pageViewModel = ViewModelProviders.of(this).get(PageViewModel::class.java).apply {
             setIndex(arguments?.getInt(ARG_SECTION_NUMBER) ?: 1)
             page = arguments?.getInt(ARG_SECTION_NUMBER) ?: 1
         }
-
-        val filter = IntentFilter()
-        filter.addAction(Constants.ACTION_UPDATE_REFRESH)
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
     }
 
     override fun onCreateView(
@@ -150,7 +117,34 @@ class MainFragment : Fragment() {
             receiveScreen.visibility = View.VISIBLE
         }
 
+        WalletManager.refreshEvents.observe(viewLifecycleOwner, Observer { event ->
+            if(event != null) {
+                println("Refresh Event...")
+                refresh()
+            }
+        })
+
         return root
+    }
+
+    private fun refresh() {
+        when (currentAddressViewType) {
+            AddressViewType.SLP -> {
+                refresh(
+                    WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
+                    true
+                )
+            }
+            AddressViewType.BIP47 -> {
+                refresh(WalletManager.walletKit?.paymentCode, false)
+            }
+            AddressViewType.CASH -> {
+                refresh(
+                    WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
+                    false
+                )
+            }
+        }
     }
 
     private fun refresh(address: String?, slp: Boolean) {

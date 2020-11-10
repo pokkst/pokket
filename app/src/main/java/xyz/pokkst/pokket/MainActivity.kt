@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.tabs.TabLayout
 import kotlinx.android.synthetic.main.activity_main.*
@@ -20,22 +21,9 @@ import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.io.File
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
     var inFragment = false
-    private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (Constants.ACTION_UPDATE_REFRESH == intent.action) {
-                if (intent.extras?.containsKey("sync") == true) {
-                    val pct = intent.extras?.getInt("sync")
-                    this@MainActivity.refresh(pct)
-                } else {
-                    this@MainActivity.refresh()
-                }
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,9 +105,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val filter = IntentFilter()
-        filter.addAction(Constants.ACTION_UPDATE_REFRESH)
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter)
+        WalletManager.syncPercentage.observe(this, Observer { pct ->
+            refresh(pct)
+        })
+
+        WalletManager.refreshEvents.observe(this, Observer { event ->
+            if(event != null) {
+                refresh()
+            }
+        })
     }
 
     override fun onBackPressed() {

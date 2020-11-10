@@ -64,6 +64,8 @@ class SettingsHomeFragment : Fragment() {
             navigate(R.id.nav_to_wipe)
         }
 
+        setSyncStatus(root)
+
         root.transactions_list.setOnItemClickListener { parent, view, position, id ->
             (activity as? SettingsActivity)?.adjustDeepMenu(1)
             val txid = txList[position]
@@ -107,6 +109,23 @@ class SettingsHomeFragment : Fragment() {
         return root
     }
 
+    private fun setSyncStatus(root: View?) {
+        val lastSeenBlockHeight = WalletManager.wallet?.lastBlockSeenHeight
+        val bestBlockHeight = if(WalletManager.isMultisigKit) {
+            WalletManager.multisigWalletKit?.peerGroup()?.mostCommonChainHeight
+        } else {
+            WalletManager.walletKit?.peerGroup()?.mostCommonChainHeight
+        }
+
+        when {
+            bestBlockHeight == 0 ->
+                root?.sync_status?.text = resources.getString(R.string.not_syncing)
+            bestBlockHeight != lastSeenBlockHeight ->
+                root?.sync_status?.text = resources.getString(R.string.syncing)
+            bestBlockHeight == lastSeenBlockHeight ->
+                root?.sync_status?.text = resources.getString(R.string.synced)
+        }
+    }
     private fun navigate(navResId: Int) {
         (activity as? SettingsActivity)?.adjustDeepMenu(1)
         findNavController().navigate(navResId)

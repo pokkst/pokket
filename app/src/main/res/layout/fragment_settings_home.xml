@@ -71,12 +71,12 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/separator_height"
+                    android:layout_marginBottom="30dp"
                     android:background="@color/gray" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/separator_height"
-                    android:layout_marginTop="30dp"
                     android:background="@color/gray" />
 
                 <!--<RelativeLayout
@@ -137,12 +137,6 @@
                     android:background="@color/gray" />-->
 
                 <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/separator_height"
-                    android:layout_marginStart="20dp"
-                    android:background="@color/gray" />
-
-                <RelativeLayout
                     android:id="@+id/start_recovery_wallet"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -161,6 +155,22 @@
 
                 </RelativeLayout>
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/separator_height"
+                    android:background="@color/gray" />
+
+                <TextView
+                    android:id="@+id/sync_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/not_syncing"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="@color/light_gray"
+                    android:textSize="@dimen/text_size"
+                    app:layout_constraintTop_toBottomOf="@id/start_recovery_wallet" />
             </LinearLayout>
 
         </ScrollView>
