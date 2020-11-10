@@ -14,6 +14,7 @@ import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.script.ScriptPattern
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.util.BalanceFormatter
+import xyz.pokkst.pokket.util.ClipboardHelper
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.util.*
@@ -40,6 +41,9 @@ class TransactionReceivedFragment : Fragment() {
 
         if (isSlp) {
             slpTransaction = SlpTransaction(tx)
+        }
+        root.tx_id.setOnClickListener {
+            ClipboardHelper.copyToClipboard(activity, txid)
         }
         root.tx_hash_text.text = txid
 
