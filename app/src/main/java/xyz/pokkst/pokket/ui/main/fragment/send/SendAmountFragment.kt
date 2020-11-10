@@ -765,7 +765,7 @@ class SendAmountFragment : Fragment() {
                 ErrorCorrectionLevel.L
             )
             encoder.bitmap()
-        } catch (e: WriterException) {
+        } catch (e: Exception) {
             e.printStackTrace()
             null
         }
