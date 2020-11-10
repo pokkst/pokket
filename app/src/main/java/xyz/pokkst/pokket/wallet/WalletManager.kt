@@ -11,6 +11,7 @@ import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.kits.MultisigAppKit
 import org.bitcoinj.kits.SlpBIP47AppKit
 import org.bitcoinj.params.MainNetParams
+import org.bitcoinj.params.TestNet4Params
 import org.bitcoinj.script.Script
 import org.bitcoinj.utils.Threading
 import org.bitcoinj.wallet.DeterministicSeed

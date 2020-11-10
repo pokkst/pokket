@@ -117,7 +117,7 @@ class SendAmountFragment : Fragment() {
             if (payload != null) {
                 val tx = Transaction(WalletManager.parameters, Hex.decode(payload.hex))
                 val payloadAddress = fetchMultisigPayloadDestination(tx)
-                root?.to_field_text?.text = "to: ${payloadAddress?.replace("bitcoincash:", "")}"
+                root?.to_field_text?.text = "to: ${payloadAddress?.replace("${WalletManager.parameters.cashAddrPrefix}:", "")}"
                 this.getPayloadData(tx)
             }
         } else {

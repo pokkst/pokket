@@ -54,9 +54,10 @@ class UriHelper {
         }
 
         fun parse(uri: String): PaymentContent? {
+            val params = WalletManager.parameters
             val mappedVariables = getQueryParams(uri)
             val destinationWithoutPrefix =
-                uri.replace("bitcoincash:", "").replace("simpleledger:", "")
+                uri.replace("${params.cashAddrPrefix}:", "").replace("${params.simpleledgerPrefix}:", "")
             if (destinationWithoutPrefix.contains("http")) {
                 addressOrPayload = if (mappedVariables["r"] != null) {
                     (mappedVariables["r"] ?: error(""))[0]
@@ -80,15 +81,15 @@ class UriHelper {
                     }
 
                     addressOrPayload = when {
-                        uri.startsWith(WalletManager.parameters.cashAddrPrefix) -> getQueryBaseAddress(
+                        uri.startsWith(params.cashAddrPrefix) -> getQueryBaseAddress(
                             uri
-                        ).replace(WalletManager.parameters.cashAddrPrefix + ":", "")
+                        ).replace("${params.cashAddrPrefix}:", "")
                         uri.startsWith("cashacct") -> getQueryBaseAddress(uri).replace(
                             "cashacct:",
                             ""
                         )
-                        uri.startsWith("simpleledger") -> getQueryBaseAddress(uri).replace(
-                            "simpleledger:",
+                        uri.startsWith(params.simpleledgerPrefix) -> getQueryBaseAddress(uri).replace(
+                            "${params.simpleledgerPrefix}:",
                             ""
                         )
                         else -> getQueryBaseAddress(uri)
