@@ -36,6 +36,8 @@ import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.protocols.payments.PaymentProtocol
 import org.bitcoinj.protocols.payments.PaymentProtocolException
 import org.bitcoinj.protocols.payments.PaymentSession
+import org.bitcoinj.protocols.payments.slp.SlpPaymentProtocol
+import org.bitcoinj.protocols.payments.slp.SlpPaymentSession
 import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.utils.MultisigPayload
@@ -57,6 +59,8 @@ class SendAmountFragment : Fragment() {
     var tokenId: String? = null
     var root: View? = null
     var paymentContent: PaymentContent? = null
+    var bip70Type: BIP70Type? = null
+
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_MAIN_ENABLE_PAGER == intent.action) {
@@ -138,6 +142,51 @@ class SendAmountFragment : Fragment() {
             }
         }
 
+        setSlpView()
+    }
+
+    private fun setListeners() {
+        root?.input_type_toggle?.setOnClickListener {
+            if (PriceHelper.price != 0.0) {
+                bchIsSendType = !bchIsSendType
+                swapSendTypes(root)
+            }
+        }
+
+        val charInputListener = View.OnClickListener { v ->
+            if (root?.send_amount_input?.isEnabled == true) {
+                val view = v as Button
+                appendCharacterToInput(root, view.text.toString())
+                updateAltCurrencyDisplay(root)
+            }
+        }
+
+        root?.input_0?.setOnClickListener(charInputListener)
+        root?.input_1?.setOnClickListener(charInputListener)
+        root?.input_2?.setOnClickListener(charInputListener)
+        root?.input_3?.setOnClickListener(charInputListener)
+        root?.input_4?.setOnClickListener(charInputListener)
+        root?.input_5?.setOnClickListener(charInputListener)
+        root?.input_6?.setOnClickListener(charInputListener)
+        root?.input_7?.setOnClickListener(charInputListener)
+        root?.input_8?.setOnClickListener(charInputListener)
+        root?.input_9?.setOnClickListener(charInputListener)
+        root?.decimal_button?.setOnClickListener(charInputListener)
+        root?.delete_button?.setOnClickListener {
+            if (root?.send_amount_input?.isEnabled == true) {
+                val newValue = root?.send_amount_input?.text.toString().dropLast(1)
+                root?.send_amount_input?.setText(newValue)
+                updateAltCurrencyDisplay(root)
+            }
+        }
+
+        val filter = IntentFilter()
+        filter.addAction(Constants.ACTION_MAIN_ENABLE_PAGER)
+        filter.addAction(Constants.ACTION_FRAGMENT_SEND_SEND)
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
+    }
+
+    private fun setSlpView() {
         if (tokenId != null || paymentContent?.paymentType == PaymentType.SLP_ADDRESS) {
             val items = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
             val adapter = object : ArrayAdapter<SlpTokenBalance>(
@@ -202,45 +251,13 @@ class SendAmountFragment : Fragment() {
         }
     }
 
-    private fun setListeners() {
-        root?.input_type_toggle?.setOnClickListener {
-            if (PriceHelper.price != 0.0) {
-                bchIsSendType = !bchIsSendType
-                swapSendTypes(root)
-            }
+    private fun setSlpBip70View() {
+        if (tokenId != null || paymentContent?.paymentType == PaymentType.SLP_ADDRESS) {
+            root?.alt_currency_symbol?.visibility = View.GONE
+            root?.alt_currency_display?.visibility = View.GONE
+            root?.input_type_toggle?.visibility = View.GONE
+            root?.main_currency_symbol?.visibility = View.GONE
         }
-
-        val charInputListener = View.OnClickListener { v ->
-            if (root?.send_amount_input?.isEnabled == true) {
-                val view = v as Button
-                appendCharacterToInput(root, view.text.toString())
-                updateAltCurrencyDisplay(root)
-            }
-        }
-
-        root?.input_0?.setOnClickListener(charInputListener)
-        root?.input_1?.setOnClickListener(charInputListener)
-        root?.input_2?.setOnClickListener(charInputListener)
-        root?.input_3?.setOnClickListener(charInputListener)
-        root?.input_4?.setOnClickListener(charInputListener)
-        root?.input_5?.setOnClickListener(charInputListener)
-        root?.input_6?.setOnClickListener(charInputListener)
-        root?.input_7?.setOnClickListener(charInputListener)
-        root?.input_8?.setOnClickListener(charInputListener)
-        root?.input_9?.setOnClickListener(charInputListener)
-        root?.decimal_button?.setOnClickListener(charInputListener)
-        root?.delete_button?.setOnClickListener {
-            if (root?.send_amount_input?.isEnabled == true) {
-                val newValue = root?.send_amount_input?.text.toString().dropLast(1)
-                root?.send_amount_input?.setText(newValue)
-                updateAltCurrencyDisplay(root)
-            }
-        }
-
-        val filter = IntentFilter()
-        filter.addAction(Constants.ACTION_MAIN_ENABLE_PAGER)
-        filter.addAction(Constants.ACTION_FRAGMENT_SEND_SEND)
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
     }
 
     override fun onDestroy() {
@@ -518,39 +535,13 @@ class SendAmountFragment : Fragment() {
         object : Thread() {
             override fun run() {
                 try {
-                    val future: ListenableFuture<PaymentSession> = PaymentSession.createFromUrl(url)
-
-                    val session = future.get()
-                    if (session.isExpired) {
-                        showToast("invoice is expired")
-                        return
-                    }
-
-                    val req = session.sendRequest
-                    req.allowUnconfirmed()
-                    WalletManager.wallet?.completeTx(req)
-
-                    val ack = session.sendPayment(
-                        ImmutableList.of(req.tx),
-                        WalletManager.wallet?.freshReceiveAddress(),
-                        null
-                    )
-                    if (ack != null) {
-                        Futures.addCallback<PaymentProtocol.Ack>(
-                            ack,
-                            object : FutureCallback<PaymentProtocol.Ack> {
-                                override fun onSuccess(ack: PaymentProtocol.Ack?) {
-                                    WalletManager.wallet?.commitTx(req.tx)
-                                    showToast("coins sent!")
-                                    (activity as? MainActivity)?.toggleSendScreen(false)
-                                }
-
-                                override fun onFailure(throwable: Throwable) {
-                                    showToast("an error occurred")
-                                }
-                            },
-                            MoreExecutors.directExecutor()
-                        )
+                    val type = bip70Type
+                    if(type != null) {
+                        if(type == BIP70Type.BCH) {
+                            processBchBIP70(url)
+                        } else if(type == BIP70Type.SLP) {
+                            processSlpBIP70(url)
+                        }
                     }
                 } catch (e: InsufficientMoneyException) {
                     e.printStackTrace()
@@ -569,6 +560,72 @@ class SendAmountFragment : Fragment() {
                 }
             }
         }.start()
+    }
+
+    private fun processBchBIP70(url: String) {
+        val session = BIP70Helper.getBchPaymentSession(url)
+        if (session.isExpired) {
+            showToast("invoice is expired")
+            return
+        }
+
+        val req = session.sendRequest
+        req.allowUnconfirmed()
+        WalletManager.wallet?.completeTx(req)
+
+        val ack = session.sendPayment(
+            ImmutableList.of(req.tx),
+            WalletManager.wallet?.freshReceiveAddress(),
+            null
+        )
+        if (ack != null) {
+            Futures.addCallback<PaymentProtocol.Ack>(
+                ack,
+                object : FutureCallback<PaymentProtocol.Ack> {
+                    override fun onSuccess(ack: PaymentProtocol.Ack?) {
+                        WalletManager.wallet?.commitTx(req.tx)
+                        showToast("coins sent!")
+                        (activity as? MainActivity)?.toggleSendScreen(false)
+                    }
+
+                    override fun onFailure(throwable: Throwable) {
+                        showToast("an error occurred")
+                    }
+                },
+                MoreExecutors.directExecutor()
+            )
+        }
+    }
+
+    private fun processSlpBIP70(url: String) {
+        val session = BIP70Helper.getSlpPaymentSession(url)
+        if (session.isExpired) {
+            showToast("invoice is expired")
+            return
+        }
+
+        val tokenId = session.tokenId
+        val slpToken = WalletManager.walletKit?.getSlpToken(tokenId)
+        if(slpToken != null) {
+            val rawTokens = session.rawTokenAmounts
+            val addresses = session.getSlpAddresses(WalletManager.parameters)
+            val tx = WalletManager.walletKit?.createSlpTransactionBip70(tokenId, null, rawTokens, addresses, session)
+            val ack = session.sendPayment(ImmutableList.of(tx!!), WalletManager.wallet?.freshReceiveAddress(), null)
+            if (ack != null) {
+                Futures.addCallback<SlpPaymentProtocol.Ack>(ack, object : FutureCallback<SlpPaymentProtocol.Ack> {
+                    override fun onSuccess(ack: SlpPaymentProtocol.Ack?) {
+                        showToast("coins sent!")
+                        (activity as? MainActivity)?.toggleSendScreen(false)
+                    }
+
+                    override fun onFailure(throwable: Throwable) {
+                        showToast("an error occurred")
+                    }
+                }, MoreExecutors.directExecutor())
+            }
+        } else {
+            showToast("unknown token")
+        }
     }
 
     private fun processSlpTransaction(address: String, tokenAmount: Double, tokenId: String) {
@@ -652,22 +709,30 @@ class SendAmountFragment : Fragment() {
         object : Thread() {
             override fun run() {
                 try {
-                    val future: ListenableFuture<PaymentSession> = PaymentSession.createFromUrl(url)
-                    val session = future.get()
-                    val amountWanted = session.value
-                    setCoinAmount(amountWanted)
-                    activity?.runOnUiThread {
-                        root?.send_amount_input?.isEnabled = false
-                        root?.to_field_text?.text = session.memo
+                    val type = BIP70Helper.getPaymentSessionType(url)
+                    bip70Type = type
+                    if(type == BIP70Type.BCH) {
+                        val session = BIP70Helper.getBchPaymentSession(url)
+                        val amountWanted = session.value
+                        setCoinAmount(amountWanted)
+                        activity?.runOnUiThread {
+                            root?.send_amount_input?.isEnabled = false
+                            root?.to_field_text?.text = session.memo
+                        }
+                    } else if(type == BIP70Type.SLP) {
+                        val session = BIP70Helper.getSlpPaymentSession(url)
+                        val amountWanted = session.totalTokenAmount
+                        setTokenAmount(amountWanted)
+                        tokenId = session.tokenId
+                        activity?.runOnUiThread {
+                            setSlpBip70View()
+                            root?.send_amount_input?.isEnabled = false
+                            root?.to_field_text?.text = session.memo
+                        }
                     }
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                } catch (e: ExecutionException) {
-                    e.printStackTrace()
-                } catch (e: PaymentProtocolException) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
-
             }
         }.start()
     }
@@ -729,6 +794,12 @@ class SendAmountFragment : Fragment() {
                 root?.alt_currency_display?.text =
                     BalanceFormatter.formatBalance(bchValue, "#.########")
             }
+        }
+    }
+
+    private fun setTokenAmount(amount: Long) {
+        activity?.runOnUiThread {
+            root?.send_amount_input?.setText(amount.toString())
         }
     }
 
