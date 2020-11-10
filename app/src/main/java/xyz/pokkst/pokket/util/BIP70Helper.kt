@@ -1,11 +1,8 @@
 package xyz.pokkst.pokket.util
 
 import com.google.common.util.concurrent.ListenableFuture
-import org.bitcoinj.protocols.payments.PaymentProtocolException
 import org.bitcoinj.protocols.payments.PaymentSession
 import org.bitcoinj.protocols.payments.slp.SlpPaymentSession
-import java.io.FileNotFoundException
-import java.lang.Exception
 
 class BIP70Helper {
     companion object {
@@ -23,11 +20,11 @@ class BIP70Helper {
             return try {
                 getBchPaymentSession(url)
                 BIP70Type.BCH
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 try {
                     getSlpPaymentSession(url)
                     BIP70Type.SLP
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     null
                 }
             }

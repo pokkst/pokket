@@ -20,10 +20,8 @@ import androidx.navigation.fragment.findNavController
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.gson.Gson
-import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import kotlinx.android.synthetic.main.component_input_numpad.view.*
 import kotlinx.android.synthetic.main.fragment_send_amount.view.*
@@ -35,13 +33,10 @@ import org.bitcoinj.core.slp.SlpTokenBalance
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.protocols.payments.PaymentProtocol
 import org.bitcoinj.protocols.payments.PaymentProtocolException
-import org.bitcoinj.protocols.payments.PaymentSession
 import org.bitcoinj.protocols.payments.slp.SlpPaymentProtocol
-import org.bitcoinj.protocols.payments.slp.SlpPaymentSession
 import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.utils.MultisigPayload
-import org.bitcoinj.wallet.RedeemData
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
 import org.bouncycastle.util.encoders.Hex
@@ -536,10 +531,10 @@ class SendAmountFragment : Fragment() {
             override fun run() {
                 try {
                     val type = bip70Type
-                    if(type != null) {
-                        if(type == BIP70Type.BCH) {
+                    if (type != null) {
+                        if (type == BIP70Type.BCH) {
                             processBchBIP70(url)
-                        } else if(type == BIP70Type.SLP) {
+                        } else if (type == BIP70Type.SLP) {
                             processSlpBIP70(url)
                         }
                     }
@@ -606,22 +601,36 @@ class SendAmountFragment : Fragment() {
 
         val tokenId = session.tokenId
         val slpToken = WalletManager.walletKit?.getSlpToken(tokenId)
-        if(slpToken != null) {
+        if (slpToken != null) {
             val rawTokens = session.rawTokenAmounts
             val addresses = session.getSlpAddresses(WalletManager.parameters)
-            val tx = WalletManager.walletKit?.createSlpTransactionBip70(tokenId, null, rawTokens, addresses, session)
-            val ack = session.sendPayment(ImmutableList.of(tx!!), WalletManager.wallet?.freshReceiveAddress(), null)
+            val tx = WalletManager.walletKit?.createSlpTransactionBip70(
+                tokenId,
+                null,
+                rawTokens,
+                addresses,
+                session
+            )
+            val ack = session.sendPayment(
+                ImmutableList.of(tx!!),
+                WalletManager.wallet?.freshReceiveAddress(),
+                null
+            )
             if (ack != null) {
-                Futures.addCallback<SlpPaymentProtocol.Ack>(ack, object : FutureCallback<SlpPaymentProtocol.Ack> {
-                    override fun onSuccess(ack: SlpPaymentProtocol.Ack?) {
-                        showToast("coins sent!")
-                        (activity as? MainActivity)?.toggleSendScreen(false)
-                    }
+                Futures.addCallback<SlpPaymentProtocol.Ack>(
+                    ack,
+                    object : FutureCallback<SlpPaymentProtocol.Ack> {
+                        override fun onSuccess(ack: SlpPaymentProtocol.Ack?) {
+                            showToast("coins sent!")
+                            (activity as? MainActivity)?.toggleSendScreen(false)
+                        }
 
-                    override fun onFailure(throwable: Throwable) {
-                        showToast("an error occurred")
-                    }
-                }, MoreExecutors.directExecutor())
+                        override fun onFailure(throwable: Throwable) {
+                            showToast("an error occurred")
+                        }
+                    },
+                    MoreExecutors.directExecutor()
+                )
             }
         } else {
             showToast("unknown token")
@@ -711,7 +720,7 @@ class SendAmountFragment : Fragment() {
                 try {
                     val type = BIP70Helper.getPaymentSessionType(url)
                     bip70Type = type
-                    if(type == BIP70Type.BCH) {
+                    if (type == BIP70Type.BCH) {
                         val session = BIP70Helper.getBchPaymentSession(url)
                         val amountWanted = session.value
                         setCoinAmount(amountWanted)
@@ -719,7 +728,7 @@ class SendAmountFragment : Fragment() {
                             root?.send_amount_input?.isEnabled = false
                             root?.to_field_text?.text = session.memo
                         }
-                    } else if(type == BIP70Type.SLP) {
+                    } else if (type == BIP70Type.SLP) {
                         val session = BIP70Helper.getSlpPaymentSession(url)
                         val amountWanted = session.totalTokenAmount
                         setTokenAmount(amountWanted)

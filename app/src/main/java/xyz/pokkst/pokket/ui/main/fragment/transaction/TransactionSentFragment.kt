@@ -8,15 +8,7 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.transaction_item_expanded_received.view.*
 import kotlinx.android.synthetic.main.transaction_item_expanded_sent.view.*
-import kotlinx.android.synthetic.main.transaction_item_expanded_sent.view.general_tx_from_layout
-import kotlinx.android.synthetic.main.transaction_item_expanded_sent.view.general_tx_to_layout
-import kotlinx.android.synthetic.main.transaction_item_expanded_sent.view.tx_amount_text
-import kotlinx.android.synthetic.main.transaction_item_expanded_sent.view.tx_exchange_text
-import kotlinx.android.synthetic.main.transaction_item_expanded_sent.view.tx_hash_text
-import kotlinx.android.synthetic.main.transaction_item_expanded_sent.view.tx_id
-import kotlinx.android.synthetic.main.transaction_item_expanded_sent.view.tx_status_text
 import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.script.ScriptPattern
