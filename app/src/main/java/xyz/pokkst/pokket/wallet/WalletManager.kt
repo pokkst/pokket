@@ -146,7 +146,7 @@ class WalletManager {
                 }
             })
 
-            val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1560281760L
+            val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1501547158L
             if (seed != null) {
                 val deterministicSeed = DeterministicSeed(seed, null, "", creationDate)
                 multisigWalletKit?.restoreWalletFromSeed(deterministicSeed)
