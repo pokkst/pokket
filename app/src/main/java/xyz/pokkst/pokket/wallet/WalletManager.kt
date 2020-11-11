@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
+import org.bitcoinj.core.PeerAddress
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.kits.MultisigAppKit
@@ -21,7 +22,10 @@ import org.bitcoinj.wallet.KeyChainGroupStructure
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.livedata.Event
 import xyz.pokkst.pokket.util.Constants
+import xyz.pokkst.pokket.util.PrefsHelper
 import java.io.File
+import java.net.InetAddress
+import java.net.UnknownHostException
 import java.util.*
 import java.util.concurrent.Executor
 
@@ -91,7 +95,7 @@ class WalletManager {
             walletKit?.setBlockingStartup(false)
             val checkpointsInputStream = activity.assets.open("checkpoints.txt")
             walletKit?.setCheckpoints(checkpointsInputStream)
-
+            setupNodeOnStart()
             println("Starting wallet...")
             walletKit?.startAsync()
         }
@@ -143,9 +147,29 @@ class WalletManager {
             multisigWalletKit?.setBlockingStartup(false)
             val checkpointsInputStream = activity.assets.open("checkpoints.txt")
             multisigWalletKit?.setCheckpoints(checkpointsInputStream)
-
+            setupNodeOnStart()
             println("Starting multisig wallet...")
             multisigWalletKit?.startAsync()
+        }
+
+        private fun setupNodeOnStart() {
+            val nodeIP = PrefsHelper.instance(null)?.getString("node_ip", null)
+            if (nodeIP?.isNotEmpty() == true) {
+                var node1: InetAddress? = null
+                try {
+                    node1 = InetAddress.getByName(nodeIP)
+                } catch (e: UnknownHostException) {
+                    e.printStackTrace()
+                }
+
+                if(isMultisigKit) {
+                    this.multisigWalletKit?.setPeerNodes(null)
+                    this.multisigWalletKit?.setPeerNodes(PeerAddress(parameters, node1))
+                } else {
+                    this.walletKit?.setPeerNodes(null)
+                    this.walletKit?.setPeerNodes(PeerAddress(parameters, node1))
+                }
+            }
         }
 
         fun getBalance(wallet: Wallet): Coin {

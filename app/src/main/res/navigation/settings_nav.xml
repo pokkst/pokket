@@ -19,6 +19,12 @@
             android:id="@+id/nav_to_wipe"
             app:destination="@id/settingsWipeFragment" />
         <action
+            android:id="@+id/nav_to_epk"
+            app:destination="@id/settingsEpkFragment" />
+        <action
+            android:id="@+id/nav_to_node"
+            app:destination="@id/settingsNodeFragment" />
+        <action
             android:id="@+id/nav_to_tx_received"
             app:destination="@id/transactionReceivedFragment">
             <argument
@@ -54,6 +60,18 @@
         android:name="xyz.pokkst.pokket.ui.main.fragment.setting.SettingsPhraseFragment"
         android:label="fragment_settings_about"
         tools:layout="@layout/fragment_settings_phrase">
+    </fragment>
+    <fragment
+        android:id="@+id/settingsNodeFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.setting.SettingsNodeFragment"
+        android:label="fragment_settings_about"
+        tools:layout="@layout/fragment_settings_node">
+    </fragment>
+    <fragment
+        android:id="@+id/settingsEpkFragment"
+        android:name="xyz.pokkst.pokket.ui.main.fragment.setting.SettingsEpkFragment"
+        android:label="fragment_settings_about"
+        tools:layout="@layout/fragment_settings_epk">
     </fragment>
     <fragment
         android:id="@+id/settingsWipeFragment"

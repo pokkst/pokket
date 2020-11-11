@@ -16,9 +16,7 @@ import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.wallet.DeterministicKeyChain
 import xyz.pokkst.pokket.ui.ToggleViewPager
 import xyz.pokkst.pokket.ui.main.SectionsPagerAdapter
-import xyz.pokkst.pokket.util.BalanceFormatter
-import xyz.pokkst.pokket.util.Constants
-import xyz.pokkst.pokket.util.PriceHelper
+import xyz.pokkst.pokket.util.*
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.io.File
 
@@ -28,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        PrefsHelper.instance(this)
         WalletManager.walletDir = File(applicationInfo.dataDir)
         val extras = intent.extras
         var seed: String? = null
@@ -67,20 +66,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepareViews(newUser: Boolean) {
-        val decorView = window.decorView
-        var flags = decorView.systemUiVisibility
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            flags = flags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            flags = flags or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        }
-        decorView.systemUiVisibility = flags
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.statusBarColor = resources.getColor(R.color.statusBarLight)
-            window.navigationBarColor = resources.getColor(R.color.navBarLight)
-        }
-
+        StatusBarHelper.prepareLightStatusBar(this)
         val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
         view_pager.adapter = sectionsPagerAdapter
         if (newUser) {

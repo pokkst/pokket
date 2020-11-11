@@ -5,6 +5,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import kotlinx.android.synthetic.main.activity_settings.*
+import xyz.pokkst.pokket.util.StatusBarHelper
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -13,6 +14,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+        StatusBarHelper.prepareLightStatusBar(this)
         val settingsButton: ImageView = findViewById(R.id.settings_button)
         settingsButton.setOnClickListener {
             deepMenuCount.value?.let {

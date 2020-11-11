@@ -361,6 +361,7 @@
     <string name="b_symbol">&#384;</string>
     <string name="fiat_symbol">$</string>
     <string name="appbar_temp">&#384;0.000000 ($0.00)</string>
+    <string name="node_label">custom node</string>
     <string name="epk_label">extended public key</string>
     <string name="view_tokens">view tokens</string>
     <string name="utxo">utxo</string>
@@ -376,5 +377,8 @@
     <string name="multisig_instructions">please enter the type of multisig wallet you are creating, this must match for all other users</string>
     <string name="multisig_key_instructions">please enter the other user watching keys here:</string>
     <string name="not_syncing">not syncing</string>
+    <string name="epk_desc">this is your extended public key, also known as your "watching key"</string>
+    <string name="node_desc">enter an ip address here to connect to custom node upon startup</string>
+    <string name="node_ip_hint">192.168.1.1</string>
 
 </resources>
