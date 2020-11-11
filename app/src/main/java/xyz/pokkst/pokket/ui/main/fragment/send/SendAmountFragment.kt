@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import net.glxn.qrgen.android.QRCode
 import org.bitcoinj.core.*
 import org.bitcoinj.core.bip47.BIP47Channel
-import org.bitcoinj.core.slp.SlpToken
 import org.bitcoinj.core.slp.SlpTokenBalance
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.protocols.payments.PaymentProtocol
@@ -321,7 +320,7 @@ class SendAmountFragment : Fragment() {
                         if (destination != null && slpTokenId != null) {
                             this.processSlpTransaction(destination, amount, slpTokenId)
                         }
-                    } else if(paymentContent?.paymentType == PaymentType.BIP70) {
+                    } else if (paymentContent?.paymentType == PaymentType.BIP70) {
                         destination?.let { this.processBIP70(it) }
                     } else {
                         showToast("invalid slp address")

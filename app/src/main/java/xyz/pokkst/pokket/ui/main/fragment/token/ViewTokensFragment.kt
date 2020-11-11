@@ -4,15 +4,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.ImageView
-import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
@@ -20,7 +16,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.luminiasoft.ethereum.blockiesandroid.BlockiesIdenticon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -31,7 +26,6 @@ import xyz.pokkst.pokket.ui.NonScrollListView
 import xyz.pokkst.pokket.ui.SlpTokenListEntryView
 import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.wallet.WalletManager
-import java.util.*
 
 
 /**
@@ -131,7 +125,7 @@ class ViewTokensFragment : Fragment() {
         slpList?.adapter = itemsAdapter
         slpList?.refreshDrawableState()
 
-        if(items.isEmpty()) {
+        if (items.isEmpty()) {
             root?.findViewById<TextView>(R.id.loading_tokens_view)?.visibility = View.GONE
             root?.findViewById<TextView>(R.id.no_tokens_view)?.visibility = View.VISIBLE
             slpList?.visibility = View.GONE
