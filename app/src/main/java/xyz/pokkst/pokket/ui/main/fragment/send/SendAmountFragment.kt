@@ -265,11 +265,11 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun setSlpBip70View() {
-        if (tokenId != null || paymentContent?.paymentType == PaymentType.SLP_ADDRESS) {
+        if (tokenId != null) {
             root?.alt_currency_symbol?.visibility = View.GONE
             root?.alt_currency_display?.visibility = View.GONE
             root?.input_type_toggle?.visibility = View.GONE
-            root?.main_currency_symbol?.visibility = View.GONE
+            root?.main_currency_symbol?.text = WalletManager.walletKit?.getSlpToken(tokenId)?.ticker
         }
     }
 
@@ -318,6 +318,8 @@ class SendAmountFragment : Fragment() {
                         if (destination != null && slpTokenId != null) {
                             this.processSlpTransaction(destination, amount, slpTokenId)
                         }
+                    } else if(paymentContent?.paymentType == PaymentType.BIP70) {
+                        destination?.let { this.processBIP70(it) }
                     } else {
                         showToast("invalid slp address")
                     }
@@ -659,10 +661,10 @@ class SendAmountFragment : Fragment() {
     private fun processSlpTransaction(address: String, tokenAmount: Double, tokenId: String) {
         val tx = WalletManager.walletKit?.createSlpTransaction(address, tokenId, tokenAmount, null)
         val req = SendRequest.forTx(tx)
-        val sendResult = WalletManager.wallet?.sendCoins(req)
+        val sendResult = WalletManager.walletKit?.peerGroup()?.broadcastTransaction(req.tx)
         println("Processing SLP tx...")
         Futures.addCallback(
-            sendResult?.broadcastComplete,
+            sendResult?.future(),
             object : FutureCallback<Transaction?> {
                 override fun onSuccess(@Nullable result: Transaction?) {
                     showToast("coins sent!")
@@ -840,7 +842,7 @@ class SendAmountFragment : Fragment() {
 
     private fun setTokenAmount(amount: BigDecimal, slpToken: SlpToken) {
         activity?.runOnUiThread {
-            root?.send_amount_input?.setText("${amount.toDouble()} ${slpToken.ticker}")
+            root?.send_amount_input?.setText(amount.toDouble().toString())
         }
     }
 
@@ -854,7 +856,9 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun showToast(message: String) {
-        (activity as? MainActivity)?.enablePayButton()
+        activity?.runOnUiThread {
+            (activity as? MainActivity)?.enablePayButton()
+        }
         (activity as? MainActivity)?.let { Toaster.showMessage(it, message) }
     }
 
