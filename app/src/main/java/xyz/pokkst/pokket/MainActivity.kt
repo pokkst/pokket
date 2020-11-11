@@ -161,6 +161,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun enablePayButton() {
+        pay_button.isEnabled = true
+    }
+
     fun enableTokensScreen() {
         val viewPager: ToggleViewPager = findViewById(R.id.view_pager)
         val tabs: TabLayout = findViewById(R.id.tabs)

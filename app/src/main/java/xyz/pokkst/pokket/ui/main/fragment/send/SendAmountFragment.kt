@@ -29,6 +29,7 @@ import kotlinx.android.synthetic.main.token_spinner_cell.view.*
 import net.glxn.qrgen.android.QRCode
 import org.bitcoinj.core.*
 import org.bitcoinj.core.bip47.BIP47Channel
+import org.bitcoinj.core.slp.SlpToken
 import org.bitcoinj.core.slp.SlpTokenBalance
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.protocols.payments.PaymentProtocol
@@ -44,6 +45,8 @@ import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.util.*
 import xyz.pokkst.pokket.wallet.WalletManager
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.util.concurrent.ExecutionException
 
 
@@ -547,7 +550,7 @@ class SendAmountFragment : Fragment() {
                 } catch (e: Wallet.ExceededMaxTransactionSize) {
                     e.printStackTrace()
                     showToast("transaction is too big")
-                } catch (e: NullPointerException) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                     e.message?.let {
                         showToast(it)
@@ -580,7 +583,9 @@ class SendAmountFragment : Fragment() {
                     override fun onSuccess(ack: PaymentProtocol.Ack?) {
                         WalletManager.wallet?.commitTx(req.tx)
                         showToast("coins sent!")
-                        (activity as? MainActivity)?.toggleSendScreen(false)
+                        activity?.runOnUiThread {
+                            (activity as? MainActivity)?.toggleSendScreen(false)
+                        }
                     }
 
                     override fun onFailure(throwable: Throwable) {
@@ -622,7 +627,9 @@ class SendAmountFragment : Fragment() {
                     object : FutureCallback<SlpPaymentProtocol.Ack> {
                         override fun onSuccess(ack: SlpPaymentProtocol.Ack?) {
                             showToast("coins sent!")
-                            (activity as? MainActivity)?.toggleSendScreen(false)
+                            activity?.runOnUiThread {
+                                (activity as? MainActivity)?.toggleSendScreen(false)
+                            }
                         }
 
                         override fun onFailure(throwable: Throwable) {
@@ -731,12 +738,21 @@ class SendAmountFragment : Fragment() {
                     } else if (type == BIP70Type.SLP) {
                         val session = BIP70Helper.getSlpPaymentSession(url)
                         val amountWanted = session.totalTokenAmount
-                        setTokenAmount(amountWanted)
-                        tokenId = session.tokenId
-                        activity?.runOnUiThread {
-                            setSlpBip70View()
-                            root?.send_amount_input?.isEnabled = false
-                            root?.to_field_text?.text = session.memo
+                        val slpToken = WalletManager.walletKit?.getSlpToken(session.tokenId)
+                        if(slpToken != null) {
+                            setTokenAmount(BigDecimal.valueOf(amountWanted).scaleByPowerOfTen(-slpToken.decimals), slpToken)
+
+                            tokenId = session.tokenId
+                            activity?.runOnUiThread {
+                                setSlpBip70View()
+                                root?.send_amount_input?.isEnabled = false
+                                root?.to_field_text?.text = session.memo
+                            }
+                        } else {
+                            showToast("unknown token")
+                            activity?.runOnUiThread {
+                                (activity as? MainActivity)?.toggleSendScreen(false)
+                            }
                         }
                     }
                 } catch (e: Exception) {
@@ -806,9 +822,9 @@ class SendAmountFragment : Fragment() {
         }
     }
 
-    private fun setTokenAmount(amount: Long) {
+    private fun setTokenAmount(amount: BigDecimal, slpToken: SlpToken) {
         activity?.runOnUiThread {
-            root?.send_amount_input?.setText(amount.toString())
+            root?.send_amount_input?.setText("${amount.toDouble()} ${slpToken.ticker}")
         }
     }
 
@@ -822,6 +838,7 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun showToast(message: String) {
+        (activity as? MainActivity)?.enablePayButton()
         (activity as? MainActivity)?.let { Toaster.showMessage(it, message) }
     }
 
