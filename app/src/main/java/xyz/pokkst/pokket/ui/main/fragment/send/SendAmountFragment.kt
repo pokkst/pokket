@@ -757,7 +757,7 @@ class SendAmountFragment : Fragment() {
                         if (slpToken != null) {
                             setTokenAmount(
                                 BigDecimal.valueOf(amountWanted)
-                                    .scaleByPowerOfTen(-slpToken.decimals), slpToken
+                                    .scaleByPowerOfTen(-slpToken.decimals)
                             )
 
                             tokenId = session.tokenId
@@ -840,7 +840,7 @@ class SendAmountFragment : Fragment() {
         }
     }
 
-    private fun setTokenAmount(amount: BigDecimal, slpToken: SlpToken) {
+    private fun setTokenAmount(amount: BigDecimal) {
         activity?.runOnUiThread {
             root?.send_amount_input?.setText(amount.toDouble().toString())
         }
