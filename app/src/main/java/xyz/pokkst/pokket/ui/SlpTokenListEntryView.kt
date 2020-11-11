@@ -44,10 +44,10 @@ class SlpTokenListEntryView {
                                 )
                             )
                         activity?.runOnUiThread {
-                                slpIcon.setImageDrawable(drawable)
-                                slpImage.visibility = View.GONE
-                                slpIcon.visibility = View.VISIBLE
-                            }
+                            slpIcon.setImageDrawable(drawable)
+                            slpImage.visibility = View.GONE
+                            slpIcon.visibility = View.VISIBLE
+                        }
                     } else {
                         slpImage.setAddress(slpBlockiesAddress)
                         slpImage.setCornerRadius(128f)

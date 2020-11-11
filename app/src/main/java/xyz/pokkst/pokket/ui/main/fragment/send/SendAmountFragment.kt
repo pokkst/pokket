@@ -23,10 +23,8 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.gson.Gson
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import com.luminiasoft.ethereum.blockiesandroid.BlockiesIdenticon
 import kotlinx.android.synthetic.main.component_input_numpad.view.*
 import kotlinx.android.synthetic.main.fragment_send_amount.view.*
-import kotlinx.android.synthetic.main.token_spinner_cell.view.*
 import net.glxn.qrgen.android.QRCode
 import org.bitcoinj.core.*
 import org.bitcoinj.core.bip47.BIP47Channel
@@ -48,7 +46,6 @@ import xyz.pokkst.pokket.ui.SlpTokenListEntryView
 import xyz.pokkst.pokket.util.*
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.math.BigDecimal
-import java.util.*
 import java.util.concurrent.ExecutionException
 
 
@@ -170,14 +167,14 @@ class SendAmountFragment : Fragment() {
             if (root?.send_amount_input?.isEnabled == true) {
                 val view = v as Button
 
-                if(tokenId != null) {
+                if (tokenId != null) {
                     val slpToken = WalletManager.walletKit?.getSlpToken(tokenId)
-                    if(slpToken?.decimals != 0) {
+                    if (slpToken?.decimals != 0) {
                         appendCharacterToInput(root, view.text.toString())
                         updateAltCurrencyDisplay(root)
                     }
                 } else {
-                    if(paymentContent?.paymentType != PaymentType.SLP_ADDRESS) {
+                    if (paymentContent?.paymentType != PaymentType.SLP_ADDRESS) {
                         appendCharacterToInput(root, view.text.toString())
                         updateAltCurrencyDisplay(root)
                     }
@@ -219,11 +216,23 @@ class SendAmountFragment : Fragment() {
                 items
             ) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    return SlpTokenListEntryView.instanceOf(activity, position, R.layout.token_spinner_cell)
+                    return SlpTokenListEntryView.instanceOf(
+                        activity,
+                        position,
+                        R.layout.token_spinner_cell
+                    )
                 }
 
-                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    return SlpTokenListEntryView.instanceOf(activity, position, R.layout.token_list_cell)
+                override fun getDropDownView(
+                    position: Int,
+                    convertView: View?,
+                    parent: ViewGroup
+                ): View {
+                    return SlpTokenListEntryView.instanceOf(
+                        activity,
+                        position,
+                        R.layout.token_list_cell
+                    )
                 }
             }
             root?.token_selector_todo?.adapter = adapter

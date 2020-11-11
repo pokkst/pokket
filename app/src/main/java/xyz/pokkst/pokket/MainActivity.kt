@@ -15,7 +15,6 @@ import xyz.pokkst.pokket.ui.main.SectionsPagerAdapter
 import xyz.pokkst.pokket.util.*
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.io.File
-import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
     var inFragment = false
@@ -158,7 +157,8 @@ class MainActivity : AppCompatActivity() {
                                 "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
                         }
                     }
-                } catch (e: Exception) { }
+                } catch (e: Exception) {
+                }
             }
         }.start()
     }
