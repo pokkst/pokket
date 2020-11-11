@@ -15,6 +15,7 @@ import xyz.pokkst.pokket.ui.main.SectionsPagerAdapter
 import xyz.pokkst.pokket.util.*
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.io.File
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
     var inFragment = false
@@ -146,15 +147,18 @@ class MainActivity : AppCompatActivity() {
         object : Thread() {
             override fun run() {
                 super.run()
-                val bch = WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
-                bch?.let {
-                    val fiat = bch.toDouble() * PriceHelper.price
-                    val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
-                    this@MainActivity.runOnUiThread {
-                        appbar_title.text =
-                            "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
+                try {
+                    val bch =
+                        WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
+                    bch?.let {
+                        val fiat = bch.toDouble() * PriceHelper.price
+                        val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
+                        this@MainActivity.runOnUiThread {
+                            appbar_title.text =
+                                "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
+                        }
                     }
-                }
+                } catch (e: Exception) { }
             }
         }.start()
     }

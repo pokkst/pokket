@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.gson.Gson
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import com.luminiasoft.ethereum.blockiesandroid.BlockiesIdenticon
 import kotlinx.android.synthetic.main.component_input_numpad.view.*
 import kotlinx.android.synthetic.main.fragment_send_amount.view.*
 import kotlinx.android.synthetic.main.token_spinner_cell.view.*
@@ -43,9 +44,11 @@ import org.bitcoinj.wallet.Wallet
 import org.bouncycastle.util.encoders.Hex
 import xyz.pokkst.pokket.MainActivity
 import xyz.pokkst.pokket.R
+import xyz.pokkst.pokket.ui.SlpTokenListEntryView
 import xyz.pokkst.pokket.util.*
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.math.BigDecimal
+import java.util.*
 import java.util.concurrent.ExecutionException
 
 
@@ -78,6 +81,8 @@ class SendAmountFragment : Fragment() {
                     } else {
                         this@SendAmountFragment.send()
                     }
+                } else {
+                    showToast("enter an amount")
                 }
             }
         }
@@ -161,6 +166,25 @@ class SendAmountFragment : Fragment() {
             }
         }
 
+        val decimalListener = View.OnClickListener { v ->
+            if (root?.send_amount_input?.isEnabled == true) {
+                val view = v as Button
+
+                if(tokenId != null) {
+                    val slpToken = WalletManager.walletKit?.getSlpToken(tokenId)
+                    if(slpToken?.decimals != 0) {
+                        appendCharacterToInput(root, view.text.toString())
+                        updateAltCurrencyDisplay(root)
+                    }
+                } else {
+                    if(paymentContent?.paymentType != PaymentType.SLP_ADDRESS) {
+                        appendCharacterToInput(root, view.text.toString())
+                        updateAltCurrencyDisplay(root)
+                    }
+                }
+            }
+        }
+
         root?.input_0?.setOnClickListener(charInputListener)
         root?.input_1?.setOnClickListener(charInputListener)
         root?.input_2?.setOnClickListener(charInputListener)
@@ -171,7 +195,7 @@ class SendAmountFragment : Fragment() {
         root?.input_7?.setOnClickListener(charInputListener)
         root?.input_8?.setOnClickListener(charInputListener)
         root?.input_9?.setOnClickListener(charInputListener)
-        root?.decimal_button?.setOnClickListener(charInputListener)
+        root?.decimal_button?.setOnClickListener(decimalListener)
         root?.delete_button?.setOnClickListener {
             if (root?.send_amount_input?.isEnabled == true) {
                 val newValue = root?.send_amount_input?.text.toString().dropLast(1)
@@ -191,35 +215,15 @@ class SendAmountFragment : Fragment() {
             val items = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
             val adapter = object : ArrayAdapter<SlpTokenBalance>(
                 requireContext(),
-                R.layout.token_spinner_cell,
+                R.layout.token_list_cell,
                 items
             ) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val view = LayoutInflater.from(requireContext())
-                        .inflate(R.layout.token_spinner_cell, null)
-                    val slpToken = WalletManager.walletKit?.getSlpToken(
-                        WalletManager.walletKit?.slpBalances?.get(position)?.tokenId
-                    )
-                    if (slpToken != null) {
-                        view.token_ticker.text = slpToken.ticker
-                    }
-                    return view
+                    return SlpTokenListEntryView.instanceOf(activity, position, R.layout.token_spinner_cell)
                 }
 
-                override fun getDropDownView(
-                    position: Int,
-                    convertView: View?,
-                    parent: ViewGroup
-                ): View {
-                    val view = LayoutInflater.from(requireContext())
-                        .inflate(R.layout.token_spinner_cell, null)
-                    val slpToken = WalletManager.walletKit?.getSlpToken(
-                        WalletManager.walletKit?.slpBalances?.get(position)?.tokenId
-                    )
-                    if (slpToken != null) {
-                        view.token_ticker.text = slpToken.ticker
-                    }
-                    return view
+                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    return SlpTokenListEntryView.instanceOf(activity, position, R.layout.token_list_cell)
                 }
             }
             root?.token_selector_todo?.adapter = adapter
@@ -305,18 +309,15 @@ class SendAmountFragment : Fragment() {
                         if (destination != null && slpTokenId != null) {
                             this.processSlpTransaction(destination, amount, slpTokenId)
                         }
+                    } else {
+                        showToast("invalid slp address")
                     }
                 }
             } else {
-                (activity as? MainActivity)?.let {
-                    Toaster.showMessage(
-                        it,
-                        "please enter an address"
-                    )
-                }
+                showToast("please enter an address")
             }
         } else {
-            (activity as? MainActivity)?.let { Toaster.showMessage(it, "wallet balance is zero") }
+            showToast("wallet balance is zero")
         }
     }
 
@@ -650,6 +651,7 @@ class SendAmountFragment : Fragment() {
         val tx = WalletManager.walletKit?.createSlpTransaction(address, tokenId, tokenAmount, null)
         val req = SendRequest.forTx(tx)
         val sendResult = WalletManager.wallet?.sendCoins(req)
+        println("Processing SLP tx...")
         Futures.addCallback(
             sendResult?.broadcastComplete,
             object : FutureCallback<Transaction?> {
