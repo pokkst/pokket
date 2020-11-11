@@ -75,6 +75,9 @@ class WalletManager {
                     peerGroup()?.addConnectedEventListener { peer, peerCount ->
                         _peerCount.postValue(peerCount)
                     }
+                    peerGroup()?.addDisconnectedEventListener { peer, peerCount ->
+                        _peerCount.postValue(peerCount)
+                    }
                     wallet().saveToFile(vWalletFile)
                 }
             }
@@ -128,6 +131,9 @@ class WalletManager {
                         _refreshEvents.postValue(Event(tx.txId.toString()))
                     }
                     peerGroup()?.addConnectedEventListener { peer, peerCount ->
+                        _peerCount.postValue(peerCount)
+                    }
+                    peerGroup()?.addDisconnectedEventListener { peer, peerCount ->
                         _peerCount.postValue(peerCount)
                     }
                     wallet().saveToFile(vWalletFile)
