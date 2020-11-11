@@ -91,18 +91,18 @@ class MainFragment : Fragment() {
                     AddressViewType.CASH -> {
                         refresh(
                             WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
-                            true
+                            R.drawable.logo_slp
                         )
                         AddressViewType.SLP
                     }
                     AddressViewType.SLP -> {
-                        refresh(WalletManager.walletKit?.paymentCode, false)
+                        refresh(WalletManager.walletKit?.paymentCode, R.drawable.logo_bch_bip47)
                         AddressViewType.BIP47
                     }
                     AddressViewType.BIP47 -> {
                         refresh(
                             WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
-                            false
+                            R.drawable.logo_bch
                         )
                         AddressViewType.CASH
                     }
@@ -132,37 +132,32 @@ class MainFragment : Fragment() {
             AddressViewType.SLP -> {
                 refresh(
                     WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
-                    true
+                    R.drawable.logo_slp
                 )
             }
             AddressViewType.BIP47 -> {
-                refresh(WalletManager.walletKit?.paymentCode, false)
+                refresh(WalletManager.walletKit?.paymentCode, R.drawable.logo_bch_bip47)
             }
             AddressViewType.CASH -> {
                 refresh(
                     WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
-                    false
+                    R.drawable.logo_bch
                 )
             }
         }
     }
 
-    private fun refresh(address: String?, slp: Boolean) {
-        this.generateQR(address, slp)
+    private fun refresh(address: String?, resId: Int) {
+        this.generateQR(address, resId)
     }
 
-    private fun generateQR(address: String?, slp: Boolean) {
+    private fun generateQR(address: String?, resId: Int) {
 
         try {
             val encoder = QRCode.from(address).withSize(1024, 1024)
                 .withErrorCorrection(ErrorCorrectionLevel.H)
             val qrCode = encoder.bitmap()
-            val coinLogo: Int = if (!slp)
-                R.drawable.logo_bch
-            else
-                R.drawable.logo_slp
-
-            receiveQrCoinIcon?.setImageResource(coinLogo)
+            receiveQrCoinIcon?.setImageResource(resId)
             receiveQr?.setImageBitmap(qrCode)
             receiveText?.text = address?.replace("${WalletManager.parameters.cashAddrPrefix}:", "")
                 ?.replace("${WalletManager.parameters.simpleledgerPrefix}:", "")
