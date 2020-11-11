@@ -57,7 +57,8 @@ class UriHelper {
             val params = WalletManager.parameters
             val mappedVariables = getQueryParams(uri)
             val destinationWithoutPrefix =
-                uri.replace("${params.cashAddrPrefix}:", "").replace("${params.simpleledgerPrefix}:", "")
+                uri.replace("${params.cashAddrPrefix}:", "")
+                    .replace("${params.simpleledgerPrefix}:", "")
             if (destinationWithoutPrefix.contains("http")) {
                 addressOrPayload = if (mappedVariables["r"] != null) {
                     (mappedVariables["r"] ?: error(""))[0]

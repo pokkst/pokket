@@ -21,7 +21,6 @@ import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.DateFormatter
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
-import java.lang.Exception
 
 
 /**
@@ -60,9 +59,10 @@ class SettingsHomeFragment : Fragment() {
         root.custom_node.findViewById<TextView>(R.id.setting_label).text =
             resources.getString(R.string.node_label)
 
-        root.extended_public_key.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
-            navigate(R.id.nav_to_epk)
-        }
+        root.extended_public_key.findViewById<RelativeLayout>(R.id.setting_layout)
+            .setOnClickListener {
+                navigate(R.id.nav_to_epk)
+            }
         root.extended_public_key.findViewById<TextView>(R.id.setting_label).text =
             resources.getString(R.string.epk_label)
 
@@ -127,6 +127,7 @@ class SettingsHomeFragment : Fragment() {
                 root?.sync_status?.text = resources.getString(R.string.synced)
         }
     }
+
     private fun navigate(navResId: Int) {
         (activity as? SettingsActivity)?.adjustDeepMenu(1)
         findNavController().navigate(navResId)
@@ -156,7 +157,7 @@ class SettingsHomeFragment : Fragment() {
                         for (x in 0 until 5) {
                             val tx = try {
                                 txListFromWallet[x]
-                            } catch(e: Exception) {
+                            } catch (e: Exception) {
                                 continue
                             }
                             val isSlp = SlpOpReturn.isSlpTx(tx)

@@ -58,8 +58,7 @@ class SplashActivity : AppCompatActivity() {
      */
     private fun setupBouncyCastle() {
         val provider: Provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME)
-            ?:
-            return
+            ?: return
         if (provider.javaClass == BouncyCastleProvider::class.java) { // BC with same package name, shouldn't happen in real life.
             return
         }

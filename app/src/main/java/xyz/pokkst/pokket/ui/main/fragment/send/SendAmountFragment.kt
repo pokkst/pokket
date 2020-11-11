@@ -46,7 +46,6 @@ import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.util.*
 import xyz.pokkst.pokket.wallet.WalletManager
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.util.concurrent.ExecutionException
 
 
@@ -120,7 +119,10 @@ class SendAmountFragment : Fragment() {
             if (payload != null) {
                 val tx = Transaction(WalletManager.parameters, Hex.decode(payload.hex))
                 val payloadAddress = fetchMultisigPayloadDestination(tx)
-                root?.to_field_text?.text = "to: ${payloadAddress?.replace("${WalletManager.parameters.cashAddrPrefix}:", "")}"
+                root?.to_field_text?.text = "to: ${payloadAddress?.replace(
+                    "${WalletManager.parameters.cashAddrPrefix}:",
+                    ""
+                )}"
                 this.getPayloadData(tx)
             }
         } else {
@@ -739,8 +741,11 @@ class SendAmountFragment : Fragment() {
                         val session = BIP70Helper.getSlpPaymentSession(url)
                         val amountWanted = session.totalTokenAmount
                         val slpToken = WalletManager.walletKit?.getSlpToken(session.tokenId)
-                        if(slpToken != null) {
-                            setTokenAmount(BigDecimal.valueOf(amountWanted).scaleByPowerOfTen(-slpToken.decimals), slpToken)
+                        if (slpToken != null) {
+                            setTokenAmount(
+                                BigDecimal.valueOf(amountWanted)
+                                    .scaleByPowerOfTen(-slpToken.decimals), slpToken
+                            )
 
                             tokenId = session.tokenId
                             activity?.runOnUiThread {

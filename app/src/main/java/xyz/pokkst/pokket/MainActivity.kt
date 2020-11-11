@@ -92,18 +92,33 @@ class MainActivity : AppCompatActivity() {
         })
 
         WalletManager.refreshEvents.observe(this, Observer { event ->
-            if(event != null) {
+            if (event != null) {
                 refresh()
             }
         })
 
         WalletManager.peerCount.observe(this, Observer { peers ->
-            if(peers == 0) {
-                appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_disconnected, 0)
-            } else if(peers > 0 && peers < WalletManager.parameters.defaultPeerCount) {
-                appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_connected_partial, 0)
-            } else if(peers >= WalletManager.parameters.defaultPeerCount){
-                appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_connected, 0)
+            if (peers == 0) {
+                appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    0,
+                    0,
+                    R.drawable.ic_disconnected,
+                    0
+                )
+            } else if (peers > 0 && peers < WalletManager.parameters.defaultPeerCount) {
+                appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    0,
+                    0,
+                    R.drawable.ic_connected_partial,
+                    0
+                )
+            } else if (peers >= WalletManager.parameters.defaultPeerCount) {
+                appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    0,
+                    0,
+                    R.drawable.ic_connected,
+                    0
+                )
             }
         })
     }

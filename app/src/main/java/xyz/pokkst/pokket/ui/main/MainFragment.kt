@@ -1,9 +1,5 @@
 package xyz.pokkst.pokket.ui.main
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,13 +10,11 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import net.glxn.qrgen.android.QRCode
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.util.ClipboardHelper
-import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.wallet.WalletManager
 
 
@@ -118,7 +112,7 @@ class MainFragment : Fragment() {
         }
 
         WalletManager.refreshEvents.observe(viewLifecycleOwner, Observer { event ->
-            if(event != null) {
+            if (event != null) {
                 println("Refresh Event...")
                 refresh()
             }

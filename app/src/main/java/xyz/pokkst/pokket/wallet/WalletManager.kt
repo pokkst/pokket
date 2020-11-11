@@ -1,11 +1,9 @@
 package xyz.pokkst.pokket.wallet
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Handler
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.core.PeerAddress
@@ -15,14 +13,12 @@ import org.bitcoinj.kits.MultisigAppKit
 import org.bitcoinj.kits.SlpBIP47AppKit
 import org.bitcoinj.kits.WalletKitCore
 import org.bitcoinj.params.MainNetParams
-import org.bitcoinj.params.TestNet4Params
 import org.bitcoinj.script.Script
 import org.bitcoinj.utils.Threading
 import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.KeyChainGroupStructure
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.livedata.Event
-import xyz.pokkst.pokket.util.Constants
 import xyz.pokkst.pokket.util.PrefsHelper
 import java.io.File
 import java.net.InetAddress

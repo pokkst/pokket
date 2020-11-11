@@ -8,8 +8,11 @@ class PrefsHelper {
         private var prefs: SharedPreferences? = null
 
         fun instance(context: Context?): SharedPreferences? {
-            if(prefs == null) {
-                prefs = context?.getSharedPreferences(context.applicationInfo?.packageName, Context.MODE_PRIVATE)
+            if (prefs == null) {
+                prefs = context?.getSharedPreferences(
+                    context.applicationInfo?.packageName,
+                    Context.MODE_PRIVATE
+                )
             }
 
             return prefs

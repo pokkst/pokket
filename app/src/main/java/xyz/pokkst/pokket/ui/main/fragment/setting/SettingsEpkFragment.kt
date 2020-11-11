@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_settings_epk.view.*
-import kotlinx.android.synthetic.main.fragment_settings_phrase.view.*
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.util.ClipboardHelper
 import xyz.pokkst.pokket.wallet.WalletManager
