@@ -20,6 +20,7 @@ import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.SettingsActivity
+import xyz.pokkst.pokket.ui.TransactionListEntryView
 import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.DateFormatter
 import xyz.pokkst.pokket.util.PriceHelper
@@ -223,57 +224,14 @@ class SettingsHomeFragment : Fragment() {
                             convertView: View?,
                             parent: ViewGroup
                         ): View {
-                            // Get the Item from ListView
-                            val view = LayoutInflater.from(requireContext())
-                                .inflate(R.layout.transaction_list_item, null)
-                            val sentReceivedTextView =
-                                view.findViewById<TextView>(R.id.transaction_sent_received_label)
-                            val dateTextView =
-                                view.findViewById<TextView>(R.id.transaction_date)
-                            val bitsMoved =
-                                view.findViewById<TextView>(R.id.transaction_amount_bits)
-                            val dollarsMoved =
-                                view.findViewById<TextView>(R.id.transaction_amount_dollars)
-
-                            val ticker = txListFormatted[position]["ticker"]
-                            val isSlp = txListFormatted[position]["slp"]
-                            val action = txListFormatted[position]["action"]
-                            val received = action == "received"
-                            val amount = txListFormatted[position]["amount"]
-                            val fiatAmount = txListFormatted[position]["fiatAmount"]
-                            val timestamp = txListFormatted[position]["timestamp"]?.let {
-                                java.lang.Long.parseLong(it)
-                            }
-                            sentReceivedTextView.setBackgroundResource(if (received) R.drawable.received_label else R.drawable.sent_label)
-                            sentReceivedTextView.setTextColor(if (received) receivedColor else sentColor)
-                            sentReceivedTextView.text = action
-                            bitsMoved.text =
-                                if (isSlp == "true" && ticker != "") "$amount $ticker" else resources.getString(
-                                    R.string.tx_amount_moved,
-                                    amount
-                                )
-                            dollarsMoved.text =
-                                if (isSlp == "true" && ticker != "") null else "($$fiatAmount)"
-                            dateTextView.text = if (timestamp != 0L) {
-                                timestamp?.let {
-                                    DateFormatter.getFormattedDateFromLong(
-                                        requireActivity(),
-                                        it
-                                    )
-                                }
-                            } else DateFormatter.getFormattedDateFromLong(
-                                requireActivity(),
-                                System.currentTimeMillis()
-                            )
-                            // Generate ListView Item using TextView
-                            return view
+                            return TransactionListEntryView.instanceOf(activity, position, txListFormatted)
                         }
                     }
-                    requireActivity().runOnUiThread {
+                    activity?.runOnUiThread {
                         root.transactions_list.adapter = itemsAdapter
                     }
                 } else {
-                    requireActivity().runOnUiThread {
+                    activity?.runOnUiThread {
                         root.space.visibility = View.GONE
                         root.transactions_list.visibility = View.GONE
                         root.no_transactions.visibility = View.VISIBLE

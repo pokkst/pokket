@@ -19,6 +19,7 @@ import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.SettingsActivity
+import xyz.pokkst.pokket.ui.TransactionListEntryView
 import xyz.pokkst.pokket.util.BalanceFormatter
 import xyz.pokkst.pokket.util.DateFormatter
 import xyz.pokkst.pokket.util.PriceHelper
@@ -29,8 +30,6 @@ import xyz.pokkst.pokket.wallet.WalletManager
  * A placeholder fragment containing a simple view.
  */
 class SettingsTransactionsFragment : Fragment() {
-    private var sentColor = 0
-    private var receivedColor = 0
     private var txList = ArrayList<String>()
 
     override fun onCreateView(
@@ -39,8 +38,6 @@ class SettingsTransactionsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_transactions, container, false)
-        sentColor = Color.parseColor("#FF5454")
-        receivedColor = Color.parseColor("#00BF00")
         this.setArrayAdapter(root, WalletManager.wallet)
         root.transactions_list.setOnItemClickListener { parent, view, position, id ->
             (activity as? SettingsActivity)?.adjustDeepMenu(1)
@@ -149,50 +146,7 @@ class SettingsTransactionsFragment : Fragment() {
                                 convertView: View?,
                                 parent: ViewGroup
                             ): View {
-                                // Get the Item from ListView
-                                val view = LayoutInflater.from(requireContext())
-                                    .inflate(R.layout.transaction_list_item, null)
-                                val sentReceivedTextView =
-                                    view.findViewById<TextView>(R.id.transaction_sent_received_label)
-                                val dateTextView =
-                                    view.findViewById<TextView>(R.id.transaction_date)
-                                val bitsMoved =
-                                    view.findViewById<TextView>(R.id.transaction_amount_bits)
-                                val dollarsMoved =
-                                    view.findViewById<TextView>(R.id.transaction_amount_dollars)
-
-                                val ticker = txListFormatted[position]["ticker"]
-                                val isSlp = txListFormatted[position]["slp"]
-                                val action = txListFormatted[position]["action"]
-                                val received = action == "received"
-                                val amount = txListFormatted[position]["amount"]
-                                val fiatAmount = txListFormatted[position]["fiatAmount"]
-                                val timestamp = txListFormatted[position]["timestamp"]?.let {
-                                    java.lang.Long.parseLong(it)
-                                }
-                                sentReceivedTextView.setBackgroundResource(if (received) R.drawable.received_label else R.drawable.sent_label)
-                                sentReceivedTextView.setTextColor(if (received) receivedColor else sentColor)
-                                sentReceivedTextView.text = action
-                                bitsMoved.text =
-                                    if (isSlp == "true" && ticker != "") "$amount $ticker" else resources.getString(
-                                        R.string.tx_amount_moved,
-                                        amount
-                                    )
-                                dollarsMoved.text =
-                                    if (isSlp == "true" && ticker != "") null else "($$fiatAmount)"
-                                dateTextView.text = if (timestamp != 0L) {
-                                    timestamp?.let {
-                                        DateFormatter.getFormattedDateFromLong(
-                                            requireActivity(),
-                                            it
-                                        )
-                                    }
-                                } else DateFormatter.getFormattedDateFromLong(
-                                    requireActivity(),
-                                    System.currentTimeMillis()
-                                )
-                                // Generate ListView Item using TextView
-                                return view
+                                return TransactionListEntryView.instanceOf(activity, position, txListFormatted)
                             }
                         }
                         requireActivity().runOnUiThread {
