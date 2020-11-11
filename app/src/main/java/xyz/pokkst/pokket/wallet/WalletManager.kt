@@ -13,6 +13,7 @@ import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.kits.MultisigAppKit
 import org.bitcoinj.kits.SlpBIP47AppKit
+import org.bitcoinj.kits.WalletKitCore
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.TestNet4Params
 import org.bitcoinj.script.Script
@@ -37,6 +38,10 @@ class WalletManager {
         val wallet: Wallet?
             get() {
                 return walletKit?.wallet() ?: multisigWalletKit?.wallet()
+            }
+        val kit: WalletKitCore?
+            get() {
+                return walletKit ?: multisigWalletKit
             }
         val isMultisigKit: Boolean
             get() {
@@ -176,13 +181,8 @@ class WalletManager {
                     e.printStackTrace()
                 }
 
-                if(isMultisigKit) {
-                    this.multisigWalletKit?.setPeerNodes(null)
-                    this.multisigWalletKit?.setPeerNodes(PeerAddress(parameters, node1))
-                } else {
-                    this.walletKit?.setPeerNodes(null)
-                    this.walletKit?.setPeerNodes(PeerAddress(parameters, node1))
-                }
+                this.kit?.setPeerNodes(null)
+                this.kit?.setPeerNodes(PeerAddress(parameters, node1))
             }
         }
 
@@ -197,10 +197,8 @@ class WalletManager {
         }
 
         fun stopWallets() {
-            walletKit?.stopAsync()
-            multisigWalletKit?.stopAsync()
-            walletKit?.awaitTerminated()
-            multisigWalletKit?.awaitTerminated()
+            kit?.stopAsync()
+            kit?.awaitTerminated()
             walletKit = null
             multisigWalletKit = null
         }

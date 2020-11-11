@@ -117,12 +117,7 @@ class SettingsHomeFragment : Fragment() {
 
     private fun setSyncStatus(root: View?) {
         val lastSeenBlockHeight = WalletManager.wallet?.lastBlockSeenHeight
-        val bestBlockHeight = if(WalletManager.isMultisigKit) {
-            WalletManager.multisigWalletKit?.peerGroup()?.mostCommonChainHeight
-        } else {
-            WalletManager.walletKit?.peerGroup()?.mostCommonChainHeight
-        }
-
+        val bestBlockHeight = WalletManager.kit?.peerGroup()?.mostCommonChainHeight
         when {
             bestBlockHeight == 0 ->
                 root?.sync_status?.text = resources.getString(R.string.not_syncing)
