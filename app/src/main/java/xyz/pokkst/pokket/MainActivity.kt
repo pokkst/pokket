@@ -1,10 +1,6 @@
 package xyz.pokkst.pokket
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -100,6 +96,16 @@ class MainActivity : AppCompatActivity() {
                 refresh()
             }
         })
+
+        WalletManager.peerCount.observe(this, Observer { peers ->
+            if(peers == 0) {
+                appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_disconnected, 0)
+            } else if(peers > 0 && peers < WalletManager.parameters.defaultPeerCount) {
+                appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_connected_partial, 0)
+            } else if(peers >= WalletManager.parameters.defaultPeerCount){
+                appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_connected, 0)
+            }
+        })
     }
 
     override fun onBackPressed() {
@@ -144,7 +150,7 @@ class MainActivity : AppCompatActivity() {
         viewPager.setPagingEnabled(!status)
         val imgResId = if (status) R.drawable.navigationback else R.drawable.burger
         settings_button.setImageResource(imgResId)
-        pay_button.visibility = if (status) View.VISIBLE else View.GONE
+        pay_button.visibility = if (status) View.VISIBLE else View.INVISIBLE
         pay_button.isEnabled = status
         tabs.visibility = if (status) View.GONE else View.VISIBLE
         inFragment = status

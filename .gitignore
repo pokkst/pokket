@@ -25,3 +25,4 @@ hs_err_pid*
 # Gradle and Android Studio/IntelliJ garbage
 .idea/
 .gradle/
+app/release/*

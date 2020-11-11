@@ -49,7 +49,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-runtime:2.2.2'
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
-    implementation 'com.github.pokkst:bitcoincashj:0.24'
+    implementation 'com.github.pokkst:bitcoincashj:0.24.1'
     implementation 'com.luminiasoft.ethereum:blockiesandroid:0.1.0'
     implementation 'com.github.kenglxn.QRGen:android:2.5.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'

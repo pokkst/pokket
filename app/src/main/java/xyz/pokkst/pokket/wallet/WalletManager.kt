@@ -47,6 +47,8 @@ class WalletManager {
         val syncPercentage: LiveData<Int> = _syncPercentage
         private val _refreshEvents: MutableLiveData<Event<String>> = MutableLiveData()
         val refreshEvents: LiveData<Event<String>> = _refreshEvents
+        private val _peerCount: MutableLiveData<Int> = MutableLiveData(0)
+        val peerCount: LiveData<Int> = _peerCount
         const val walletFileName = "pokket"
         const val multisigWalletFileName = "pokket_multisig"
         fun startWallet(activity: Activity, seed: String?, newUser: Boolean) {
@@ -69,6 +71,9 @@ class WalletManager {
                     }
                     wallet().addCoinsSentEventListener { wallet, tx, prevBalance, newBalance ->
                         _refreshEvents.postValue(Event(tx.txId.toString()))
+                    }
+                    peerGroup()?.addConnectedEventListener { peer, peerCount ->
+                        _peerCount.postValue(peerCount)
                     }
                     wallet().saveToFile(vWalletFile)
                 }
@@ -121,6 +126,9 @@ class WalletManager {
                     }
                     wallet().addCoinsSentEventListener { wallet, tx, prevBalance, newBalance ->
                         _refreshEvents.postValue(Event(tx.txId.toString()))
+                    }
+                    peerGroup()?.addConnectedEventListener { peer, peerCount ->
+                        _peerCount.postValue(peerCount)
                     }
                     wallet().saveToFile(vWalletFile)
                 }

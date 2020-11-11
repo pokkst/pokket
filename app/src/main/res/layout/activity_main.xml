@@ -17,21 +17,38 @@
         android:layout_marginEnd="10dp"
         app:layout_constraintBottom_toTopOf="@id/view_pager"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/appbar_info"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/appbar_title"
-        android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/appbar_info"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="@dimen/appbar_padding"
-        android:text="@string/appbar_temp"
-        android:gravity="center"
-        android:background="#fff"
-        android:layout_gravity="center"
-        android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintEnd_toStartOf="@id/pay_button"
+        app:layout_constraintStart_toEndOf="@id/settings_button">
+
+        <TextView
+            android:id="@+id/appbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="#fff"
+            android:gravity="center"
+            android:padding="@dimen/appbar_padding"
+            android:drawableEnd="@drawable/ic_disconnected"
+            android:drawablePadding="10dp"
+            android:singleLine="true"
+            android:ellipsize="middle"
+            android:text="@string/appbar_temp"
+            android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constrainedWidth="true" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <TextView
         android:id="@+id/pay_button"
@@ -44,9 +61,10 @@
         android:textColor="@color/dark_blue"
         android:layout_marginEnd="10dp"
         android:textSize="18sp"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@id/view_pager"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/appbar_info"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
@@ -56,7 +74,7 @@
         android:indeterminateOnly="false"
         android:layout_height="2dp"
         android:progressDrawable="@drawable/progress_blue"
-        app:layout_constraintTop_toBottomOf="@id/appbar_title"/>
+        app:layout_constraintTop_toBottomOf="@id/appbar_info"/>
 
     <xyz.pokkst.pokket.ui.ToggleViewPager
         android:id="@+id/view_pager"
