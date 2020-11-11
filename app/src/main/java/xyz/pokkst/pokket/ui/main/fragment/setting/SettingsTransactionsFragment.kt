@@ -8,8 +8,11 @@ import android.view.ViewGroup
 import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_settings_transactions.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.core.slp.SlpOpReturn
 import org.bitcoinj.core.slp.SlpTransaction
@@ -82,124 +85,122 @@ class SettingsTransactionsFragment : Fragment() {
     }
 
     private fun setListViewShit(root: View, wallet: Wallet?) {
-        object : Thread() {
-            override fun run() {
-                if (wallet != null) {
-                    val txListFromWallet = wallet.getRecentTransactions(0, false)
-                    txList = ArrayList<String>()
+        lifecycleScope.launch(Dispatchers.IO) {
+            if (wallet != null) {
+                val txListFromWallet = wallet.getRecentTransactions(0, false)
+                txList = ArrayList<String>()
 
-                    if (txListFromWallet != null && txListFromWallet.size != 0) {
-                        val txListFormatted = ArrayList<Map<String, String>>()
+                if (txListFromWallet != null && txListFromWallet.size != 0) {
+                    val txListFormatted = ArrayList<Map<String, String>>()
 
-                        if (txListFromWallet.size > 0) {
-                            for (x in 0 until txListFromWallet.size) {
-                                val tx = txListFromWallet[x]
-                                val isSlp = SlpOpReturn.isSlpTx(tx)
-                                val value = tx.getValue(wallet)
-                                val timestamp = tx.updateTime.time.toString()
-                                val datum = HashMap<String, String>()
-                                var ticker = ""
-                                val amountStr = if (isSlp) {
-                                    val slpTx = SlpTransaction(tx)
-                                    val slpToken =
-                                        WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
-                                    if (slpToken != null) {
-                                        ticker = slpToken.ticker
-                                        val slpAmount = slpTx.getRawValue(WalletManager.wallet)
-                                            .scaleByPowerOfTen(-slpToken.decimals).toDouble()
-                                        BalanceFormatter.formatBalance(slpAmount, "#.#########")
-                                    } else {
-                                        value.toPlainString()
-                                    }
+                    if (txListFromWallet.size > 0) {
+                        for (x in 0 until txListFromWallet.size) {
+                            val tx = txListFromWallet[x]
+                            val isSlp = SlpOpReturn.isSlpTx(tx)
+                            val value = tx.getValue(wallet)
+                            val timestamp = tx.updateTime.time.toString()
+                            val datum = HashMap<String, String>()
+                            var ticker = ""
+                            val amountStr = if (isSlp) {
+                                val slpTx = SlpTransaction(tx)
+                                val slpToken =
+                                    WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
+                                if (slpToken != null) {
+                                    ticker = slpToken.ticker
+                                    val slpAmount = slpTx.getRawValue(WalletManager.wallet)
+                                        .scaleByPowerOfTen(-slpToken.decimals).toDouble()
+                                    BalanceFormatter.formatBalance(slpAmount, "#.#########")
                                 } else {
                                     value.toPlainString()
                                 }
-
-                                datum["action"] =
-                                    if (value.isPositive || amountStr.toDouble() > 0) {
-                                        "received"
-                                    } else {
-                                        "sent"
-                                    }
-
-                                datum["ticker"] = ticker
-                                datum["slp"] = if (isSlp) "true" else "false"
-                                datum["amount"] = amountStr
-                                datum["fiatAmount"] = BalanceFormatter.formatBalance(
-                                    (amountStr.toDouble() * PriceHelper.price),
-                                    "0.00"
-                                )
-                                datum["timestamp"] = timestamp
-
-                                txList.add(tx.txId.toString())
-                                txListFormatted.add(datum)
+                            } else {
+                                value.toPlainString()
                             }
 
-                            val itemsAdapter = object : SimpleAdapter(
-                                requireContext(),
-                                txListFormatted,
-                                R.layout.transaction_list_item,
-                                null,
-                                null
-                            ) {
-                                override fun getView(
-                                    position: Int,
-                                    convertView: View?,
-                                    parent: ViewGroup
-                                ): View {
-                                    // Get the Item from ListView
-                                    val view = LayoutInflater.from(requireContext())
-                                        .inflate(R.layout.transaction_list_item, null)
-                                    val sentReceivedTextView =
-                                        view.findViewById<TextView>(R.id.transaction_sent_received_label)
-                                    val dateTextView =
-                                        view.findViewById<TextView>(R.id.transaction_date)
-                                    val bitsMoved =
-                                        view.findViewById<TextView>(R.id.transaction_amount_bits)
-                                    val dollarsMoved =
-                                        view.findViewById<TextView>(R.id.transaction_amount_dollars)
-
-                                    val ticker = txListFormatted[position]["ticker"]
-                                    val isSlp = txListFormatted[position]["slp"]
-                                    val action = txListFormatted[position]["action"]
-                                    val received = action == "received"
-                                    val amount = txListFormatted[position]["amount"]
-                                    val fiatAmount = txListFormatted[position]["fiatAmount"]
-                                    val timestamp = txListFormatted[position]["timestamp"]?.let {
-                                        java.lang.Long.parseLong(it)
-                                    }
-                                    sentReceivedTextView.setBackgroundResource(if (received) R.drawable.received_label else R.drawable.sent_label)
-                                    sentReceivedTextView.setTextColor(if (received) receivedColor else sentColor)
-                                    sentReceivedTextView.text = action
-                                    bitsMoved.text =
-                                        if (isSlp == "true" && ticker != "") "$amount $ticker" else resources.getString(
-                                            R.string.tx_amount_moved,
-                                            amount
-                                        )
-                                    dollarsMoved.text =
-                                        if (isSlp == "true" && ticker != "") null else "($$fiatAmount)"
-                                    dateTextView.text = if (timestamp != 0L) {
-                                        timestamp?.let {
-                                            DateFormatter.getFormattedDateFromLong(
-                                                requireActivity(),
-                                                it
-                                            )
-                                        }
-                                    } else DateFormatter.getFormattedDateFromLong(
-                                        requireActivity(),
-                                        System.currentTimeMillis()
-                                    )
-                                    // Generate ListView Item using TextView
-                                    return view
+                            datum["action"] =
+                                if (value.isPositive || amountStr.toDouble() > 0) {
+                                    "received"
+                                } else {
+                                    "sent"
                                 }
+
+                            datum["ticker"] = ticker
+                            datum["slp"] = if (isSlp) "true" else "false"
+                            datum["amount"] = amountStr
+                            datum["fiatAmount"] = BalanceFormatter.formatBalance(
+                                (amountStr.toDouble() * PriceHelper.price),
+                                "0.00"
+                            )
+                            datum["timestamp"] = timestamp
+
+                            txList.add(tx.txId.toString())
+                            txListFormatted.add(datum)
+                        }
+
+                        val itemsAdapter = object : SimpleAdapter(
+                            requireContext(),
+                            txListFormatted,
+                            R.layout.transaction_list_item,
+                            null,
+                            null
+                        ) {
+                            override fun getView(
+                                position: Int,
+                                convertView: View?,
+                                parent: ViewGroup
+                            ): View {
+                                // Get the Item from ListView
+                                val view = LayoutInflater.from(requireContext())
+                                    .inflate(R.layout.transaction_list_item, null)
+                                val sentReceivedTextView =
+                                    view.findViewById<TextView>(R.id.transaction_sent_received_label)
+                                val dateTextView =
+                                    view.findViewById<TextView>(R.id.transaction_date)
+                                val bitsMoved =
+                                    view.findViewById<TextView>(R.id.transaction_amount_bits)
+                                val dollarsMoved =
+                                    view.findViewById<TextView>(R.id.transaction_amount_dollars)
+
+                                val ticker = txListFormatted[position]["ticker"]
+                                val isSlp = txListFormatted[position]["slp"]
+                                val action = txListFormatted[position]["action"]
+                                val received = action == "received"
+                                val amount = txListFormatted[position]["amount"]
+                                val fiatAmount = txListFormatted[position]["fiatAmount"]
+                                val timestamp = txListFormatted[position]["timestamp"]?.let {
+                                    java.lang.Long.parseLong(it)
+                                }
+                                sentReceivedTextView.setBackgroundResource(if (received) R.drawable.received_label else R.drawable.sent_label)
+                                sentReceivedTextView.setTextColor(if (received) receivedColor else sentColor)
+                                sentReceivedTextView.text = action
+                                bitsMoved.text =
+                                    if (isSlp == "true" && ticker != "") "$amount $ticker" else resources.getString(
+                                        R.string.tx_amount_moved,
+                                        amount
+                                    )
+                                dollarsMoved.text =
+                                    if (isSlp == "true" && ticker != "") null else "($$fiatAmount)"
+                                dateTextView.text = if (timestamp != 0L) {
+                                    timestamp?.let {
+                                        DateFormatter.getFormattedDateFromLong(
+                                            requireActivity(),
+                                            it
+                                        )
+                                    }
+                                } else DateFormatter.getFormattedDateFromLong(
+                                    requireActivity(),
+                                    System.currentTimeMillis()
+                                )
+                                // Generate ListView Item using TextView
+                                return view
                             }
-                            requireActivity().runOnUiThread {
-                                root.transactions_list.adapter = itemsAdapter
-                            }
+                        }
+                        requireActivity().runOnUiThread {
+                            root.transactions_list.adapter = itemsAdapter
                         }
                     }
                 }
             }
-        }.start()
+        }
     }
 }

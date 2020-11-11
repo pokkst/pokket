@@ -5,9 +5,12 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.tabs.TabLayout
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.wallet.DeterministicKeyChain
 import xyz.pokkst.pokket.ui.ToggleViewPager
@@ -143,24 +146,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
-        object : Thread() {
-            override fun run() {
-                super.run()
-                try {
-                    val bch =
-                        WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
-                    bch?.let {
-                        val fiat = bch.toDouble() * PriceHelper.price
-                        val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
-                        this@MainActivity.runOnUiThread {
-                            appbar_title.text =
-                                "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
-                        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val bch =
+                    WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
+                bch?.let {
+                    val fiat = bch.toDouble() * PriceHelper.price
+                    val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
+                    this@MainActivity.runOnUiThread {
+                        appbar_title.text =
+                            "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
                     }
-                } catch (e: Exception) {
                 }
+            } catch (e: Exception) {
             }
-        }.start()
+        }
     }
 
     fun toggleSendScreen(status: Boolean) {

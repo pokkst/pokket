@@ -8,7 +8,10 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.transaction_item_expanded_sent.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.script.ScriptPattern
@@ -120,18 +123,16 @@ class TransactionSentFragment : Fragment() {
         }
 
         if (!isSlp || slpToken == null) {
-            object : Thread() {
-                override fun run() {
-                    val fiatValue = bchSent.times(PriceHelper.price)
-                    val feeFiatValue = bchFee * PriceHelper.price
-                    requireActivity().runOnUiThread {
-                        root.tx_to_fee_exchange_text.text =
-                            "($-${BalanceFormatter.formatBalance(feeFiatValue, "0.00")})"
-                        root.tx_exchange_text.text =
-                            "($${BalanceFormatter.formatBalance(fiatValue, "0.00")})"
-                    }
+            lifecycleScope.launch(Dispatchers.IO) {
+                val fiatValue = bchSent.times(PriceHelper.price)
+                val feeFiatValue = bchFee * PriceHelper.price
+                activity?.runOnUiThread {
+                    root.tx_to_fee_exchange_text.text =
+                        "($-${BalanceFormatter.formatBalance(feeFiatValue, "0.00")})"
+                    root.tx_exchange_text.text =
+                        "($${BalanceFormatter.formatBalance(fiatValue, "0.00")})"
                 }
-            }.start()
+            }
         }
 
         setSentToAddresses(root.general_tx_to_layout, toAddresses, toAmounts)

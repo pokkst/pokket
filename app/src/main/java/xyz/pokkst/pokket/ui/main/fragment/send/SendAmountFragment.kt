@@ -15,6 +15,7 @@ import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.Nullable
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import com.google.common.collect.ImmutableList
@@ -25,6 +26,8 @@ import com.google.gson.Gson
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import kotlinx.android.synthetic.main.component_input_numpad.view.*
 import kotlinx.android.synthetic.main.fragment_send_amount.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.glxn.qrgen.android.QRCode
 import org.bitcoinj.core.*
 import org.bitcoinj.core.bip47.BIP47Channel
@@ -514,64 +517,60 @@ class SendAmountFragment : Fragment() {
 
     private fun updateAltCurrencyDisplay(root: View?) {
         if (root != null) {
-            object : Thread() {
-                override fun run() {
-                    if (root.send_amount_input.text.toString().isNotEmpty()) {
-                        val value = if (root.send_amount_input.text.toString() == ".")
-                            0.0
-                        else
-                            java.lang.Double.parseDouble(root.send_amount_input.text.toString())
+            lifecycleScope.launch(Dispatchers.IO) {
+                if (root.send_amount_input.text.toString().isNotEmpty()) {
+                    val value = if (root.send_amount_input.text.toString() == ".")
+                        0.0
+                    else
+                        java.lang.Double.parseDouble(root.send_amount_input.text.toString())
 
-                        val price = PriceHelper.price
+                    val price = PriceHelper.price
 
-                        activity?.runOnUiThread {
-                            root.alt_currency_display.text = if (bchIsSendType) {
-                                val fiatValue = value * price
-                                BalanceFormatter.formatBalance(fiatValue, "0.00")
-                            } else {
-                                val bchValue = value / price
-                                BalanceFormatter.formatBalance(bchValue, "#.########")
-                            }
-                        }
-                    } else {
-                        activity?.runOnUiThread {
-                            root.alt_currency_display.text = null
+                    activity?.runOnUiThread {
+                        root.alt_currency_display.text = if (bchIsSendType) {
+                            val fiatValue = value * price
+                            BalanceFormatter.formatBalance(fiatValue, "0.00")
+                        } else {
+                            val bchValue = value / price
+                            BalanceFormatter.formatBalance(bchValue, "#.########")
                         }
                     }
+                } else {
+                    activity?.runOnUiThread {
+                        root.alt_currency_display.text = null
+                    }
                 }
-            }.start()
+            }
         }
     }
 
     private fun processBIP70(url: String) {
-        object : Thread() {
-            override fun run() {
-                try {
-                    val type = bip70Type
-                    if (type != null) {
-                        if (type == BIP70Type.BCH) {
-                            processBchBIP70(url)
-                        } else if (type == BIP70Type.SLP) {
-                            processSlpBIP70(url)
-                        }
-                    }
-                } catch (e: InsufficientMoneyException) {
-                    e.printStackTrace()
-                    showToast("not enough coins in wallet")
-                } catch (e: Wallet.CouldNotAdjustDownwards) {
-                    e.printStackTrace()
-                    showToast("error adjusting downwards")
-                } catch (e: Wallet.ExceededMaxTransactionSize) {
-                    e.printStackTrace()
-                    showToast("transaction is too big")
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    e.message?.let {
-                        showToast(it)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val type = bip70Type
+                if (type != null) {
+                    if (type == BIP70Type.BCH) {
+                        processBchBIP70(url)
+                    } else if (type == BIP70Type.SLP) {
+                        processSlpBIP70(url)
                     }
                 }
+            } catch (e: InsufficientMoneyException) {
+                e.printStackTrace()
+                showToast("not enough coins in wallet")
+            } catch (e: Wallet.CouldNotAdjustDownwards) {
+                e.printStackTrace()
+                showToast("error adjusting downwards")
+            } catch (e: Wallet.ExceededMaxTransactionSize) {
+                e.printStackTrace()
+                showToast("transaction is too big")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                e.message?.let {
+                    showToast(it)
+                }
             }
-        }.start()
+        }
     }
 
     private fun processBchBIP70(url: String) {
@@ -689,119 +688,112 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun processNormalTransaction(address: String, bchAmount: Coin) {
-        object : Thread() {
-            override fun run() {
-                try {
-                    val req: SendRequest =
-                        if (bchAmount == WalletManager.wallet?.let { WalletManager.getBalance(it) }) {
-                            SendRequest.emptyWallet(WalletManager.parameters, address)
-                        } else {
-                            SendRequest.to(WalletManager.parameters, address, bchAmount)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val req: SendRequest =
+                    if (bchAmount == WalletManager.wallet?.let { WalletManager.getBalance(it) }) {
+                        SendRequest.emptyWallet(WalletManager.parameters, address)
+                    } else {
+                        SendRequest.to(WalletManager.parameters, address, bchAmount)
+                    }
+
+                req.allowUnconfirmed()
+                req.ensureMinRequiredFee = false
+                req.feePerKb = Coin.valueOf(2L * 1000L)
+                val sendResult = WalletManager.wallet?.sendCoins(req)
+                Futures.addCallback(
+                    sendResult?.broadcastComplete,
+                    object : FutureCallback<Transaction?> {
+                        override fun onSuccess(@Nullable result: Transaction?) {
+                            showToast("coins sent!")
+                            (activity as? MainActivity)?.toggleSendScreen(false)
                         }
 
-                    req.allowUnconfirmed()
-                    req.ensureMinRequiredFee = false
-                    req.feePerKb = Coin.valueOf(2L * 1000L)
-                    val sendResult = WalletManager.wallet?.sendCoins(req)
-                    Futures.addCallback(
-                        sendResult?.broadcastComplete,
-                        object : FutureCallback<Transaction?> {
-                            override fun onSuccess(@Nullable result: Transaction?) {
-                                showToast("coins sent!")
-                                (activity as? MainActivity)?.toggleSendScreen(false)
-                            }
+                        override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
 
-                            override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
-
-                            }
-                        },
-                        MoreExecutors.directExecutor()
-                    )
-                } catch (e: InsufficientMoneyException) {
-                    e.printStackTrace()
-                    showToast("not enough coins in wallet")
-                } catch (e: Wallet.CouldNotAdjustDownwards) {
-                    e.printStackTrace()
-                    showToast("error adjusting downwards")
-                } catch (e: Wallet.ExceededMaxTransactionSize) {
-                    e.printStackTrace()
-                    showToast("transaction is too big")
-                } catch (e: NullPointerException) {
-                    e.printStackTrace()
-                    e.message?.let {
-                        showToast(it)
-                    }
+                        }
+                    },
+                    MoreExecutors.directExecutor()
+                )
+            } catch (e: InsufficientMoneyException) {
+                e.printStackTrace()
+                showToast("not enough coins in wallet")
+            } catch (e: Wallet.CouldNotAdjustDownwards) {
+                e.printStackTrace()
+                showToast("error adjusting downwards")
+            } catch (e: Wallet.ExceededMaxTransactionSize) {
+                e.printStackTrace()
+                showToast("transaction is too big")
+            } catch (e: NullPointerException) {
+                e.printStackTrace()
+                e.message?.let {
+                    showToast(it)
                 }
             }
-        }.start()
+        }
     }
 
     fun getBIP70Data(root: View?, url: String?) {
-        object : Thread() {
-            override fun run() {
-                try {
-                    val type = BIP70Helper.getPaymentSessionType(url)
-                    bip70Type = type
-                    if (type == BIP70Type.BCH) {
-                        val session = BIP70Helper.getBchPaymentSession(url)
-                        val amountWanted = session.value
-                        setCoinAmount(amountWanted)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val type = BIP70Helper.getPaymentSessionType(url)
+                bip70Type = type
+                if (type == BIP70Type.BCH) {
+                    val session = BIP70Helper.getBchPaymentSession(url)
+                    val amountWanted = session.value
+                    setCoinAmount(amountWanted)
+                    activity?.runOnUiThread {
+                        root?.send_amount_input?.isEnabled = false
+                        root?.to_field_text?.text = session.memo
+                    }
+                } else if (type == BIP70Type.SLP) {
+                    val session = BIP70Helper.getSlpPaymentSession(url)
+                    val amountWanted = session.totalTokenAmount
+                    val slpToken = WalletManager.walletKit?.getSlpToken(session.tokenId)
+                    if (slpToken != null) {
+                        setTokenAmount(
+                            BigDecimal.valueOf(amountWanted)
+                                .scaleByPowerOfTen(-slpToken.decimals)
+                        )
+
+                        tokenId = session.tokenId
                         activity?.runOnUiThread {
+                            setSlpBip70View()
                             root?.send_amount_input?.isEnabled = false
                             root?.to_field_text?.text = session.memo
                         }
-                    } else if (type == BIP70Type.SLP) {
-                        val session = BIP70Helper.getSlpPaymentSession(url)
-                        val amountWanted = session.totalTokenAmount
-                        val slpToken = WalletManager.walletKit?.getSlpToken(session.tokenId)
-                        if (slpToken != null) {
-                            setTokenAmount(
-                                BigDecimal.valueOf(amountWanted)
-                                    .scaleByPowerOfTen(-slpToken.decimals)
-                            )
-
-                            tokenId = session.tokenId
-                            activity?.runOnUiThread {
-                                setSlpBip70View()
-                                root?.send_amount_input?.isEnabled = false
-                                root?.to_field_text?.text = session.memo
-                            }
-                        } else {
-                            showToast("unknown token")
-                            activity?.runOnUiThread {
-                                (activity as? MainActivity)?.toggleSendScreen(false)
-                            }
+                    } else {
+                        showToast("unknown token")
+                        activity?.runOnUiThread {
+                            (activity as? MainActivity)?.toggleSendScreen(false)
                         }
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        }.start()
+        }
     }
 
     fun getPayloadData(tx: Transaction) {
-        object : Thread() {
-            override fun run() {
-                try {
-                    var amount = 0L
-                    for (output in tx.outputs) {
-                        if (!output.isMineOrWatched(WalletManager.wallet)) {
-                            amount += output.value.value
-                        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                var amount = 0L
+                for (output in tx.outputs) {
+                    if (!output.isMineOrWatched(WalletManager.wallet)) {
+                        amount += output.value.value
                     }
-                    val amountWanted = Coin.valueOf(amount)
-                    setCoinAmount(amountWanted)
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                } catch (e: ExecutionException) {
-                    e.printStackTrace()
-                } catch (e: PaymentProtocolException) {
-                    e.printStackTrace()
                 }
-
+                val amountWanted = Coin.valueOf(amount)
+                setCoinAmount(amountWanted)
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            } catch (e: ExecutionException) {
+                e.printStackTrace()
+            } catch (e: PaymentProtocolException) {
+                e.printStackTrace()
             }
-        }.start()
+        }
     }
 
     private fun getCoinAmount(): Coin {
