@@ -201,13 +201,6 @@ class SettingsHomeFragment : Fragment() {
                         )
                         datum["timestamp"] = timestamp
 
-                        when {
-                            confirmations == 0 -> datum["confirmations"] = "0/unconfirmed"
-                            confirmations < 6 -> datum["confirmations"] =
-                                "$confirmations/6 confirmations"
-                            else -> datum["confirmations"] = "6+ confirmations"
-                        }
-
                         txList.add(tx.txId.toString())
                         txListFormatted.add(datum)
                     }
