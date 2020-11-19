@@ -72,6 +72,10 @@
                     android:id="@+id/extended_public_key"
                     layout="@layout/fragment_component_setting"/>
 
+                <include
+                    android:id="@+id/shift_service"
+                    layout="@layout/fragment_component_service"/>
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/separator_height"

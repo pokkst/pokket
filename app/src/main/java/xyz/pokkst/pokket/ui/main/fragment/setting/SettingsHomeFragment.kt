@@ -1,6 +1,8 @@
 package xyz.pokkst.pokket.ui.main.fragment.setting
 
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +24,6 @@ import xyz.pokkst.pokket.R
 import xyz.pokkst.pokket.SettingsActivity
 import xyz.pokkst.pokket.ui.TransactionListEntryView
 import xyz.pokkst.pokket.util.BalanceFormatter
-import xyz.pokkst.pokket.util.DateFormatter
 import xyz.pokkst.pokket.util.PriceHelper
 import xyz.pokkst.pokket.wallet.WalletManager
 
@@ -69,6 +70,13 @@ class SettingsHomeFragment : Fragment() {
             }
         root.extended_public_key.findViewById<TextView>(R.id.setting_label).text =
             resources.getString(R.string.epk_label)
+
+        root.shift_service.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://shift.pokket.cash/a/mmG1iwJRO"))
+            startActivity(browserIntent)
+        }
+        root.shift_service.findViewById<TextView>(R.id.setting_label).text =
+            resources.getString(R.string.shift_service_label)
 
         root.start_recovery_wallet.setOnClickListener {
             navigate(R.id.nav_to_wipe)
