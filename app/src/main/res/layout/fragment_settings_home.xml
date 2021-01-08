@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SettingsActivity">
+    tools:context=".cash.SettingsActivity">
 
     <LinearLayout
         android:id="@+id/settings_view"
@@ -21,7 +21,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <xyz.pokkst.pokket.ui.NonScrollListView
+                <xyz.pokkst.pokket.cash.ui.NonScrollListView
                     android:id="@+id/transactions_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

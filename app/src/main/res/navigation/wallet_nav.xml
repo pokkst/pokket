@@ -6,7 +6,7 @@
     app:startDestination="@id/sendHomeFragment">
     <fragment
         android:id="@+id/sendHomeFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.send.SendHomeFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.send.SendHomeFragment"
         android:label="fragment_send_home"
         tools:layout="@layout/fragment_send_home">
         <action
@@ -22,13 +22,13 @@
     </fragment>
     <fragment
         android:id="@+id/sendAmountFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.send.SendAmountFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.send.SendAmountFragment"
         android:label="fragment_send_amount"
         tools:layout="@layout/fragment_send_amount">
     </fragment>
     <fragment
         android:id="@+id/viewTokensFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.token.ViewTokensFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.token.ViewTokensFragment"
         android:label="fragment_view_tokens"
         tools:layout="@layout/fragment_view_tokens">
         <action

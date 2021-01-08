@@ -6,7 +6,7 @@
     app:startDestination="@id/settingsHomeFragment">
     <fragment
         android:id="@+id/settingsHomeFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.setting.SettingsHomeFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsHomeFragment"
         android:label="fragment_setings_home"
         tools:layout="@layout/fragment_settings_home">
         <action
@@ -51,49 +51,49 @@
     </fragment>
     <fragment
         android:id="@+id/settingsAboutFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.setting.SettingsAboutFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsAboutFragment"
         android:label="fragment_settings_about"
         tools:layout="@layout/fragment_settings_about">
     </fragment>
     <fragment
         android:id="@+id/settingsPhraseFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.setting.SettingsPhraseFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsPhraseFragment"
         android:label="fragment_settings_about"
         tools:layout="@layout/fragment_settings_phrase">
     </fragment>
     <fragment
         android:id="@+id/settingsNodeFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.setting.SettingsNodeFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsNodeFragment"
         android:label="fragment_settings_about"
         tools:layout="@layout/fragment_settings_node">
     </fragment>
     <fragment
         android:id="@+id/settingsEpkFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.setting.SettingsEpkFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsEpkFragment"
         android:label="fragment_settings_about"
         tools:layout="@layout/fragment_settings_epk">
     </fragment>
     <fragment
         android:id="@+id/settingsWipeFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.setting.SettingsWipeFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsWipeFragment"
         android:label="fragment_settings_about"
         tools:layout="@layout/fragment_settings_wipe">
     </fragment>
     <fragment
         android:id="@+id/transactionReceivedFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.transaction.TransactionReceivedFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.transaction.TransactionReceivedFragment"
         android:label="fragment_tx_received"
         tools:layout="@layout/transaction_item_expanded_received">
     </fragment>
     <fragment
         android:id="@+id/transactionSentFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.transaction.TransactionSentFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.transaction.TransactionSentFragment"
         android:label="fragment_tx_received"
         tools:layout="@layout/transaction_item_expanded_sent">
     </fragment>
     <fragment
         android:id="@+id/transactionsListFragment"
-        android:name="xyz.pokkst.pokket.ui.main.fragment.setting.SettingsTransactionsFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsTransactionsFragment"
         android:label="fragment_tx_received"
         tools:layout="@layout/fragment_settings_transactions">
         <action
