@@ -81,6 +81,11 @@ class MainActivity : AppCompatActivity() {
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
         }
 
+        appbar_title.setOnClickListener {
+            val intent = Intent(Constants.ACTION_FRAGMENT_SEND_MAX)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        }
+
         settings_button.setOnClickListener {
             if (view_pager.isPagingEnabled()) {
                 val intentSettings = Intent(this, SettingsActivity::class.java)

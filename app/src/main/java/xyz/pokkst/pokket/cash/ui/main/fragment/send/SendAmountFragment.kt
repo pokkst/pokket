@@ -83,6 +83,10 @@ class SendAmountFragment : Fragment() {
                 } else {
                     showToast("enter an amount")
                 }
+            } else if (Constants.ACTION_FRAGMENT_SEND_MAX == intent.action) {
+                val balance = WalletManager.kit?.wallet()?.getBalance(Wallet.BalanceType.ESTIMATED)?.toPlainString()
+                val coinBalance = Coin.parseCoin(balance)
+                setCoinAmount(coinBalance)
             }
         }
     }
@@ -206,6 +210,7 @@ class SendAmountFragment : Fragment() {
         val filter = IntentFilter()
         filter.addAction(Constants.ACTION_MAIN_ENABLE_PAGER)
         filter.addAction(Constants.ACTION_FRAGMENT_SEND_SEND)
+        filter.addAction(Constants.ACTION_FRAGMENT_SEND_MAX)
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
     }
 
