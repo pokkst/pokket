@@ -1,9 +1,14 @@
 package xyz.pokkst.pokket.cash
 
+import android.app.Activity
+import android.app.KeyguardManager
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +19,9 @@ import java.io.File
 import java.security.Provider
 import java.security.Security
 
-class SplashActivity : AppCompatActivity() {
 
+class SplashActivity : AppCompatActivity() {
+    private val CODE_AUTHENTICATION_VERIFICATION = 241
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupBouncyCastle()
@@ -39,14 +45,54 @@ class SplashActivity : AppCompatActivity() {
                 applicationInfo.dataDir,
                 "${WalletManager.multisigWalletFileName}.wallet"
             ).exists()
-            val intent = if (newUser) {
-                Intent(baseContext, NewUserActivity::class.java)
+            if (newUser) {
+                val intent = Intent(baseContext, NewUserActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                finish()
             } else {
-                Intent(baseContext, MainActivity::class.java)
+                val km =
+                    getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+                if (km.isKeyguardSecure) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        val securityIntent = km.createConfirmDeviceCredentialIntent(
+                            "Unlock Wallet",
+                            null
+                        )
+                        startActivityForResult(securityIntent, CODE_AUTHENTICATION_VERIFICATION)
+                    } else {
+                        val intent = Intent(baseContext, MainActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(intent)
+                        finish()
+                    }
+
+                } else {
+                    val intent = Intent(baseContext, MainActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                    finish()
+                }
             }
+
+        }
+    }
+
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == Activity.RESULT_OK && requestCode == CODE_AUTHENTICATION_VERIFICATION) {
+            val intent = Intent(baseContext, MainActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
             finish()
+        } else {
+            Toast.makeText(this, "Unlock failed. Try again.", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
