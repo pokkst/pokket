@@ -39,7 +39,12 @@ class OtherFollowingKeysFragment : Fragment() {
         val cosignerKeysList = root.cosigner_keys_layout
 
         root.n_edittext.doAfterTextChanged { text ->
-            val n = if (text.isNullOrEmpty()) 0 else text.toString().toInt()
+            var n = if (text.isNullOrEmpty()) 0 else text.toString().toInt()
+            if(n > 4) {
+                n = 4
+                root.n_edittext.setText("4")
+            }
+
             if (n != nPrevious) {
                 val difference = n - nPrevious
                 if (difference > 0) {
@@ -73,7 +78,12 @@ class OtherFollowingKeysFragment : Fragment() {
         }
 
         root.m_edittext.doAfterTextChanged { text ->
-            val m = if (text.isNullOrEmpty()) 0 else text.toString().toInt()
+            var m = if (text.isNullOrEmpty()) 0 else text.toString().toInt()
+            if(m > 4) {
+                m = 4
+                root.m_edittext.setText("4")
+            }
+
             mCurrent = m
 
             root.m_of_n_textview.text = resources.getString(
