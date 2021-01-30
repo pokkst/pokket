@@ -349,11 +349,12 @@ class SendAmountFragment : Fragment() {
                         toAddress,
                         getCoinAmount()
                     )
-                    val needsMoreSigs = signMultisigInputs(myTx)
+                    val needsMoreSigs = WalletManager.multisigWalletKit?.signMultisigInputs(myTx)
 
-                    if (needsMoreSigs) {
+                    if (needsMoreSigs == true) {
                         val payload = MultisigPayload()
                         payload.hex = Hex.toHexString(myTx?.bitcoinSerialize())
+                        println("Raw tx: " + Hex.toHexString(myTx?.bitcoinSerialize()))
                         val json: String = Gson().toJson(payload)
                         showPayload(json)
                     } else {
@@ -379,9 +380,9 @@ class SendAmountFragment : Fragment() {
     private fun importMultisigPayload(base64Payload: String) {
         val multisigPayload = PayloadHelper.decodeMultisigPayload(base64Payload) ?: return
         val cosignerTx = WalletManager.multisigWalletKit?.importMultisigPayload(multisigPayload.hex)
-        val needsMoreSigs = signMultisigInputs(cosignerTx)
+        val needsMoreSigs = WalletManager.multisigWalletKit?.signMultisigInputs(cosignerTx)
 
-        if (needsMoreSigs) {
+        if (needsMoreSigs == true) {
             multisigPayload.hex = Hex.toHexString(cosignerTx?.bitcoinSerialize())
             val newPayloadJson: String = Gson().toJson(multisigPayload)
             showPayload(newPayloadJson)
@@ -421,46 +422,6 @@ class SendAmountFragment : Fragment() {
             dialog.dismiss()
         }
         dialog?.show()
-    }
-
-    private fun signMultisigInputs(tx: Transaction?): Boolean {
-        var needsMoreSigs = false
-        tx?.inputs?.forEach { input ->
-            val bitcoinRedeemData =
-                input.getConnectedRedeemData(WalletManager.wallet)
-            if (bitcoinRedeemData != null) {
-                val utxo = input.connectedOutput
-                val script: Script? = utxo?.scriptPubKey
-                val redeemScriptProgram = bitcoinRedeemData.redeemScript.program
-                val sigHash: Sha256Hash = tx.hashForSignatureWitness(
-                    input.index,
-                    bitcoinRedeemData.redeemScript,
-                    input.connectedOutput!!.value,
-                    Transaction.SigHash.ALL,
-                    false
-                )
-                var inputScript = input.scriptSig
-                val signature: TransactionSignature = tx.calculateWitnessSignature(
-                    input.index,
-                    bitcoinRedeemData.fullKey,
-                    redeemScriptProgram,
-                    input.connectedOutput!!.value,
-                    Transaction.SigHash.ALL,
-                    false
-                )
-                val signatureIndex =
-                    input.scriptSig.getSigInsertionIndex(sigHash, bitcoinRedeemData.fullKey)
-                inputScript = script?.getScriptSigWithSignature(
-                    inputScript,
-                    signature.encodeToBitcoin(),
-                    signatureIndex
-                )
-                input.scriptSig = inputScript
-                needsMoreSigs = needsMoreSigs(input, utxo)
-            }
-        }
-
-        return needsMoreSigs
     }
 
     private fun attemptBip47Payment() {
@@ -839,15 +800,6 @@ class SendAmountFragment : Fragment() {
     private fun setTokenAmount(amount: BigDecimal) {
         activity?.runOnUiThread {
             root?.send_amount_input?.setText(amount.toDouble().toString())
-        }
-    }
-
-    fun needsMoreSigs(input: TransactionInput, utxo: TransactionOutput?): Boolean {
-        return try {
-            input.verify(utxo)
-            false
-        } catch (e: Exception) {
-            true
         }
     }
 

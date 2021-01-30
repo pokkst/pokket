@@ -142,6 +142,8 @@ class WalletManager {
                 }
             }
 
+            multisigWalletKit?.setUseSchnorr(true)
+
             multisigWalletKit?.setDownloadListener(object : DownloadProgressTracker() {
                 override fun doneDownload() {
                     super.doneDownload()
@@ -154,7 +156,7 @@ class WalletManager {
                 }
             })
 
-            val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1501547158L
+            val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1611541003L
             if (seed != null) {
                 val deterministicSeed = DeterministicSeed(seed, null, "", creationDate)
                 multisigWalletKit?.restoreWalletFromSeed(deterministicSeed)
@@ -164,7 +166,6 @@ class WalletManager {
             val checkpointsInputStream = activity.assets.open("checkpoints.txt")
             multisigWalletKit?.setCheckpoints(checkpointsInputStream)
             setupNodeOnStart()
-            println("Starting multisig wallet...")
             multisigWalletKit?.startAsync()
         }
 
