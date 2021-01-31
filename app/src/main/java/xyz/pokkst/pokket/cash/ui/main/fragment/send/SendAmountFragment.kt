@@ -354,7 +354,6 @@ class SendAmountFragment : Fragment() {
                     if (needsMoreSigs == true) {
                         val payload = MultisigPayload()
                         payload.hex = Hex.toHexString(myTx?.bitcoinSerialize())
-                        println("Raw tx: " + Hex.toHexString(myTx?.bitcoinSerialize()))
                         val json: String = Gson().toJson(payload)
                         showPayload(json)
                     } else {
@@ -433,7 +432,6 @@ class SendAmountFragment : Fragment() {
             if (paymentChannel.isNotificationTransactionSent) {
                 depositAddress = WalletManager.walletKit?.getCurrentOutgoingAddress(paymentChannel)
                 if (depositAddress != null) {
-                    println("Received user's deposit address $depositAddress")
                     paymentChannel.incrementOutgoingIndex()
                     WalletManager.walletKit?.saveBip47MetaData()
                     this.processNormalTransaction(depositAddress)
@@ -626,7 +624,7 @@ class SendAmountFragment : Fragment() {
         val tx = WalletManager.walletKit?.createSlpTransaction(address, tokenId, tokenAmount, null)
         val req = SendRequest.forTx(tx)
         val sendResult = WalletManager.walletKit?.peerGroup()?.broadcastTransaction(req.tx)
-        println("Processing SLP tx...")
+
         Futures.addCallback(
             sendResult?.future(),
             object : FutureCallback<Transaction?> {

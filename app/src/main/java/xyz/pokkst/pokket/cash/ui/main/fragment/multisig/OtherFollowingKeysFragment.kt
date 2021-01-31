@@ -40,9 +40,9 @@ class OtherFollowingKeysFragment : Fragment() {
 
         root.n_edittext.doAfterTextChanged { text ->
             var n = if (text.isNullOrEmpty()) 0 else text.toString().toInt()
-            if(n > 4) {
-                n = 4
-                root.n_edittext.setText("4")
+            if(n > 9) {
+                n = 9
+                root.n_edittext.setText("9")
             }
 
             if (n != nPrevious) {
@@ -79,9 +79,9 @@ class OtherFollowingKeysFragment : Fragment() {
 
         root.m_edittext.doAfterTextChanged { text ->
             var m = if (text.isNullOrEmpty()) 0 else text.toString().toInt()
-            if(m > 4) {
-                m = 4
-                root.m_edittext.setText("4")
+            if(m > 8) {
+                m = 8
+                root.m_edittext.setText("8")
             }
 
             mCurrent = m
