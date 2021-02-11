@@ -65,7 +65,6 @@ class WalletManager {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
                     wallet().allowSpendingUnconfirmedTransactions()
-                    recalculateSlpUtxos()
                     _syncPercentage.postValue(0)
                     _refreshEvents.postValue(Event(""))
                     wallet().addCoinsReceivedEventListener { wallet, tx, prevBalance, newBalance ->

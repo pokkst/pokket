@@ -90,7 +90,6 @@ class ViewTokensFragment : Fragment() {
     }
 
     private fun refresh() {
-        recalculationJob?.cancel()
         recalculationJob = lifecycleScope.launch(Dispatchers.IO) {
             WalletManager.walletKit?.recalculateSlpUtxos()
 
