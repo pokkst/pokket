@@ -384,5 +384,6 @@
     <string name="node_desc">enter an ip address here to connect to custom node upon startup</string>
     <string name="node_ip_hint">192.168.1.1</string>
     <string name="cancel_pledge">cancel pledge</string>
+    <string name="copy_pledge">copy pledge</string>
 
 </resources>

@@ -448,7 +448,7 @@ class SendAmountFragment : Fragment() {
     private fun showFlipstarterPledge(base64Payload: String) {
         val dialog = activity?.let { Dialog(it) }
         dialog?.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog?.setContentView(R.layout.dialog_payload)
+        dialog?.setContentView(R.layout.dialog_share_pledge)
         val payloadQr = dialog?.findViewById<ImageView>(R.id.payload_qr)
         val sharePayloadButton = dialog?.findViewById<Button>(R.id.share_payload_button)
         val closeButton = dialog?.findViewById<TextView>(R.id.payload_close)
@@ -457,7 +457,7 @@ class SendAmountFragment : Fragment() {
             ClipboardHelper.copyToClipboard(activity, base64Payload)
         }
         sharePayloadButton?.setOnClickListener {
-            sharePayload(base64Payload)
+            ClipboardHelper.copyToClipboard(activity, base64Payload)
         }
         closeButton?.setOnClickListener {
             dialog.dismiss()

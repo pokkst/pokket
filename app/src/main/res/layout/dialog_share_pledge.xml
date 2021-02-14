@@ -2,13 +2,24 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="20dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView
+        android:id="@+id/payload_qr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:src="@drawable/app_icon"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/share_payload_button"/>
     <Button
-        android:id="@+id/cancel_pledge_button"
+        android:id="@+id/share_payload_button"
         android:layout_width="240dp"
         android:layout_height="45dp"
-        android:text="@string/cancel_pledge"
+        android:text="@string/copy_pledge"
         android:layout_margin="20dp"
         android:background="@drawable/button_regular_blue"
         android:textAllCaps="false"
@@ -18,11 +29,10 @@
         android:paddingStart="30dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/pledge_close" />
-
+        app:layout_constraintTop_toBottomOf="@id/payload_qr"
+        app:layout_constraintBottom_toTopOf="@id/payload_close" />
     <TextView
-        android:id="@+id/pledge_close"
+        android:id="@+id/payload_close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -32,6 +42,6 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cancel_pledge_button"
+        app:layout_constraintTop_toBottomOf="@id/share_payload_button"
         app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
