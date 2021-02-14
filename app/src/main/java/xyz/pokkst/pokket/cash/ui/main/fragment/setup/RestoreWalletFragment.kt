@@ -35,15 +35,22 @@ class RestoreWalletFragment : Fragment() {
                     findNavController().navigate(action)
                     StatusBarHelper.setStatusBarColor(requireActivity(), R.color.extra_light_grey)
                 } else {
+                    val bip39passphrase = root.bip39_passphrase_edit_text.text.toString().trim()
                     StatusBarHelper.setStatusBarColor(requireActivity(), R.color.extra_light_grey)
                     val intent = Intent(requireActivity(), MainActivity::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                    println(seedStr)
                     intent.putExtra("seed", seedStr)
                     intent.putExtra("new", false)
+                    if(bip39passphrase.isNotEmpty()) {
+                        intent.putExtra("passphrase", bip39passphrase)
+                    }
                     startActivity(intent)
                 }
             }
+        }
+
+        root.multsig_checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
+            root.bip39_passphrase_edit_text.visibility = if(isChecked) View.GONE else View.VISIBLE
         }
 
         root.intro_left_button.setOnClickListener {

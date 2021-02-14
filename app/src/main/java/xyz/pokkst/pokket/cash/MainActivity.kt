@@ -30,12 +30,14 @@ class MainActivity : AppCompatActivity() {
         val extras = intent.extras
         var seed: String? = null
         var newUser: Boolean = false
+        var passphrase: String? = null
         var isMultisig: Boolean = false
         val followingKeys = ArrayList<DeterministicKey>()
         var m = 0
         if (extras != null) {
             seed = extras.getString("seed")
             newUser = extras.getBoolean("new")
+            passphrase = extras.getString("passphrase")
             isMultisig = extras.getBoolean("multisig")
             val keys = extras.getStringArrayList("followingKeys") ?: ArrayList()
             val keysLength = keys.size - 1
@@ -60,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         if (isMultisig) {
             WalletManager.startMultisigWallet(this, seed, newUser, followingKeys, m)
         } else {
-            WalletManager.startWallet(this, seed, newUser)
+            WalletManager.startWallet(this, seed, newUser, passphrase)
         }
     }
 

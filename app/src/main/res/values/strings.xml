@@ -220,7 +220,8 @@
     <!-- checked -->
     <string name="no_transactions">no transactions</string>
     <!-- checked -->
-    <string name="recovery_phrase">recovery phrase:</string>
+    <string name="recovery_phrase">enter recovery phrase</string>
+    <string name="recovery_phrase_extension">enter bip39 passphrase (optional)</string>
     <!-- checked -->
     <string name="use_passcode">passcode</string>
     <!-- checked -->

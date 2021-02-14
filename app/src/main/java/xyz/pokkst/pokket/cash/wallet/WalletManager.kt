@@ -52,7 +52,7 @@ class WalletManager {
         val peerCount: LiveData<Int> = _peerCount
         const val walletFileName = "pokket"
         const val multisigWalletFileName = "pokket_multisig"
-        fun startWallet(activity: Activity, seed: String?, newUser: Boolean) {
+        fun startWallet(activity: Activity, seed: String?, newUser: Boolean, passphrase: String?) {
             setBitcoinSDKThread()
 
             walletKit = object : SlpBIP47AppKit(
@@ -97,7 +97,7 @@ class WalletManager {
 
             val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1560281760L
             if (seed != null) {
-                val deterministicSeed = DeterministicSeed(seed, null, "", creationDate)
+                val deterministicSeed = DeterministicSeed(seed, null, passphrase ?: "", creationDate)
                 walletKit?.restoreWalletFromSeed(deterministicSeed)
             }
 
@@ -105,7 +105,6 @@ class WalletManager {
             val checkpointsInputStream = activity.assets.open("checkpoints.txt")
             walletKit?.setCheckpoints(checkpointsInputStream)
             setupNodeOnStart()
-            println("Starting wallet...")
             walletKit?.startAsync()
         }
 
