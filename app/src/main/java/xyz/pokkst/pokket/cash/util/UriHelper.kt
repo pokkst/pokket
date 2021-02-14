@@ -73,6 +73,12 @@ class UriHelper {
                         null,
                         PaymentType.MULTISIG_PAYLOAD
                     )
+                } else if(PayloadHelper.isFlipstarterPayload(destinationWithoutPrefix)) {
+                    return PaymentContent(
+                        destinationWithoutPrefix,
+                        null,
+                        PaymentType.FLIPSTARTER_PAYLOAD
+                    )
                 } else {
                     amount = if (mappedVariables["amount"] != null) {
                         val amountVariable = (mappedVariables["amount"] ?: error(""))[0]

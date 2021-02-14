@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import net.glxn.qrgen.android.QRCode
 import org.bitcoinj.core.*
 import org.bitcoinj.core.bip47.BIP47Channel
+import org.bitcoinj.core.flipstarter.FlipstarterInvoicePayload
 import org.bitcoinj.core.slp.SlpTokenBalance
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.protocols.payments.PaymentProtocol
@@ -132,6 +133,14 @@ class SendAmountFragment : Fragment() {
                     ""
                 )}"
                 this.getPayloadData(tx)
+            }
+        } else if(paymentContent?.paymentType == PaymentType.FLIPSTARTER_PAYLOAD) {
+            root?.send_amount_input?.isEnabled = false
+            val payload =
+                paymentContent?.addressOrPayload?.let { PayloadHelper.decodeFlipstarterPayload(it) }
+            if (payload != null) {
+                root?.to_field_text?.text = "to: flipstarter"
+                this.getFlipstarterInvoiceData(payload)
             }
         } else {
             if (paymentContent != null) {
@@ -314,6 +323,19 @@ class SendAmountFragment : Fragment() {
                                 this.attemptBip47Payment()
                             }
                         }
+                        PaymentType.FLIPSTARTER_PAYLOAD -> {
+                            val sendReq = SendRequest.createFlipstarterPledge(WalletManager.wallet, paymentContent?.addressOrPayload)
+                            val peers = WalletManager.kit?.peerGroup()?.connectedPeers
+                            if(peers != null) {
+                                for (peer in peers) {
+                                    val tx = sendReq.left
+                                    peer.sendMessage(tx)
+                                }
+                            }
+
+                            val pledgePayload = sendReq.right
+                            showFlipstarterPledge(pledgePayload)
+                        }
                         PaymentType.SLP_ADDRESS -> showToast("please choose slp token")
                         PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
                         null -> showToast("please enter a valid destination")
@@ -416,6 +438,26 @@ class SendAmountFragment : Fragment() {
         }
         sharePayloadButton?.setOnClickListener {
             sharePayload(payloadBase64)
+        }
+        closeButton?.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog?.show()
+    }
+
+    private fun showFlipstarterPledge(base64Payload: String) {
+        val dialog = activity?.let { Dialog(it) }
+        dialog?.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog?.setContentView(R.layout.dialog_payload)
+        val payloadQr = dialog?.findViewById<ImageView>(R.id.payload_qr)
+        val sharePayloadButton = dialog?.findViewById<Button>(R.id.share_payload_button)
+        val closeButton = dialog?.findViewById<TextView>(R.id.payload_close)
+        payloadQr?.setImageBitmap(generateQR(base64Payload))
+        payloadQr?.setOnClickListener {
+            ClipboardHelper.copyToClipboard(activity, base64Payload)
+        }
+        sharePayloadButton?.setOnClickListener {
+            sharePayload(base64Payload)
         }
         closeButton?.setOnClickListener {
             dialog.dismiss()
@@ -733,6 +775,22 @@ class SendAmountFragment : Fragment() {
                     }
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun getFlipstarterInvoiceData(payload: FlipstarterInvoicePayload) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val amount = payload.donation.amount
+                val amountWanted = Coin.valueOf(amount)
+                setCoinAmount(amountWanted)
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            } catch (e: ExecutionException) {
+                e.printStackTrace()
+            } catch (e: PaymentProtocolException) {
                 e.printStackTrace()
             }
         }

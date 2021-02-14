@@ -78,6 +78,12 @@ class SettingsHomeFragment : Fragment() {
         root.shift_service.findViewById<TextView>(R.id.setting_label).text =
             resources.getString(R.string.shift_service_label)
 
+        root.flipstarters.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
+            navigate(R.id.nav_to_flipstarters)
+        }
+        root.flipstarters.findViewById<TextView>(R.id.setting_label).text =
+            resources.getString(R.string.flipstarter_label)
+
         root.start_recovery_wallet.setOnClickListener {
             navigate(R.id.nav_to_wipe)
         }

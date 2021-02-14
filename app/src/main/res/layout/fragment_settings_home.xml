@@ -73,6 +73,10 @@
                     layout="@layout/fragment_component_setting"/>
 
                 <include
+                    android:id="@+id/flipstarters"
+                    layout="@layout/fragment_component_service"/>
+
+                <include
                     android:id="@+id/shift_service"
                     layout="@layout/fragment_component_service"/>
 

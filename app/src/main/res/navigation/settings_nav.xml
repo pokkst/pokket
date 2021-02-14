@@ -22,6 +22,9 @@
             android:id="@+id/nav_to_epk"
             app:destination="@id/settingsEpkFragment" />
         <action
+            android:id="@+id/nav_to_flipstarters"
+            app:destination="@id/settingsFlipstartersFragment" />
+        <action
             android:id="@+id/nav_to_node"
             app:destination="@id/settingsNodeFragment" />
         <action
@@ -70,6 +73,12 @@
     <fragment
         android:id="@+id/settingsEpkFragment"
         android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsEpkFragment"
+        android:label="fragment_settings_about"
+        tools:layout="@layout/fragment_settings_epk">
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFlipstartersFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsFlipstartersFragment"
         android:label="fragment_settings_about"
         tools:layout="@layout/fragment_settings_epk">
     </fragment>

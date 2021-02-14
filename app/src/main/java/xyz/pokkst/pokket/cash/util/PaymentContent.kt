@@ -10,5 +10,6 @@ enum class PaymentType {
     PAYMENT_CODE,
     SLP_ADDRESS,
     MULTISIG_PAYLOAD,
+    FLIPSTARTER_PAYLOAD,
     BIP70
 }
