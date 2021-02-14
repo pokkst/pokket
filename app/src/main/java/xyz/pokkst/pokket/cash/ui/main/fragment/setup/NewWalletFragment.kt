@@ -8,6 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_intro_bg.view.*
 import kotlinx.android.synthetic.main.fragment_new_wallet.view.*
+import kotlinx.android.synthetic.main.fragment_new_wallet.view.bip39_passphrase_edit_text
+import kotlinx.android.synthetic.main.fragment_new_wallet.view.multsig_checkbox
+import kotlinx.android.synthetic.main.fragment_restore_wallet.view.*
 import kotlinx.android.synthetic.main.intro_fragment_warning.view.*
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.util.StatusBarHelper
@@ -31,12 +34,19 @@ class NewWalletFragment : Fragment() {
 
         root.intro_warning_show_button.setOnClickListener {
             val isMultisigChecked = root.multsig_checkbox.isChecked
+            val bip39passphrase = root.bip39_passphrase_edit_text.text.toString().trim()
+
             val action =
                 NewWalletFragmentDirections.navToGeneratedSeed(
-                    isMultisigChecked
+                    isMultisigChecked,
+                    bip39passphrase
                 )
             findNavController().navigate(action)
             StatusBarHelper.setStatusBarColor(activity, R.color.extra_light_grey)
+        }
+
+        root.multsig_checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
+            root.bip39_passphrase_edit_text.visibility = if(isChecked) View.GONE else View.VISIBLE
         }
 
         root.intro_left_button.setOnClickListener {

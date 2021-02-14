@@ -41,6 +41,7 @@ class GeneratedSeedFragment : Fragment() {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_generated_seed, container, false)
         val isMultisig = args.multisig
+        val bip39Passphrase = args.passphrase
 
         val decorView = requireActivity().window.decorView
         var flags = decorView.systemUiVisibility
@@ -84,6 +85,9 @@ class GeneratedSeedFragment : Fragment() {
                 intent.putExtra("seed", seedStr)
                 intent.putExtra("new", true)
                 intent.putExtra("multisig", isMultisig)
+                if(!isMultisig && bip39Passphrase.isNotEmpty()) {
+                    intent.putExtra("passphrase", bip39Passphrase)
+                }
                 startActivity(intent)
             }
         }
