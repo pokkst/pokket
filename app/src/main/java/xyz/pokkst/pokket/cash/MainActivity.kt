@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
         if (extras != null) {
             seed = extras.getString("seed")
             newUser = extras.getBoolean("new")
-            passphrase = extras.getString("passphrase")
             isMultisig = extras.getBoolean("multisig")
             val keys = extras.getStringArrayList("followingKeys") ?: ArrayList()
             val keysLength = keys.size - 1
@@ -62,6 +61,9 @@ class MainActivity : AppCompatActivity() {
         if (isMultisig) {
             WalletManager.startMultisigWallet(this, seed, newUser, followingKeys, m)
         } else {
+            if(extras?.containsKey("passphrase") == true) {
+                passphrase = extras.getString("passphrase")
+            }
             WalletManager.startWallet(this, seed, newUser, passphrase)
         }
     }
