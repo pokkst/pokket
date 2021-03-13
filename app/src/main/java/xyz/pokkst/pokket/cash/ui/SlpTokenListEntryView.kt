@@ -6,7 +6,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import com.luminiasoft.ethereum.blockiesandroid.BlockiesIdenticon
+import com.squareup.picasso.Picasso
 import xyz.pokkst.pokket.cash.R
+import xyz.pokkst.pokket.cash.util.NFTConstants
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 import java.util.*
 
@@ -44,7 +46,9 @@ class SlpTokenListEntryView {
                 tokenId
                     ?: error("")
             )
-            val slpToken = WalletManager.walletKit?.getSlpToken(tokenId) ?: WalletManager.walletKit?.getNft(tokenId)
+            val slpToken = WalletManager.walletKit?.getSlpToken(tokenId)
+            val nft = WalletManager.walletKit?.getNft(tokenId)
+
             try {
                 if (slpToken != null) {
                     val exists =
@@ -72,18 +76,30 @@ class SlpTokenListEntryView {
                         slpImage.setCornerRadius(128f)
                     }
                 } else {
-                    val drawable =
-                        activity?.resources?.getDrawable(
-                            activity.resources.getIdentifier(
-                                "logo_bch",
-                                "drawable",
-                                activity.packageName
-                            )
-                        )
-                    activity?.runOnUiThread {
-                        slpIcon.setImageDrawable(drawable)
-                        slpImage.visibility = View.GONE
-                        slpIcon.visibility = View.VISIBLE
+                    if(nft != null) {
+                        val nftParentId = nft.nftParentId
+                        if(nftParentId == NFTConstants.NFT_PARENT_ID_WAIFU) {
+                            Picasso.get().load("https://icons.waifufaucet.com/128/${nft.tokenId}.png").into(slpIcon)
+                            slpIcon.visibility = View.VISIBLE
+                            slpImage.visibility = View.GONE
+                        } else {
+                            slpImage.setAddress(nft.tokenId)
+                            slpImage.setCornerRadius(128f)
+                        }
+                    } else {
+                        val drawable =
+                                activity?.resources?.getDrawable(
+                                        activity.resources.getIdentifier(
+                                                "logo_bch",
+                                                "drawable",
+                                                activity.packageName
+                                        )
+                                )
+                        activity?.runOnUiThread {
+                            slpIcon.setImageDrawable(drawable)
+                            slpImage.visibility = View.GONE
+                            slpIcon.visibility = View.VISIBLE
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -96,16 +112,21 @@ class SlpTokenListEntryView {
             val text3 = view.findViewById<TextView>(R.id.text3)
             val balance =
                 tokenBal.balance
-            text1.text = String.format(
-                Locale.ENGLISH, "%.${slpToken?.decimals
-                    ?: 0}f", balance
-            )
-            text3.text = if(isNft) {
-                slpToken?.ticker + " (NFT)"
-            } else {
-                slpToken?.ticker
+            if(slpToken != null) {
+                text1.text = String.format(
+                        Locale.ENGLISH, "%.${slpToken.decimals
+                        ?: 0}f", balance
+                )
+                text3.text = slpToken.ticker
+                text2.text = slpToken.tokenId
+            } else if(nft != null) {
+                text1.text = String.format(
+                        Locale.ENGLISH, "%.${nft.decimals
+                        ?: 0}f", balance
+                )
+                text3.text = nft.ticker + " (NFT)"
+                text2.text = nft.tokenId
             }
-            text2.text = slpToken?.tokenId
 
             return view
         }
