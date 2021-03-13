@@ -35,6 +35,7 @@ class ViewTokensFragment : Fragment() {
     var root: View? = null
     private var srlSLP: SwipeRefreshLayout? = null
     private var slpList: NonScrollListView? = null
+    private var nftList: NonScrollListView? = null
     private var recalculationJob: Job? = null
 
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -67,19 +68,27 @@ class ViewTokensFragment : Fragment() {
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
         srlSLP = root?.findViewById(R.id.srlSLP)
         slpList = root?.findViewById(R.id.slpList)
+        nftList = root?.findViewById(R.id.nftList)
         this.srlSLP?.setOnRefreshListener { this.refresh() }
         this.slpList?.setOnItemClickListener { parent, view, position, id ->
-            val tokenBalance = try {
-                WalletManager.walletKit?.slpBalances?.get(position)
-            } catch(e: Exception) {
-                WalletManager.walletKit?.nftBalances?.get(position)
-            }
+            val tokenBalance = WalletManager.walletKit?.slpBalances?.get(position)
             val tokenId = tokenBalance?.tokenId
             findNavController().navigate(
                 ViewTokensFragmentDirections.navToSendFromViewTokens(
                     null,
                     tokenId
                 )
+            )
+        }
+
+        this.nftList?.setOnItemClickListener { parent, view, position, id ->
+            val tokenBalance = WalletManager.walletKit?.nftBalances?.get(position)
+            val tokenId = tokenBalance?.tokenId
+            findNavController().navigate(
+                    ViewTokensFragmentDirections.navToSendFromViewTokens(
+                            null,
+                            tokenId
+                    )
             )
         }
 
@@ -106,13 +115,11 @@ class ViewTokensFragment : Fragment() {
     }
 
     private fun setSLPList() {
-        val items = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
-        val nftItems = WalletManager.walletKit?.nftBalances?.toList() ?: listOf()
-        val finalItems = items + nftItems
-        val itemsAdapter = object : ArrayAdapter<SlpTokenBalance>(
+        val slpItems = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
+        val slpAdapter = object : ArrayAdapter<SlpTokenBalance>(
             requireContext(),
             R.layout.token_list_cell,
-                finalItems
+                slpItems
         ) {
             override fun getView(
                 position: Int,
@@ -127,17 +134,54 @@ class ViewTokensFragment : Fragment() {
             }
         }
 
-        slpList?.adapter = itemsAdapter
+        slpList?.adapter = slpAdapter
         slpList?.refreshDrawableState()
 
-        if (finalItems.isEmpty()) {
+        if (slpItems.isEmpty()) {
+            slpList?.visibility = View.GONE
+            root?.findViewById<TextView>(R.id.slp_list_label)?.visibility = View.GONE
+        } else {
+            slpList?.visibility = View.VISIBLE
+            root?.findViewById<TextView>(R.id.slp_list_label)?.visibility = View.VISIBLE
+        }
+
+        val nftItems = WalletManager.walletKit?.nftBalances?.toList() ?: listOf()
+        val nftAdapter = object : ArrayAdapter<SlpTokenBalance>(
+                requireContext(),
+                R.layout.token_list_cell,
+                nftItems
+        ) {
+            override fun getView(
+                    position: Int,
+                    convertView: View?,
+                    parent: ViewGroup
+            ): View {
+                return SlpTokenListEntryView.instanceOf(
+                        activity,
+                        position,
+                        R.layout.token_list_cell,
+                        true
+                )
+            }
+        }
+
+        nftList?.adapter = nftAdapter
+        nftList?.refreshDrawableState()
+
+        if (nftItems.isEmpty()) {
+            nftList?.visibility = View.GONE
+            root?.findViewById<TextView>(R.id.nft_list_label)?.visibility = View.GONE
+        } else {
+            nftList?.visibility = View.VISIBLE
+            root?.findViewById<TextView>(R.id.nft_list_label)?.visibility = View.VISIBLE
+        }
+
+        if(slpItems.isEmpty() && nftItems.isEmpty()) {
             root?.findViewById<TextView>(R.id.loading_tokens_view)?.visibility = View.GONE
             root?.findViewById<TextView>(R.id.no_tokens_view)?.visibility = View.VISIBLE
-            slpList?.visibility = View.GONE
         } else {
             root?.findViewById<TextView>(R.id.loading_tokens_view)?.visibility = View.GONE
             root?.findViewById<TextView>(R.id.no_tokens_view)?.visibility = View.GONE
-            slpList?.visibility = View.VISIBLE
         }
     }
 }

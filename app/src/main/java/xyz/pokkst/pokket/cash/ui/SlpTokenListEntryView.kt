@@ -12,20 +12,31 @@ import java.util.*
 
 class SlpTokenListEntryView {
     companion object {
-        fun instanceOf(activity: Activity?, position: Int, layoutResId: Int): View {
+        fun instanceOf(activity: Activity?, position: Int, layoutResId: Int, tokenIsNft: Boolean = false): View {
             val view = LayoutInflater.from(activity)
                 .inflate(layoutResId, null)
-            var isNft = false
-            val tokenBal = try {
-                WalletManager.walletKit?.slpBalances?.get(position)
-            } catch(e: Exception) {
+            var isNft = tokenIsNft
+            val tokenBal = if(isNft) {
                 val nft = WalletManager.walletKit?.nftBalances?.get(position)
                 if(nft != null) {
                     isNft = true
                 }
 
                 nft
+            } else {
+                try {
+                    WalletManager.walletKit?.slpBalances?.get(position)
+                } catch(e: Exception) {
+                    val fixedPosition = position - (WalletManager.walletKit?.slpBalances?.size ?: 0)
+                    val nft = WalletManager.walletKit?.nftBalances?.get(fixedPosition)
+                    if(nft != null) {
+                        isNft = true
+                    }
+
+                    nft
+                }
             }
+
             val tokenId = tokenBal?.tokenId
             val slpImage = view.findViewById<BlockiesIdenticon>(R.id.slpImage)
             val slpIcon = view.findViewById<ImageView>(R.id.slpWithIcon)

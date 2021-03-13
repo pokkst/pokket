@@ -226,13 +226,13 @@ class SendAmountFragment : Fragment() {
 
     private fun setSlpView() {
         if (tokenId != null || paymentContent?.paymentType == PaymentType.SLP_ADDRESS) {
-            val items = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
+            val slpItems = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
             val nftItems = WalletManager.walletKit?.nftBalances?.toList() ?: listOf()
-            val finalItems = items + nftItems
+            val combinedList = slpItems + nftItems
             val adapter = object : ArrayAdapter<SlpTokenBalance>(
                 requireContext(),
                 R.layout.token_list_cell,
-                finalItems
+                    combinedList
             ) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                     return SlpTokenListEntryView.instanceOf(
@@ -270,7 +270,8 @@ class SendAmountFragment : Fragment() {
                             }
                             slpToken?.tokenId
                         } catch(e: Exception) {
-                            val nftBalance = WalletManager.walletKit?.nftBalances?.get(position)
+                            val fixedPosition = position - (WalletManager.walletKit?.slpBalances?.size ?: 0)
+                            val nftBalance = WalletManager.walletKit?.nftBalances?.get(fixedPosition)
                             if(nftBalance != null) {
                                 sendingNft = true
                             }
@@ -281,9 +282,18 @@ class SendAmountFragment : Fragment() {
                     override fun onNothingSelected(parent: AdapterView<*>) {}
                 }
             if (tokenId != null) {
-                for (x in items.indices) {
-                    if (items[x].tokenId == tokenId) {
+                for (x in slpItems.indices) {
+                    if (slpItems[x].tokenId == tokenId) {
+                        sendingNft = false
                         root?.token_selector_todo?.setSelection(x)
+                    }
+                }
+
+                for (x in nftItems.indices) {
+                    if (nftItems[x].tokenId == tokenId) {
+                        val xWithOffset = x + slpItems.size
+                        sendingNft = true
+                        root?.token_selector_todo?.setSelection(xWithOffset)
                     }
                 }
             }

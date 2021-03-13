@@ -27,8 +27,30 @@
                     android:gravity="center"
                     android:padding="20dp"
                     android:text="loading tokens"/>
+                <TextView
+                    android:id="@+id/slp_list_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="16sp"
+                    android:padding="5dp"
+                    android:layout_marginStart="8dp"
+                    android:text="SLP tokens"
+                    android:visibility="gone"/>
                 <xyz.pokkst.pokket.cash.ui.NonScrollListView
                     android:id="@+id/slpList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+                <TextView
+                    android:id="@+id/nft_list_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="16sp"
+                    android:padding="5dp"
+                    android:layout_marginStart="8dp"
+                    android:text="NFTs"
+                    android:visibility="gone"/>
+                <xyz.pokkst.pokket.cash.ui.NonScrollListView
+                    android:id="@+id/nftList"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
                 <TextView
