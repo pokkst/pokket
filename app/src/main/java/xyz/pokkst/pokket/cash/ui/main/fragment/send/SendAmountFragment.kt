@@ -57,6 +57,7 @@ import java.util.concurrent.ExecutionException
  */
 class SendAmountFragment : Fragment() {
     var tokenId: String? = null
+    var sendingNft: Boolean? = null
     var root: View? = null
     var paymentContent: PaymentContent? = null
     var bip70Type: BIP70Type? = null
@@ -183,7 +184,7 @@ class SendAmountFragment : Fragment() {
                 val view = v as Button
 
                 if (tokenId != null) {
-                    val slpToken = WalletManager.walletKit?.getSlpToken(tokenId)
+                    val slpToken = WalletManager.walletKit?.getSlpToken(tokenId) ?: WalletManager.walletKit?.getNft(tokenId)
                     if (slpToken?.decimals != 0) {
                         appendCharacterToInput(root, view.text.toString())
                         updateAltCurrencyDisplay(root)
@@ -226,10 +227,12 @@ class SendAmountFragment : Fragment() {
     private fun setSlpView() {
         if (tokenId != null || paymentContent?.paymentType == PaymentType.SLP_ADDRESS) {
             val items = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
+            val nftItems = WalletManager.walletKit?.nftBalances?.toList() ?: listOf()
+            val finalItems = items + nftItems
             val adapter = object : ArrayAdapter<SlpTokenBalance>(
                 requireContext(),
                 R.layout.token_list_cell,
-                items
+                finalItems
             ) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                     return SlpTokenListEntryView.instanceOf(
@@ -260,7 +263,19 @@ class SendAmountFragment : Fragment() {
                         position: Int,
                         id: Long
                     ) {
-                        tokenId = WalletManager.walletKit?.slpBalances?.get(position)?.tokenId
+                        tokenId = try {
+                            val slpToken = WalletManager.walletKit?.slpBalances?.get(position)
+                            if(slpToken != null) {
+                                sendingNft = false
+                            }
+                            slpToken?.tokenId
+                        } catch(e: Exception) {
+                            val nftBalance = WalletManager.walletKit?.nftBalances?.get(position)
+                            if(nftBalance != null) {
+                                sendingNft = true
+                            }
+                            nftBalance?.tokenId
+                        }
                     }
 
                     override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -285,7 +300,7 @@ class SendAmountFragment : Fragment() {
             root?.alt_currency_symbol?.visibility = View.GONE
             root?.alt_currency_display?.visibility = View.GONE
             root?.input_type_toggle?.visibility = View.GONE
-            root?.main_currency_symbol?.text = WalletManager.walletKit?.getSlpToken(tokenId)?.ticker
+            root?.main_currency_symbol?.text = WalletManager.walletKit?.getSlpToken(tokenId)?.ticker ?: WalletManager.walletKit?.getNft(tokenId)?.ticker
         }
     }
 
@@ -663,7 +678,11 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun processSlpTransaction(address: String, tokenAmount: Double, tokenId: String) {
-        val tx = WalletManager.walletKit?.createSlpTransaction(address, tokenId, tokenAmount, null)
+        val tx = if(sendingNft == true) {
+            WalletManager.walletKit?.createNftSendTx(address, tokenId, tokenAmount, null)
+        } else {
+            WalletManager.walletKit?.createSlpTransaction(address, tokenId, tokenAmount, null)
+        }
         val req = SendRequest.forTx(tx)
         val sendResult = WalletManager.walletKit?.peerGroup()?.broadcastTransaction(req.tx)
 

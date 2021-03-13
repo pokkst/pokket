@@ -15,7 +15,17 @@ class SlpTokenListEntryView {
         fun instanceOf(activity: Activity?, position: Int, layoutResId: Int): View {
             val view = LayoutInflater.from(activity)
                 .inflate(layoutResId, null)
-            val tokenBal = WalletManager.walletKit?.slpBalances?.get(position)
+            var isNft = false
+            val tokenBal = try {
+                WalletManager.walletKit?.slpBalances?.get(position)
+            } catch(e: Exception) {
+                val nft = WalletManager.walletKit?.nftBalances?.get(position)
+                if(nft != null) {
+                    isNft = true
+                }
+
+                nft
+            }
             val tokenId = tokenBal?.tokenId
             val slpImage = view.findViewById<BlockiesIdenticon>(R.id.slpImage)
             val slpIcon = view.findViewById<ImageView>(R.id.slpWithIcon)
@@ -23,9 +33,7 @@ class SlpTokenListEntryView {
                 tokenId
                     ?: error("")
             )
-            val slpToken = WalletManager.walletKit?.getSlpToken(
-                tokenId
-            )
+            val slpToken = WalletManager.walletKit?.getSlpToken(tokenId) ?: WalletManager.walletKit?.getNft(tokenId)
             try {
                 if (slpToken != null) {
                     val exists =
@@ -81,7 +89,11 @@ class SlpTokenListEntryView {
                 Locale.ENGLISH, "%.${slpToken?.decimals
                     ?: 0}f", balance
             )
-            text3.text = slpToken?.ticker
+            text3.text = if(isNft) {
+                slpToken?.ticker + " (NFT)"
+            } else {
+                slpToken?.ticker
+            }
             text2.text = slpToken?.tokenId
 
             return view

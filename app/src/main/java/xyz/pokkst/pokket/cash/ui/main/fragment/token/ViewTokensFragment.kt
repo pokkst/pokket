@@ -69,7 +69,11 @@ class ViewTokensFragment : Fragment() {
         slpList = root?.findViewById(R.id.slpList)
         this.srlSLP?.setOnRefreshListener { this.refresh() }
         this.slpList?.setOnItemClickListener { parent, view, position, id ->
-            val tokenBalance = WalletManager.walletKit?.slpBalances?.get(position)
+            val tokenBalance = try {
+                WalletManager.walletKit?.slpBalances?.get(position)
+            } catch(e: Exception) {
+                WalletManager.walletKit?.nftBalances?.get(position)
+            }
             val tokenId = tokenBalance?.tokenId
             findNavController().navigate(
                 ViewTokensFragmentDirections.navToSendFromViewTokens(
@@ -92,7 +96,7 @@ class ViewTokensFragment : Fragment() {
     private fun refresh() {
         recalculationJob = lifecycleScope.launch(Dispatchers.IO) {
             WalletManager.walletKit?.recalculateSlpUtxos()
-
+            WalletManager.walletKit?.recalculateNftUtxos()
             activity?.runOnUiThread {
                 setSLPList()
             }
@@ -103,10 +107,12 @@ class ViewTokensFragment : Fragment() {
 
     private fun setSLPList() {
         val items = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
+        val nftItems = WalletManager.walletKit?.nftBalances?.toList() ?: listOf()
+        val finalItems = items + nftItems
         val itemsAdapter = object : ArrayAdapter<SlpTokenBalance>(
             requireContext(),
             R.layout.token_list_cell,
-            items
+                finalItems
         ) {
             override fun getView(
                 position: Int,
@@ -124,7 +130,7 @@ class ViewTokensFragment : Fragment() {
         slpList?.adapter = itemsAdapter
         slpList?.refreshDrawableState()
 
-        if (items.isEmpty()) {
+        if (finalItems.isEmpty()) {
             root?.findViewById<TextView>(R.id.loading_tokens_view)?.visibility = View.GONE
             root?.findViewById<TextView>(R.id.no_tokens_view)?.visibility = View.VISIBLE
             slpList?.visibility = View.GONE
