@@ -8,7 +8,11 @@ import xyz.pokkst.pokket.cash.MainActivity
 class Toaster {
     companion object {
         fun showToastMessage(context: Context, message: String) {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            showToastMessage(context, message, Toast.LENGTH_SHORT)
+        }
+
+        fun showToastMessage(context: Context, message: String, length: Int) {
+            Toast.makeText(context, message, length).show()
         }
 
         fun showMessage(activity: MainActivity, message: String) {

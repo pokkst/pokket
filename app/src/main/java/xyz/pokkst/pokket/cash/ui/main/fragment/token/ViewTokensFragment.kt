@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -26,6 +27,7 @@ import xyz.pokkst.pokket.cash.ui.NftListEntryView
 import xyz.pokkst.pokket.cash.ui.NonScrollListView
 import xyz.pokkst.pokket.cash.ui.SlpTokenListEntryView
 import xyz.pokkst.pokket.cash.util.Constants
+import xyz.pokkst.pokket.cash.util.Toaster
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 
 
@@ -107,14 +109,22 @@ class ViewTokensFragment : Fragment() {
 
     private fun refresh() {
         slpCalculationJob = lifecycleScope.launch(Dispatchers.IO) {
-            WalletManager.walletKit?.recalculateSlpUtxos()
+            try {
+                WalletManager.walletKit?.recalculateSlpUtxos()
+            } catch(e: Exception) {
+                e.message?.let { context?.let { it1 -> Toaster.showToastMessage(it1, it, Toast.LENGTH_LONG) } }
+            }
             activity?.runOnUiThread {
                 setSLPList()
             }
         }
 
         nftCalculationJob = lifecycleScope.launch(Dispatchers.IO) {
-            WalletManager.walletKit?.recalculateNftUtxos()
+            try {
+                WalletManager.walletKit?.recalculateNftUtxos()
+            } catch(e: Exception) {
+                e.message?.let { context?.let { it1 -> Toaster.showToastMessage(it1, it, Toast.LENGTH_LONG) } }
+            }
             activity?.runOnUiThread {
                 setNFTList()
             }
