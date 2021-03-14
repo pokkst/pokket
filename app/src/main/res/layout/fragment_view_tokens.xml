@@ -19,14 +19,23 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
                 <TextView
-                    android:id="@+id/loading_tokens_view"
+                    android:id="@+id/loading_slp_tokens_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:textSize="16sp"
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="20dp"
-                    android:text="loading tokens"/>
+                    android:text="loading slp tokens"/>
+                <TextView
+                    android:id="@+id/loading_nfts_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="16sp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:padding="20dp"
+                    android:text="loading NFTs"/>
                 <TextView
                     android:id="@+id/slp_list_label"
                     android:layout_width="match_parent"
@@ -61,7 +70,17 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:padding="20dp"
-                    android:text="no tokens found"
+                    android:text="no slp tokens found"
+                    android:visibility="gone"/>
+                <TextView
+                    android:id="@+id/no_nfts_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="16sp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:padding="20dp"
+                    android:text="no NFTs found"
                     android:visibility="gone"/>
             </LinearLayout>
 

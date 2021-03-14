@@ -12,12 +12,12 @@ import xyz.pokkst.pokket.cash.util.NFTConstants
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 import java.util.*
 
-class SlpTokenListEntryView {
+class NftListEntryView {
     companion object {
         fun instanceOf(activity: Activity?, position: Int, layoutResId: Int): View {
             val view = LayoutInflater.from(activity)
                     .inflate(layoutResId, null)
-            val tokenBal = WalletManager.walletKit?.slpBalances?.get(position)
+            val tokenBal = WalletManager.walletKit?.nftBalances?.get(position)
             val tokenId = tokenBal?.tokenId
             val slpImage = view.findViewById<BlockiesIdenticon>(R.id.slpImage)
             val slpIcon = view.findViewById<ImageView>(R.id.slpWithIcon)
@@ -25,33 +25,33 @@ class SlpTokenListEntryView {
                     tokenId
                             ?: error("")
             )
-            val slpToken = WalletManager.walletKit?.getSlpToken(tokenId)
+
+            val nft = WalletManager.walletKit?.getNft(tokenId)
 
             try {
-                if (slpToken != null) {
-                    val exists =
-                            activity?.resources?.getIdentifier(
-                                    "slp$tokenId",
-                                    "drawable",
-                                    activity.packageName
-                            ) != 0
-                    if (exists) {
-                        val drawable =
-                                activity?.resources?.getDrawable(
-                                        activity.resources.getIdentifier(
-                                                "slp$tokenId",
-                                                "drawable",
-                                                activity.packageName
-                                        )
-                                )
-                        activity?.runOnUiThread {
-                            slpIcon.setImageDrawable(drawable)
-                            slpImage.visibility = View.GONE
-                            slpIcon.visibility = View.VISIBLE
-                        }
+                if(nft != null) {
+                    val nftParentId = nft.nftParentId
+                    if(nftParentId == NFTConstants.NFT_PARENT_ID_WAIFU) {
+                        Picasso.get().load("https://icons.waifufaucet.com/128/${nft.tokenId}.png").into(slpIcon)
+                        slpIcon.visibility = View.VISIBLE
+                        slpImage.visibility = View.GONE
                     } else {
-                        slpImage.setAddress(slpBlockiesAddress)
+                        slpImage.setAddress(nft.tokenId)
                         slpImage.setCornerRadius(128f)
+                    }
+                } else {
+                    val drawable =
+                        activity?.resources?.getDrawable(
+                            activity.resources.getIdentifier(
+                                "logo_bch",
+                                "drawable",
+                                activity.packageName
+                            )
+                        )
+                    activity?.runOnUiThread {
+                        slpIcon.setImageDrawable(drawable)
+                        slpImage.visibility = View.GONE
+                        slpIcon.visibility = View.VISIBLE
                     }
                 }
             } catch (e: Exception) {
@@ -62,14 +62,9 @@ class SlpTokenListEntryView {
             val text1 = view.findViewById<TextView>(R.id.text1)
             val text2 = view.findViewById<TextView>(R.id.text2)
             val text3 = view.findViewById<TextView>(R.id.text3)
-            val balance =
-                    tokenBal.balance
-            text1.text = String.format(
-                Locale.ENGLISH, "%.${slpToken?.decimals
-                    ?: 0}f", balance
-            )
-            text3.text = slpToken?.ticker
-            text2.text = slpToken?.tokenId
+            text1.text = nft?.name
+            text3.text = nft?.ticker + " (NFT)"
+            text2.text = nft?.tokenId
 
             return view
         }

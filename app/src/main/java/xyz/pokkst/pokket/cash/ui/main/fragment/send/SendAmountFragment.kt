@@ -47,6 +47,7 @@ import org.bitcoinj.wallet.Wallet
 import org.bouncycastle.util.encoders.Hex
 import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.R
+import xyz.pokkst.pokket.cash.ui.NftListEntryView
 import xyz.pokkst.pokket.cash.ui.SlpTokenListEntryView
 import xyz.pokkst.pokket.cash.util.*
 import xyz.pokkst.pokket.cash.wallet.WalletManager
@@ -242,11 +243,20 @@ class SendAmountFragment : Fragment() {
                     combinedList
             ) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    return SlpTokenListEntryView.instanceOf(
-                        activity,
-                        position,
-                        R.layout.token_spinner_cell
-                    )
+                    return if(position >= slpItems.size) {
+                        val nftPosition = position - (slpItems.size)
+                        NftListEntryView.instanceOf(
+                            activity,
+                            nftPosition,
+                            R.layout.token_spinner_cell
+                        )
+                    } else {
+                        SlpTokenListEntryView.instanceOf(
+                            activity,
+                            position,
+                            R.layout.token_spinner_cell
+                        )
+                    }
                 }
 
                 override fun getDropDownView(
@@ -254,11 +264,20 @@ class SendAmountFragment : Fragment() {
                     convertView: View?,
                     parent: ViewGroup
                 ): View {
-                    return SlpTokenListEntryView.instanceOf(
-                        activity,
-                        position,
-                        R.layout.token_list_cell
-                    )
+                    return if(position >= slpItems.size) {
+                        val nftPosition = position - (slpItems.size)
+                        NftListEntryView.instanceOf(
+                            activity,
+                            nftPosition,
+                            R.layout.token_list_cell
+                        )
+                    } else {
+                        SlpTokenListEntryView.instanceOf(
+                            activity,
+                            position,
+                            R.layout.token_list_cell
+                        )
+                    }
                 }
             }
             root?.token_selector_todo?.adapter = adapter
