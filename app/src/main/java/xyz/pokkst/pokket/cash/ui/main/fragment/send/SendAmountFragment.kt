@@ -689,7 +689,7 @@ class SendAmountFragment : Fragment() {
 
     private fun processSlpTransaction(address: String, tokenAmount: Double, tokenId: String) {
         val tx = if(sendingNft == true) {
-            WalletManager.walletKit?.createNftSendTx(address, tokenId, tokenAmount, null)
+            WalletManager.walletKit?.createNftChildSendTx(address, tokenId, tokenAmount, null)
         } else {
             WalletManager.walletKit?.createSlpTransaction(address, tokenId, tokenAmount, null)
         }
