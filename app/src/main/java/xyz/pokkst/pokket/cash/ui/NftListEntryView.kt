@@ -32,7 +32,7 @@ class NftListEntryView {
                 if(nft != null) {
                     val nftParentId = nft.nftParentId
                     if(nftParentId == NFTConstants.NFT_PARENT_ID_WAIFU) {
-                        Picasso.get().load("https://icons.waifufaucet.com/128/${nft.tokenId}.png").into(slpIcon)
+                        Picasso.get().load("https://icons.waifufaucet.com/64/${nft.tokenId}.png").into(slpIcon)
                         slpIcon.visibility = View.VISIBLE
                         slpImage.visibility = View.GONE
                     } else {
