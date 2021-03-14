@@ -16,14 +16,9 @@ class SlpTokenListEntryView {
     companion object {
         fun instanceOf(activity: Activity?, position: Int, layoutResId: Int, tokenIsNft: Boolean = false): View {
             val view = LayoutInflater.from(activity)
-                .inflate(layoutResId, null)
-            var isNft = tokenIsNft
-            val tokenBal = if(isNft) {
+                    .inflate(layoutResId, null)
+            val tokenBal = if(tokenIsNft) {
                 val nft = WalletManager.walletKit?.nftBalances?.get(position)
-                if(nft != null) {
-                    isNft = true
-                }
-
                 nft
             } else {
                 try {
@@ -31,10 +26,6 @@ class SlpTokenListEntryView {
                 } catch(e: Exception) {
                     val fixedPosition = position - (WalletManager.walletKit?.slpBalances?.size ?: 0)
                     val nft = WalletManager.walletKit?.nftBalances?.get(fixedPosition)
-                    if(nft != null) {
-                        isNft = true
-                    }
-
                     nft
                 }
             }
@@ -43,8 +34,8 @@ class SlpTokenListEntryView {
             val slpImage = view.findViewById<BlockiesIdenticon>(R.id.slpImage)
             val slpIcon = view.findViewById<ImageView>(R.id.slpWithIcon)
             val slpBlockiesAddress = blockieAddressFromTokenId(
-                tokenId
-                    ?: error("")
+                    tokenId
+                            ?: error("")
             )
             val slpToken = WalletManager.walletKit?.getSlpToken(tokenId)
             val nft = WalletManager.walletKit?.getNft(tokenId)
@@ -52,20 +43,20 @@ class SlpTokenListEntryView {
             try {
                 if (slpToken != null) {
                     val exists =
-                        activity?.resources?.getIdentifier(
-                            "slp$tokenId",
-                            "drawable",
-                            activity.packageName
-                        ) != 0
-                    if (exists) {
-                        val drawable =
-                            activity?.resources?.getDrawable(
-                                activity.resources.getIdentifier(
+                            activity?.resources?.getIdentifier(
                                     "slp$tokenId",
                                     "drawable",
                                     activity.packageName
+                            ) != 0
+                    if (exists) {
+                        val drawable =
+                                activity?.resources?.getDrawable(
+                                        activity.resources.getIdentifier(
+                                                "slp$tokenId",
+                                                "drawable",
+                                                activity.packageName
+                                        )
                                 )
-                            )
                         activity?.runOnUiThread {
                             slpIcon.setImageDrawable(drawable)
                             slpImage.visibility = View.GONE
@@ -111,7 +102,7 @@ class SlpTokenListEntryView {
             val text2 = view.findViewById<TextView>(R.id.text2)
             val text3 = view.findViewById<TextView>(R.id.text3)
             val balance =
-                tokenBal.balance
+                    tokenBal.balance
             if(slpToken != null) {
                 text1.text = String.format(
                         Locale.ENGLISH, "%.${slpToken.decimals

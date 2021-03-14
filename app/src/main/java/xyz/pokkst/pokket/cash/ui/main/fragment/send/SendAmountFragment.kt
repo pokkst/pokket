@@ -15,6 +15,8 @@ import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.Nullable
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
@@ -57,10 +59,11 @@ import java.util.concurrent.ExecutionException
  */
 class SendAmountFragment : Fragment() {
     var tokenId: String? = null
-    var sendingNft: Boolean? = null
     var root: View? = null
     var paymentContent: PaymentContent? = null
     var bip70Type: BIP70Type? = null
+
+    val sendingNft: MutableLiveData<Boolean> = MutableLiveData(false)
 
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -217,6 +220,10 @@ class SendAmountFragment : Fragment() {
             }
         }
 
+        sendingNft.observe(viewLifecycleOwner, Observer {
+            setInputViewForSlp(it)
+        })
+
         val filter = IntentFilter()
         filter.addAction(Constants.ACTION_MAIN_ENABLE_PAGER)
         filter.addAction(Constants.ACTION_FRAGMENT_SEND_SEND)
@@ -266,14 +273,14 @@ class SendAmountFragment : Fragment() {
                         tokenId = try {
                             val slpToken = WalletManager.walletKit?.slpBalances?.get(position)
                             if(slpToken != null) {
-                                sendingNft = false
+                                sendingNft.value = false
                             }
                             slpToken?.tokenId
                         } catch(e: Exception) {
                             val fixedPosition = position - (WalletManager.walletKit?.slpBalances?.size ?: 0)
                             val nftBalance = WalletManager.walletKit?.nftBalances?.get(fixedPosition)
                             if(nftBalance != null) {
-                                sendingNft = true
+                                sendingNft.value = true
                             }
                             nftBalance?.tokenId
                         }
@@ -284,7 +291,7 @@ class SendAmountFragment : Fragment() {
             if (tokenId != null) {
                 for (x in slpItems.indices) {
                     if (slpItems[x].tokenId == tokenId) {
-                        sendingNft = false
+                        sendingNft.value = false
                         root?.token_selector_todo?.setSelection(x)
                     }
                 }
@@ -292,16 +299,12 @@ class SendAmountFragment : Fragment() {
                 for (x in nftItems.indices) {
                     if (nftItems[x].tokenId == tokenId) {
                         val xWithOffset = x + slpItems.size
-                        sendingNft = true
+                        sendingNft.value = true
                         root?.token_selector_todo?.setSelection(xWithOffset)
                     }
                 }
             }
-            root?.token_selector_todo?.visibility = View.VISIBLE
-            root?.alt_currency_symbol?.visibility = View.GONE
-            root?.alt_currency_display?.visibility = View.GONE
-            root?.input_type_toggle?.visibility = View.GONE
-            root?.main_currency_symbol?.visibility = View.GONE
+            setInputViewForSlp(false)
         }
     }
 
@@ -311,6 +314,24 @@ class SendAmountFragment : Fragment() {
             root?.alt_currency_display?.visibility = View.GONE
             root?.input_type_toggle?.visibility = View.GONE
             root?.main_currency_symbol?.text = WalletManager.walletKit?.getSlpToken(tokenId)?.ticker ?: WalletManager.walletKit?.getNft(tokenId)?.ticker
+        }
+    }
+
+    private fun setInputViewForSlp(isSendingNft: Boolean) {
+        root?.token_selector_todo?.visibility = View.VISIBLE
+        root?.alt_currency_symbol?.visibility = View.GONE
+        root?.alt_currency_display?.visibility = View.GONE
+        root?.input_type_toggle?.visibility = View.GONE
+        root?.main_currency_symbol?.visibility = View.GONE
+        if(isSendingNft) {
+            root?.send_amount_input?.isEnabled = false
+            root?.send_amount_input?.setText("1")
+            root?.send_amount_input?.visibility = View.GONE
+        } else {
+
+            root?.send_amount_input?.isEnabled = true
+            root?.send_amount_input?.text = null
+            root?.send_amount_input?.visibility = View.VISIBLE
         }
     }
 
@@ -688,7 +709,7 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun processSlpTransaction(address: String, tokenAmount: Double, tokenId: String) {
-        val tx = if(sendingNft == true) {
+        val tx = if(sendingNft.value == true) {
             WalletManager.walletKit?.createNftChildSendTx(address, tokenId, tokenAmount, null)
         } else {
             WalletManager.walletKit?.createSlpTransaction(address, tokenId, tokenAmount, null)
