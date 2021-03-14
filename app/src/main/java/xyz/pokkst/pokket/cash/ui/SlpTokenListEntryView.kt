@@ -120,10 +120,7 @@ class SlpTokenListEntryView {
                 text3.text = slpToken.ticker
                 text2.text = slpToken.tokenId
             } else if(nft != null) {
-                text1.text = String.format(
-                        Locale.ENGLISH, "%.${nft.decimals
-                        ?: 0}f", balance
-                )
+                text1.text = nft.name
                 text3.text = nft.ticker + " (NFT)"
                 text2.text = nft.tokenId
             }
