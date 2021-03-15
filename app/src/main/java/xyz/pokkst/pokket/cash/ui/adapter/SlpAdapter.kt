@@ -56,17 +56,30 @@ class SlpAdapter(private val dataSet: List<SlpTokenBalance>) :
 
             try {
                 if (slpToken != null) {
-                    val picasso = Picasso.Builder(itemView.context)
-                            .listener { picasso, uri, exception ->
-                                slpImage.setAddress(slpBlockiesAddress)
-                                slpImage.setCornerRadius(128f)
-                                slpImage.visibility = View.VISIBLE
-                                slpIcon.visibility = View.GONE
-                            }
-                            .build()
-                    picasso.load("https://tokens.bch.sx/64/${slpToken.tokenId}.png").into(slpIcon)
-                    slpImage.visibility = View.GONE
-                    slpIcon.visibility = View.VISIBLE
+                    val identifier = itemView.resources?.getIdentifier(
+                            "slp$tokenId",
+                            "drawable",
+                            itemView.context.packageName
+                    )
+                    val exists =
+                            identifier != 0
+                    if (exists) {
+                        val drawable =
+                                identifier?.let {
+                                    itemView.resources?.getDrawable(
+                                            it
+                                    )
+                                }
+                        slpIcon.setImageDrawable(drawable)
+                        slpImage.visibility = View.GONE
+                        slpIcon.visibility = View.VISIBLE
+                    } else {
+                        slpImage.setAddress(slpBlockiesAddress)
+                        slpImage.setCornerRadius(128f)
+                        slpImage.visibility = View.VISIBLE
+                        slpIcon.visibility = View.GONE
+                    }
+
                 }
             } catch (e: Exception) {
                 slpImage.setAddress(slpBlockiesAddress)
