@@ -95,7 +95,7 @@ class SettingsHomeFragment : Fragment() {
             val txid = txList[position]
             val tx = WalletManager.wallet?.getTransaction(Sha256Hash.wrap(txid))
             val amount = tx?.getValue(WalletManager.wallet)
-            val isSlp = SlpOpReturn.isSlpTx(tx)
+            val isSlp = SlpOpReturn.isSlpTx(tx) || SlpOpReturn.isNftChildTx(tx)
             val slpAmount = if (isSlp) {
                 val slpTx = SlpTransaction(tx)
                 val slpToken = WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
@@ -177,7 +177,7 @@ class SettingsHomeFragment : Fragment() {
                         } catch (e: Exception) {
                             continue
                         }
-                        val isSlp = SlpOpReturn.isSlpTx(tx)
+                        val isSlp = SlpOpReturn.isSlpTx(tx) || SlpOpReturn.isNftChildTx(tx)
                         val confirmations = tx.confidence.depthInBlocks
                         val value = tx.getValue(wallet)
                         val timestamp = tx.updateTime.time.toString()
@@ -186,7 +186,7 @@ class SettingsHomeFragment : Fragment() {
                         val amountStr = if (isSlp) {
                             val slpTx = SlpTransaction(tx)
                             val slpToken =
-                                WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
+                                WalletManager.walletKit?.getSlpToken(slpTx.tokenId) ?: WalletManager.walletKit?.getNft(slpTx.tokenId)
                             if (slpToken != null) {
                                 ticker = slpToken.ticker
                                 val slpAmount = slpTx.getRawValue(WalletManager.wallet)

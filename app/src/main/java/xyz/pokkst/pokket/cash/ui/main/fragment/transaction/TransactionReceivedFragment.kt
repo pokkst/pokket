@@ -65,7 +65,7 @@ class TransactionReceivedFragment : Fragment() {
         val toAddresses = ArrayList<String?>()
         val toAmounts = ArrayList<Long>()
         val slpTx = slpTransaction
-        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId)
+        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId) ?: WalletManager.walletKit?.getNft(slpTx?.tokenId)
         for (x in tx.outputs.indices) {
             val slpUtxo = if (slpTx != null) {
                 try {
@@ -150,7 +150,7 @@ class TransactionReceivedFragment : Fragment() {
     ) {
         val inflater = requireActivity().layoutInflater
         val slpTx = slpTransaction
-        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId)
+        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId) ?: WalletManager.walletKit?.getNft(slpTx?.tokenId)
         val txid = arguments?.getString("txid", "")
         val tx = WalletManager.wallet?.getTransaction(Sha256Hash.wrap(txid))
         for (i in addresses.indices) {

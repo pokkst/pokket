@@ -12,7 +12,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 30
         versionCode 1
-        versionName "0.4.0"
+        versionName "0.4.1"
         multiDexEnabled = true
     }
     buildTypes {
@@ -50,7 +50,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-runtime:2.3.2'
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
-    implementation 'com.github.pokkst:bitcoincashj:1468bcbc'
+    implementation 'com.github.pokkst:bitcoincashj:ddafdc44'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.luminiasoft.ethereum:blockiesandroid:0.1.0'
     implementation 'com.github.kenglxn.QRGen:android:2.5.0'
