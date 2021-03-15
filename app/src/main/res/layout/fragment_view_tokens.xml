@@ -3,88 +3,22 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/srlSLP"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
-        android:visibility="visible">
-
-        <androidx.core.widget.NestedScrollView
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/loading_slp_tokens_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:isScrollContainer="false">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/loading_slp_tokens_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:textSize="16sp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:padding="20dp"
-                    android:text="loading slp tokens"/>
-                <TextView
-                    android:id="@+id/loading_nfts_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:textSize="16sp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:padding="20dp"
-                    android:text="loading NFTs"/>
-                <TextView
-                    android:id="@+id/slp_list_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:textSize="16sp"
-                    android:padding="5dp"
-                    android:layout_marginStart="8dp"
-                    android:text="SLP tokens"
-                    android:visibility="gone"/>
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/slpList"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
-                <TextView
-                    android:id="@+id/nft_list_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:textSize="16sp"
-                    android:padding="5dp"
-                    android:layout_marginStart="8dp"
-                    android:text="NFTs"
-                    android:visibility="gone"/>
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/nftList"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
-                <TextView
-                    android:id="@+id/no_tokens_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:textSize="16sp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:padding="20dp"
-                    android:text="no slp tokens found"
-                    android:visibility="gone"/>
-                <TextView
-                    android:id="@+id/no_nfts_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:textSize="16sp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:padding="20dp"
-                    android:text="no NFTs found"
-                    android:visibility="gone"/>
-            </LinearLayout>
-
-        </androidx.core.widget.NestedScrollView>
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="20dp"
+            android:text="loading tokens"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tokenList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 </LinearLayout>
