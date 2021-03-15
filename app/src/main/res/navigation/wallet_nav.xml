@@ -18,7 +18,12 @@
         </action>
         <action
             android:id="@+id/nav_to_tokens"
-            app:destination="@id/viewTokensFragment"/>
+            app:destination="@id/viewTokensFragment">
+            <argument
+                android:name="address"
+                app:nullable="true"
+                app:argType="string" />
+        </action>
     </fragment>
     <fragment
         android:id="@+id/sendAmountFragment"

@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -16,6 +15,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,9 +24,9 @@ import kotlinx.coroutines.launch
 import org.bitcoinj.core.slp.SlpTokenBalance
 import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.R
-import xyz.pokkst.pokket.cash.ui.NftListEntryView
-import xyz.pokkst.pokket.cash.ui.NonScrollListView
-import xyz.pokkst.pokket.cash.ui.SlpTokenListEntryView
+import xyz.pokkst.pokket.cash.ui.adapter.NftAdapter
+import xyz.pokkst.pokket.cash.ui.adapter.SlpAdapter
+import xyz.pokkst.pokket.cash.ui.listener.SlpAdapterListener
 import xyz.pokkst.pokket.cash.util.Constants
 import xyz.pokkst.pokket.cash.util.Toaster
 import xyz.pokkst.pokket.cash.wallet.WalletManager
@@ -34,11 +35,12 @@ import xyz.pokkst.pokket.cash.wallet.WalletManager
 /**
  * A placeholder fragment containing a simple view.
  */
-class ViewTokensFragment : Fragment() {
+class ViewTokensFragment : Fragment(), SlpAdapterListener {
     var root: View? = null
+    var sendingAddress: String? = null
     private var srlSLP: SwipeRefreshLayout? = null
-    private var slpList: NonScrollListView? = null
-    private var nftList: NonScrollListView? = null
+    private var slpList: RecyclerView? = null
+    private var nftList: RecyclerView? = null
     private var slpCalculationJob: Job? = null
     private var nftCalculationJob: Job? = null
 
@@ -74,29 +76,9 @@ class ViewTokensFragment : Fragment() {
         slpList = root?.findViewById(R.id.slpList)
         nftList = root?.findViewById(R.id.nftList)
         this.srlSLP?.setOnRefreshListener { this.refresh() }
-        this.slpList?.setOnItemClickListener { parent, view, position, id ->
-            val tokenBalance = WalletManager.walletKit?.slpBalances?.get(position)
-            val tokenId = tokenBalance?.tokenId
-            findNavController().navigate(
-                ViewTokensFragmentDirections.navToSendFromViewTokens(
-                    null,
-                    tokenId
-                )
-            )
-        }
-
-        this.nftList?.setOnItemClickListener { parent, view, position, id ->
-            val tokenBalance = WalletManager.walletKit?.nftBalances?.get(position)
-            val tokenId = tokenBalance?.tokenId
-            findNavController().navigate(
-                    ViewTokensFragmentDirections.navToSendFromViewTokens(
-                            null,
-                            tokenId
-                    )
-            )
-        }
-
         refresh()
+
+        sendingAddress = arguments?.getString("address")
         return root
     }
 
@@ -136,26 +118,11 @@ class ViewTokensFragment : Fragment() {
 
     private fun setSLPList() {
         val slpItems = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
-        val slpAdapter = object : ArrayAdapter<SlpTokenBalance>(
-            requireContext(),
-            R.layout.token_list_cell,
-                slpItems
-        ) {
-            override fun getView(
-                position: Int,
-                convertView: View?,
-                parent: ViewGroup
-            ): View {
-                return SlpTokenListEntryView.instanceOf(
-                    activity,
-                    position,
-                    R.layout.token_list_cell
-                )
-            }
-        }
-
+        val slpAdapter = SlpAdapter(slpItems)
+        slpAdapter.listener = this
         slpList?.adapter = slpAdapter
-        slpList?.refreshDrawableState()
+        slpList?.layoutManager = LinearLayoutManager(context)
+        slpList?.isNestedScrollingEnabled = false
 
         if (slpItems.isEmpty()) {
             slpList?.visibility = View.GONE
@@ -172,26 +139,11 @@ class ViewTokensFragment : Fragment() {
 
     private fun setNFTList() {
         val nftItems = WalletManager.walletKit?.nftBalances?.toList() ?: listOf()
-        val nftAdapter = object : ArrayAdapter<SlpTokenBalance>(
-            requireContext(),
-            R.layout.token_list_cell,
-            nftItems
-        ) {
-            override fun getView(
-                position: Int,
-                convertView: View?,
-                parent: ViewGroup
-            ): View {
-                return NftListEntryView.instanceOf(
-                    activity,
-                    position,
-                    R.layout.token_list_cell
-                )
-            }
-        }
-
+        val nftAdapter = NftAdapter(nftItems)
+        nftAdapter.listener = this
         nftList?.adapter = nftAdapter
-        nftList?.refreshDrawableState()
+        nftList?.layoutManager = LinearLayoutManager(context)
+        nftList?.isNestedScrollingEnabled = false
 
         if (nftItems.isEmpty()) {
             nftList?.visibility = View.GONE
@@ -205,5 +157,14 @@ class ViewTokensFragment : Fragment() {
 
         root?.findViewById<TextView>(R.id.loading_nfts_view)?.visibility = View.GONE
 
+    }
+
+    override fun onClickToken(slpTokenBalance: SlpTokenBalance) {
+        findNavController().navigate(
+                ViewTokensFragmentDirections.navToSendFromViewTokens(
+                        sendingAddress,
+                        slpTokenBalance.tokenId
+                )
+        )
     }
 }

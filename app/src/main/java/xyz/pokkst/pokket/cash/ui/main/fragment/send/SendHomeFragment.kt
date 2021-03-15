@@ -39,16 +39,25 @@ class SendHomeFragment : Fragment() {
                 requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val pasteData = clipBoard.primaryClip?.getItemAt(0)?.text.toString()
             if (isValidPaymentType(pasteData) || PayloadHelper.isMultisigPayload(pasteData)) {
-                findNavController().navigate(
-                    SendHomeFragmentDirections.navToSend(
-                        pasteData
+                val paymentType = UriHelper.parse(pasteData)?.paymentType
+                if(paymentType == PaymentType.SLP_ADDRESS) {
+                    findNavController().navigate(
+                            SendHomeFragmentDirections.navToTokens(
+                                    pasteData
+                            )
                     )
-                )
+                } else {
+                    findNavController().navigate(
+                            SendHomeFragmentDirections.navToSend(
+                                    pasteData
+                            )
+                    )
+                }
             }
         }
 
         root.view_tokens_button.setOnClickListener {
-            findNavController().navigate(SendHomeFragmentDirections.navToTokens())
+            findNavController().navigate(SendHomeFragmentDirections.navToTokens(null))
         }
 
         if (WalletManager.isMultisigKit) {
@@ -66,11 +75,20 @@ class SendHomeFragment : Fragment() {
                     val scanData = data.getStringExtra(Constants.QR_SCAN_RESULT)
                     if (scanData != null) {
                         if (isValidPaymentType(scanData) || PayloadHelper.isMultisigPayload(scanData)) {
-                            findNavController().navigate(
-                                SendHomeFragmentDirections.navToSend(
-                                    scanData
+                            val paymentType = UriHelper.parse(scanData)?.paymentType
+                            if(paymentType == PaymentType.SLP_ADDRESS) {
+                                findNavController().navigate(
+                                        SendHomeFragmentDirections.navToTokens(
+                                                scanData
+                                        )
                                 )
-                            )
+                            } else {
+                                findNavController().navigate(
+                                        SendHomeFragmentDirections.navToSend(
+                                                scanData
+                                        )
+                                )
+                            }
                         }
                     }
                 }

@@ -26,6 +26,8 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.gson.Gson
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import com.luminiasoft.ethereum.blockiesandroid.BlockiesIdenticon
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.component_input_numpad.view.*
 import kotlinx.android.synthetic.main.fragment_send_amount.view.*
 import kotlinx.coroutines.Dispatchers
@@ -34,12 +36,9 @@ import net.glxn.qrgen.android.QRCode
 import org.bitcoinj.core.*
 import org.bitcoinj.core.bip47.BIP47Channel
 import org.bitcoinj.core.flipstarter.FlipstarterInvoicePayload
-import org.bitcoinj.core.slp.SlpTokenBalance
-import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.protocols.payments.PaymentProtocol
 import org.bitcoinj.protocols.payments.PaymentProtocolException
 import org.bitcoinj.protocols.payments.slp.SlpPaymentProtocol
-import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.utils.MultisigPayload
 import org.bitcoinj.wallet.SendRequest
@@ -47,11 +46,10 @@ import org.bitcoinj.wallet.Wallet
 import org.bouncycastle.util.encoders.Hex
 import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.R
-import xyz.pokkst.pokket.cash.ui.NftListEntryView
-import xyz.pokkst.pokket.cash.ui.SlpTokenListEntryView
 import xyz.pokkst.pokket.cash.util.*
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 import java.math.BigDecimal
+import java.util.*
 import java.util.concurrent.ExecutionException
 
 
@@ -222,7 +220,9 @@ class SendAmountFragment : Fragment() {
         }
 
         sendingNft.observe(viewLifecycleOwner, Observer {
-            setInputViewForSlp(it)
+            if(tokenId != null) {
+                setInputViewForSlp(it)
+            }
         })
 
         val filter = IntentFilter()
@@ -234,96 +234,8 @@ class SendAmountFragment : Fragment() {
 
     private fun setSlpView() {
         if (tokenId != null || paymentContent?.paymentType == PaymentType.SLP_ADDRESS) {
-            val slpItems = WalletManager.walletKit?.slpBalances?.toList() ?: listOf()
-            val nftItems = WalletManager.walletKit?.nftBalances?.toList() ?: listOf()
-            val combinedList = slpItems + nftItems
-            val adapter = object : ArrayAdapter<SlpTokenBalance>(
-                requireContext(),
-                R.layout.token_list_cell,
-                    combinedList
-            ) {
-                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    return if(position >= slpItems.size) {
-                        val nftPosition = position - (slpItems.size)
-                        NftListEntryView.instanceOf(
-                            activity,
-                            nftPosition,
-                            R.layout.token_spinner_cell
-                        )
-                    } else {
-                        SlpTokenListEntryView.instanceOf(
-                            activity,
-                            position,
-                            R.layout.token_spinner_cell
-                        )
-                    }
-                }
-
-                override fun getDropDownView(
-                    position: Int,
-                    convertView: View?,
-                    parent: ViewGroup
-                ): View {
-                    return if(position >= slpItems.size) {
-                        val nftPosition = position - (slpItems.size)
-                        NftListEntryView.instanceOf(
-                            activity,
-                            nftPosition,
-                            R.layout.token_list_cell
-                        )
-                    } else {
-                        SlpTokenListEntryView.instanceOf(
-                            activity,
-                            position,
-                            R.layout.token_list_cell
-                        )
-                    }
-                }
-            }
-            root?.token_selector_todo?.adapter = adapter
-            root?.token_selector_todo?.onItemSelectedListener =
-                object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>,
-                        v: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        tokenId = try {
-                            val slpToken = WalletManager.walletKit?.slpBalances?.get(position)
-                            if(slpToken != null) {
-                                sendingNft.value = false
-                            }
-                            slpToken?.tokenId
-                        } catch(e: Exception) {
-                            val fixedPosition = position - (WalletManager.walletKit?.slpBalances?.size ?: 0)
-                            val nftBalance = WalletManager.walletKit?.nftBalances?.get(fixedPosition)
-                            if(nftBalance != null) {
-                                sendingNft.value = true
-                            }
-                            nftBalance?.tokenId
-                        }
-                    }
-
-                    override fun onNothingSelected(parent: AdapterView<*>) {}
-                }
-            if (tokenId != null) {
-                for (x in slpItems.indices) {
-                    if (slpItems[x].tokenId == tokenId) {
-                        sendingNft.value = false
-                        root?.token_selector_todo?.setSelection(x)
-                    }
-                }
-
-                for (x in nftItems.indices) {
-                    if (nftItems[x].tokenId == tokenId) {
-                        val xWithOffset = x + slpItems.size
-                        sendingNft.value = true
-                        root?.token_selector_todo?.setSelection(xWithOffset)
-                    }
-                }
-            }
-            setInputViewForSlp(false)
+            val nft = WalletManager.walletKit?.getNft(tokenId)
+            sendingNft.value = nft != null
         }
     }
 
@@ -337,7 +249,17 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun setInputViewForSlp(isSendingNft: Boolean) {
-        root?.token_selector_todo?.visibility = View.VISIBLE
+        val tokenLayout = root?.findViewById<LinearLayout>(R.id.selected_token_layout)
+        val slpImage = tokenLayout?.findViewById<BlockiesIdenticon>(R.id.slpImage)
+        val slpIcon = tokenLayout?.findViewById<ImageView>(R.id.slpWithIcon)
+        val text1 = tokenLayout?.findViewById<TextView>(R.id.text1)
+        val text2 = tokenLayout?.findViewById<TextView>(R.id.text2)
+        val text3 = tokenLayout?.findViewById<TextView>(R.id.text3)
+        val blockiesAddress = blockieAddressFromTokenId(
+                tokenId
+                        ?: error("")
+        )
+        root?.selected_token_layout?.visibility = View.VISIBLE
         root?.alt_currency_symbol?.visibility = View.GONE
         root?.alt_currency_display?.visibility = View.GONE
         root?.input_type_toggle?.visibility = View.GONE
@@ -346,11 +268,65 @@ class SendAmountFragment : Fragment() {
             root?.send_amount_input?.isEnabled = false
             root?.send_amount_input?.setText("1")
             root?.send_amount_input?.visibility = View.GONE
-        } else {
 
+            val nft = WalletManager.walletKit?.getNft(tokenId)
+
+            try {
+                if(nft != null) {
+                    val nftParentId = nft.nftParentId
+                    if(nftParentId == NFTConstants.NFT_PARENT_ID_WAIFU) {
+                        Picasso.get().load("https://icons.waifufaucet.com/64/${nft.tokenId}.png").into(slpIcon)
+                        slpIcon?.visibility = View.VISIBLE
+                        slpImage?.visibility = View.GONE
+                    } else {
+                        slpImage?.setAddress(blockiesAddress)
+                        slpImage?.setCornerRadius(128f)
+                    }
+                }
+            } catch (e: Exception) {
+                slpImage?.setAddress(blockiesAddress)
+                slpImage?.setCornerRadius(128f)
+            }
+
+            text1?.text = nft?.name
+            text3?.text = nft?.ticker + " (NFT)"
+            text2?.text = nft?.tokenId
+        } else {
             root?.send_amount_input?.isEnabled = true
             root?.send_amount_input?.text = null
             root?.send_amount_input?.visibility = View.VISIBLE
+
+            val slpToken = WalletManager.walletKit?.getSlpToken(tokenId)
+
+            try {
+                if (slpToken != null) {
+                    val picasso = context?.let {
+                        Picasso.Builder(it)
+                                .listener { picasso, uri, exception ->
+                                    slpImage?.setAddress(blockiesAddress)
+                                    slpImage?.setCornerRadius(128f)
+                                    slpImage?.visibility = View.VISIBLE
+                                    slpIcon?.visibility = View.GONE
+                                }
+                                .build()
+                    }
+                    picasso?.load("https://tokens.bch.sx/64/${slpToken.tokenId}.png")?.into(slpIcon)
+                    slpImage?.visibility = View.GONE
+                    slpIcon?.visibility = View.VISIBLE
+                }
+            } catch (e: Exception) {
+                slpImage?.setAddress(blockiesAddress)
+                slpImage?.setCornerRadius(128f)
+            }
+
+            val balance =
+                    WalletManager.walletKit?.getTokenBalance(tokenId)?.balance
+            text1?.text = String.format(
+                    Locale.ENGLISH, "%.${slpToken?.decimals
+                    ?: 0}f", balance
+            )
+            text3?.text = slpToken?.ticker
+            text2?.text = slpToken?.tokenId
         }
     }
 
@@ -968,5 +944,9 @@ class SendAmountFragment : Fragment() {
         }
 
         return null
+    }
+
+    private fun blockieAddressFromTokenId(tokenId: String): String {
+        return tokenId.slice(IntRange(12, tokenId.count() - 1))
     }
 }

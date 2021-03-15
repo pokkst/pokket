@@ -10,7 +10,7 @@
         android:background="@color/white"
         android:visibility="visible">
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:isScrollContainer="false">
@@ -45,7 +45,7 @@
                     android:layout_marginStart="8dp"
                     android:text="SLP tokens"
                     android:visibility="gone"/>
-                <xyz.pokkst.pokket.cash.ui.NonScrollListView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/slpList"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
@@ -58,7 +58,7 @@
                     android:layout_marginStart="8dp"
                     android:text="NFTs"
                     android:visibility="gone"/>
-                <xyz.pokkst.pokket.cash.ui.NonScrollListView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/nftList"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
@@ -84,7 +84,7 @@
                     android:visibility="gone"/>
             </LinearLayout>
 
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>
