@@ -91,22 +91,14 @@ class ViewTokensFragment : Fragment(), SlpAdapterListener {
 
     private fun refresh() {
         slpCalculationJob = lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                WalletManager.walletKit?.recalculateSlpUtxos()
-            } catch(e: Exception) {
-                e.message?.let { context?.let { it1 -> Toaster.showToastMessage(it1, it, Toast.LENGTH_LONG) } }
-            }
+            WalletManager.walletKit?.recalculateSlpUtxos()
             activity?.runOnUiThread {
                 setSLPList()
             }
         }
 
         nftCalculationJob = lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                WalletManager.walletKit?.recalculateNftUtxos()
-            } catch(e: Exception) {
-                e.message?.let { context?.let { it1 -> Toaster.showToastMessage(it1, it, Toast.LENGTH_LONG) } }
-            }
+            WalletManager.walletKit?.recalculateNftUtxos()
             activity?.runOnUiThread {
                 setNFTList()
             }
