@@ -24,9 +24,9 @@ import xyz.pokkst.pokket.cash.wallet.WalletManager
  */
 class SendHomeFragment : Fragment() {
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_send_home, container, false)
 
@@ -36,11 +36,11 @@ class SendHomeFragment : Fragment() {
 
         root.paste_address_button.setOnClickListener {
             val clipBoard =
-                requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                    requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val pasteData = clipBoard.primaryClip?.getItemAt(0)?.text.toString()
             if (isValidPaymentType(pasteData) || PayloadHelper.isMultisigPayload(pasteData)) {
                 val paymentType = UriHelper.parse(pasteData)?.paymentType
-                if(paymentType == PaymentType.SLP_ADDRESS) {
+                if (paymentType == PaymentType.SLP_ADDRESS) {
                     findNavController().navigate(
                             SendHomeFragmentDirections.navToTokens(
                                     pasteData
@@ -76,7 +76,7 @@ class SendHomeFragment : Fragment() {
                     if (scanData != null) {
                         if (isValidPaymentType(scanData) || PayloadHelper.isMultisigPayload(scanData)) {
                             val paymentType = UriHelper.parse(scanData)?.paymentType
-                            if(paymentType == PaymentType.SLP_ADDRESS) {
+                            if (paymentType == PaymentType.SLP_ADDRESS) {
                                 findNavController().navigate(
                                         SendHomeFragmentDirections.navToTokens(
                                                 scanData

@@ -8,8 +8,8 @@ import com.journeyapps.barcodescanner.CaptureActivity
 class QRHelper {
     fun startQRScan(fragment: Fragment, requestCode: Int) {
         IntentIntegrator.forSupportFragment(fragment).setPrompt("Scan QR").setBeepEnabled(false)
-            .setDesiredBarcodeFormats(BarcodeFormat.QR_CODE.name).setOrientationLocked(true)
-            .setCameraId(0).setCaptureActivity(CaptureActivity::class.java)
-            .setRequestCode(requestCode).initiateScan()
+                .setDesiredBarcodeFormats(BarcodeFormat.QR_CODE.name).setOrientationLocked(true)
+                .setCameraId(0).setCaptureActivity(CaptureActivity::class.java)
+                .setRequestCode(requestCode).initiateScan()
     }
 }

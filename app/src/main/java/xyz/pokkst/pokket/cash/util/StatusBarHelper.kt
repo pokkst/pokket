@@ -32,7 +32,7 @@ class StatusBarHelper {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 activity.window.statusBarColor = activity.resources.getColor(R.color.statusBarLight)
                 activity.window.navigationBarColor =
-                    activity.resources.getColor(R.color.navBarLight)
+                        activity.resources.getColor(R.color.navBarLight)
             }
         }
     }

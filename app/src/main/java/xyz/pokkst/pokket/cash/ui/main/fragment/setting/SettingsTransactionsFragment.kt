@@ -23,9 +23,9 @@ import xyz.pokkst.pokket.cash.wallet.WalletManager
  */
 class SettingsTransactionsFragment : Fragment(), TxAdapterListener {
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_transactions, container, false)
         this.setArrayAdapter(root, WalletManager.wallet)

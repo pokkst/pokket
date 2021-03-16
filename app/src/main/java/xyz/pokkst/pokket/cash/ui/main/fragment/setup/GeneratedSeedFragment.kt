@@ -35,9 +35,9 @@ class GeneratedSeedFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_generated_seed, container, false)
         val isMultisig = args.multisig
@@ -85,7 +85,7 @@ class GeneratedSeedFragment : Fragment() {
                 intent.putExtra("seed", seedStr)
                 intent.putExtra("new", true)
                 intent.putExtra("multisig", isMultisig)
-                if(!isMultisig && bip39Passphrase.isNotEmpty()) {
+                if (!isMultisig && bip39Passphrase.isNotEmpty()) {
                     intent.putExtra("passphrase", bip39Passphrase)
                 }
                 startActivity(intent)

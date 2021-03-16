@@ -47,8 +47,8 @@ class MainFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_main, container, false)
         val sendScreen: LinearLayout = root.findViewById(R.id.send_screen)
@@ -64,28 +64,28 @@ class MainFragment : Fragment() {
 
             receiveText?.setOnClickListener {
                 ClipboardHelper.copyToClipboard(
-                    activity,
-                    receiveText?.text.toString()
+                        activity,
+                        receiveText?.text.toString()
                 )
             }
             receiveQr?.setOnClickListener {
                 ClipboardHelper.copyToClipboard(
-                    activity,
-                    receiveText?.text.toString()
+                        activity,
+                        receiveText?.text.toString()
                 )
             }
             receiveQrCoinIcon?.setOnClickListener {
                 ClipboardHelper.copyToClipboard(
-                    activity,
-                    receiveText?.text.toString()
+                        activity,
+                        receiveText?.text.toString()
                 )
             }
             swapAddressButton?.setOnClickListener {
                 currentAddressViewType = when (currentAddressViewType) {
                     AddressViewType.CASH -> {
                         refresh(
-                            WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
-                            R.drawable.logo_slp
+                                WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
+                                R.drawable.logo_slp
                         )
                         AddressViewType.SLP
                     }
@@ -95,8 +95,8 @@ class MainFragment : Fragment() {
                     }
                     AddressViewType.BIP47 -> {
                         refresh(
-                            WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
-                            R.drawable.logo_bch
+                                WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
+                                R.drawable.logo_bch
                         )
                         AddressViewType.CASH
                     }
@@ -125,8 +125,8 @@ class MainFragment : Fragment() {
         when (currentAddressViewType) {
             AddressViewType.SLP -> {
                 refresh(
-                    WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
-                    R.drawable.logo_slp
+                        WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
+                        R.drawable.logo_slp
                 )
             }
             AddressViewType.BIP47 -> {
@@ -134,8 +134,8 @@ class MainFragment : Fragment() {
             }
             AddressViewType.CASH -> {
                 refresh(
-                    WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
-                    R.drawable.logo_bch
+                        WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
+                        R.drawable.logo_bch
                 )
             }
         }
@@ -149,12 +149,12 @@ class MainFragment : Fragment() {
 
         try {
             val encoder = QRCode.from(address).withSize(1024, 1024)
-                .withErrorCorrection(ErrorCorrectionLevel.H)
+                    .withErrorCorrection(ErrorCorrectionLevel.H)
             val qrCode = encoder.bitmap()
             receiveQrCoinIcon?.setImageResource(resId)
             receiveQr?.setImageBitmap(qrCode)
             receiveText?.text = address?.replace("${WalletManager.parameters.cashAddrPrefix}:", "")
-                ?.replace("${WalletManager.parameters.simpleledgerPrefix}:", "")
+                    ?.replace("${WalletManager.parameters.simpleledgerPrefix}:", "")
         } catch (e: WriterException) {
             e.printStackTrace()
         }

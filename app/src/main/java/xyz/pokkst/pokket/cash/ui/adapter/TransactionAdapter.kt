@@ -17,7 +17,7 @@ import xyz.pokkst.pokket.cash.util.PriceHelper
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 
 class TransactionAdapter(private val dataSet: List<Transaction>) :
-    RecyclerView.Adapter<TransactionAdapter.NftAdapter>() {
+        RecyclerView.Adapter<TransactionAdapter.NftAdapter>() {
 
     var listener: TxAdapterListener? = null
 
@@ -25,7 +25,7 @@ class TransactionAdapter(private val dataSet: List<Transaction>) :
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): NftAdapter {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.transaction_list_item, viewGroup, false)
+                .inflate(R.layout.transaction_list_item, viewGroup, false)
         return NftAdapter(view, listener)
     }
 
@@ -57,7 +57,8 @@ class TransactionAdapter(private val dataSet: List<Transaction>) :
             val amountStr = if (isSlp) {
                 val slpTx = SlpTransaction(tx)
                 val slpToken =
-                        WalletManager.walletKit?.getSlpToken(slpTx.tokenId) ?: WalletManager.walletKit?.getNft(slpTx.tokenId)
+                        WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
+                                ?: WalletManager.walletKit?.getNft(slpTx.tokenId)
                 if (slpToken != null) {
                     ticker = slpToken.ticker
                     val slpAmount = slpTx.getRawValue(WalletManager.wallet)
@@ -69,7 +70,7 @@ class TransactionAdapter(private val dataSet: List<Transaction>) :
             } else {
                 value.toPlainString()
             }
-            val action = if(value.isPositive) "received" else "sent"
+            val action = if (value.isPositive) "received" else "sent"
             val received = action == "received"
             val fiatAmount = BalanceFormatter.formatBalance(
                     (amountStr.toDouble() * PriceHelper.price),

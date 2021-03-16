@@ -16,9 +16,9 @@ import xyz.pokkst.pokket.cash.util.PrefsHelper
  */
 class SettingsNodeFragment : Fragment() {
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_node, container, false)
         val ip = PrefsHelper.instance(activity)?.getString("node_ip", null)

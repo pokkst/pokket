@@ -7,7 +7,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.luminiasoft.ethereum.blockiesandroid.BlockiesIdenticon
-import com.squareup.picasso.Picasso
 import org.bitcoinj.core.slp.SlpTokenBalance
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.ui.listener.SlpAdapterListener
@@ -92,8 +91,10 @@ class SlpAdapter(private val dataSet: List<SlpTokenBalance>) :
             val balance =
                     tokenBalance.balance
             text1.text = String.format(
-                    Locale.ENGLISH, "%.${slpToken?.decimals
-                    ?: 0}f", balance
+                    Locale.ENGLISH, "%.${
+                slpToken?.decimals
+                        ?: 0
+            }f", balance
             )
             text3.text = slpToken?.ticker
             text2.text = slpToken?.tokenId

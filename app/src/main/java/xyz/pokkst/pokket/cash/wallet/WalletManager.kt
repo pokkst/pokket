@@ -56,11 +56,11 @@ class WalletManager {
             setBitcoinSDKThread()
 
             walletKit = object : SlpBIP47AppKit(
-                parameters,
-                Script.ScriptType.P2PKH,
-                KeyChainGroupStructure.SLP,
-                walletDir,
-                walletFileName
+                    parameters,
+                    Script.ScriptType.P2PKH,
+                    KeyChainGroupStructure.SLP,
+                    walletDir,
+                    walletFileName
             ) {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
@@ -97,7 +97,8 @@ class WalletManager {
 
             val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1560281760L
             if (seed != null) {
-                val deterministicSeed = DeterministicSeed(seed, null, passphrase ?: "", creationDate)
+                val deterministicSeed = DeterministicSeed(seed, null, passphrase
+                        ?: "", creationDate)
                 walletKit?.restoreWalletFromSeed(deterministicSeed)
             }
 
@@ -109,16 +110,16 @@ class WalletManager {
         }
 
         fun startMultisigWallet(
-            activity: Activity,
-            seed: String?,
-            newUser: Boolean,
-            followingKeys: List<DeterministicKey>,
-            m: Int
+                activity: Activity,
+                seed: String?,
+                newUser: Boolean,
+                followingKeys: List<DeterministicKey>,
+                m: Int
         ) {
             setBitcoinSDKThread()
 
             multisigWalletKit = object :
-                MultisigAppKit(parameters, walletDir, multisigWalletFileName, followingKeys, m) {
+                    MultisigAppKit(parameters, walletDir, multisigWalletFileName, followingKeys, m) {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
                     wallet().allowSpendingUnconfirmedTransactions()

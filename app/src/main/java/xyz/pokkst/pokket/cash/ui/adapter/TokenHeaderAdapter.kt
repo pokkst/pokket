@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import xyz.pokkst.pokket.cash.R
 
 class TokenHeaderAdapter(private val text: String) :
-    RecyclerView.Adapter<TokenHeaderAdapter.TokenHeaderViewHolder>() {
+        RecyclerView.Adapter<TokenHeaderAdapter.TokenHeaderViewHolder>() {
 
     var isVisible: Boolean = true
         set(value) {
@@ -20,7 +20,7 @@ class TokenHeaderAdapter(private val text: String) :
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): TokenHeaderViewHolder {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.token_header_layout, viewGroup, false)
+                .inflate(R.layout.token_header_layout, viewGroup, false)
         return TokenHeaderViewHolder(view, text)
     }
 
@@ -33,7 +33,7 @@ class TokenHeaderAdapter(private val text: String) :
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = if(isVisible) 1 else 0
+    override fun getItemCount() = if (isVisible) 1 else 0
 
     class TokenHeaderViewHolder(itemView: View, private val text: String) : RecyclerView.ViewHolder(itemView) {
 

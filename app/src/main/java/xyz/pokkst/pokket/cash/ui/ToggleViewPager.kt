@@ -7,7 +7,7 @@ import androidx.viewpager.widget.ViewPager
 
 
 class ToggleViewPager(context: Context, attrs: AttributeSet?) :
-    ViewPager(context, attrs) {
+        ViewPager(context, attrs) {
     private var pagingEnabled = true
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return if (pagingEnabled) {

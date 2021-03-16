@@ -20,9 +20,9 @@ import xyz.pokkst.pokket.cash.util.StatusBarHelper
  */
 class RestoreWalletFragment : Fragment() {
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_restore_wallet, container, false)
 
@@ -41,7 +41,7 @@ class RestoreWalletFragment : Fragment() {
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                     intent.putExtra("seed", seedStr)
                     intent.putExtra("new", false)
-                    if(bip39passphrase.isNotEmpty()) {
+                    if (bip39passphrase.isNotEmpty()) {
                         intent.putExtra("passphrase", bip39passphrase)
                     }
                     startActivity(intent)
@@ -50,7 +50,7 @@ class RestoreWalletFragment : Fragment() {
         }
 
         root.multsig_checkbox.setOnCheckedChangeListener { buttonView, isChecked ->
-            root.bip39_passphrase_edit_text.visibility = if(isChecked) View.GONE else View.VISIBLE
+            root.bip39_passphrase_edit_text.visibility = if (isChecked) View.GONE else View.VISIBLE
         }
 
         root.intro_left_button.setOnClickListener {

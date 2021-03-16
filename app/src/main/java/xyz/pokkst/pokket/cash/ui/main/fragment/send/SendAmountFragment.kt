@@ -68,14 +68,14 @@ class SendAmountFragment : Fragment() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_MAIN_ENABLE_PAGER == intent.action) {
                 this@SendAmountFragment.findNavController()
-                    .popBackStack(R.id.sendHomeFragment, false)
+                        .popBackStack(R.id.sendHomeFragment, false)
             } else if (Constants.ACTION_FRAGMENT_SEND_SEND == intent.action) {
                 if (getCoinAmount() != Coin.ZERO) {
                     if (WalletManager.isMultisigKit) {
                         if (paymentContent?.paymentType == PaymentType.MULTISIG_PAYLOAD) {
                             paymentContent?.addressOrPayload?.let {
                                 this@SendAmountFragment.importMultisigPayload(
-                                    it
+                                        it
                                 )
                             }
                         } else {
@@ -107,9 +107,9 @@ class SendAmountFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         root = inflater.inflate(R.layout.fragment_send_amount, container, false)
         prepareViews()
@@ -127,20 +127,22 @@ class SendAmountFragment : Fragment() {
         if (paymentContent?.paymentType == PaymentType.MULTISIG_PAYLOAD) {
             root?.send_amount_input?.isEnabled = false
             val payload =
-                paymentContent?.addressOrPayload?.let { PayloadHelper.decodeMultisigPayload(it) }
+                    paymentContent?.addressOrPayload?.let { PayloadHelper.decodeMultisigPayload(it) }
             if (payload != null) {
                 val tx = Transaction(WalletManager.parameters, Hex.decode(payload.hex))
                 val payloadAddress = fetchMultisigPayloadDestination(tx)
-                root?.to_field_text?.text = "to: ${payloadAddress?.replace(
-                    "${WalletManager.parameters.cashAddrPrefix}:",
-                    ""
-                )}"
+                root?.to_field_text?.text = "to: ${
+                    payloadAddress?.replace(
+                            "${WalletManager.parameters.cashAddrPrefix}:",
+                            ""
+                    )
+                }"
                 this.getPayloadData(tx)
             }
-        } else if(paymentContent?.paymentType == PaymentType.FLIPSTARTER_PAYLOAD) {
+        } else if (paymentContent?.paymentType == PaymentType.FLIPSTARTER_PAYLOAD) {
             root?.send_amount_input?.isEnabled = false
             val payload =
-                paymentContent?.addressOrPayload?.let { PayloadHelper.decodeFlipstarterPayload(it) }
+                    paymentContent?.addressOrPayload?.let { PayloadHelper.decodeFlipstarterPayload(it) }
             if (payload != null) {
                 root?.to_field_text?.text = "to: flipstarter"
                 this.getFlipstarterInvoiceData(payload)
@@ -186,7 +188,8 @@ class SendAmountFragment : Fragment() {
                 val view = v as Button
 
                 if (tokenId != null) {
-                    val slpToken = WalletManager.walletKit?.getSlpToken(tokenId) ?: WalletManager.walletKit?.getNft(tokenId)
+                    val slpToken = WalletManager.walletKit?.getSlpToken(tokenId)
+                            ?: WalletManager.walletKit?.getNft(tokenId)
                     if (slpToken?.decimals != 0) {
                         appendCharacterToInput(root, view.text.toString())
                         updateAltCurrencyDisplay(root)
@@ -220,7 +223,7 @@ class SendAmountFragment : Fragment() {
         }
 
         sendingNft.observe(viewLifecycleOwner, Observer {
-            if(tokenId != null) {
+            if (tokenId != null) {
                 setInputViewForSlp(it)
             }
         })
@@ -244,7 +247,8 @@ class SendAmountFragment : Fragment() {
             root?.alt_currency_symbol?.visibility = View.GONE
             root?.alt_currency_display?.visibility = View.GONE
             root?.input_type_toggle?.visibility = View.GONE
-            root?.main_currency_symbol?.text = WalletManager.walletKit?.getSlpToken(tokenId)?.ticker ?: WalletManager.walletKit?.getNft(tokenId)?.ticker
+            root?.main_currency_symbol?.text = WalletManager.walletKit?.getSlpToken(tokenId)?.ticker
+                    ?: WalletManager.walletKit?.getNft(tokenId)?.ticker
         }
     }
 
@@ -264,7 +268,7 @@ class SendAmountFragment : Fragment() {
         root?.alt_currency_display?.visibility = View.GONE
         root?.input_type_toggle?.visibility = View.GONE
         root?.main_currency_symbol?.visibility = View.GONE
-        if(isSendingNft) {
+        if (isSendingNft) {
             root?.send_amount_input?.isEnabled = false
             root?.send_amount_input?.setText("1")
             root?.send_amount_input?.visibility = View.GONE
@@ -272,9 +276,9 @@ class SendAmountFragment : Fragment() {
             val nft = WalletManager.walletKit?.getNft(tokenId)
 
             try {
-                if(nft != null) {
+                if (nft != null) {
                     val nftParentId = nft.nftParentId
-                    if(nftParentId == NFTConstants.NFT_PARENT_ID_WAIFU) {
+                    if (nftParentId == NFTConstants.NFT_PARENT_ID_WAIFU) {
                         Picasso.get().load("https://icons.waifufaucet.com/64/${nft.tokenId}.png").into(slpIcon)
                         slpIcon?.visibility = View.VISIBLE
                         slpImage?.visibility = View.GONE
@@ -322,8 +326,10 @@ class SendAmountFragment : Fragment() {
             val balance =
                     WalletManager.walletKit?.getTokenBalance(tokenId)?.balance
             text1?.text = String.format(
-                    Locale.ENGLISH, "%.${slpToken?.decimals
-                    ?: 0}f", balance
+                    Locale.ENGLISH, "%.${
+                slpToken?.decimals
+                        ?: 0
+            }f", balance
             )
             text3?.text = slpToken?.ticker
             text2?.text = slpToken?.tokenId
@@ -339,7 +345,7 @@ class SendAmountFragment : Fragment() {
         if (WalletManager.wallet?.getBalance(Wallet.BalanceType.ESTIMATED)?.isZero == false) {
             if (paymentContent != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
                 if (paymentContent == null) paymentContent =
-                    root?.to_field_edit_text?.text?.toString()?.let { UriHelper.parse(it) }
+                        root?.to_field_edit_text?.text?.toString()?.let { UriHelper.parse(it) }
                 val destination = paymentContent?.addressOrPayload
                 if (tokenId == null) {
                     when (paymentContent?.paymentType) {
@@ -347,19 +353,19 @@ class SendAmountFragment : Fragment() {
                         PaymentType.CASH_ACCOUNT, PaymentType.ADDRESS -> this.processNormalTransaction()
                         PaymentType.PAYMENT_CODE -> {
                             val canSendToPaymentCode =
-                                WalletManager.walletKit?.canSendToPaymentCode(destination)
+                                    WalletManager.walletKit?.canSendToPaymentCode(destination)
                             if (canSendToPaymentCode == true) {
                                 this.attemptBip47Payment()
                             } else {
                                 val notification =
-                                    WalletManager.walletKit?.makeNotificationTransaction(
-                                        destination,
-                                        true
-                                    )
+                                        WalletManager.walletKit?.makeNotificationTransaction(
+                                                destination,
+                                                true
+                                        )
                                 WalletManager.walletKit?.broadcastTransaction(notification?.tx)
                                 WalletManager.walletKit?.putPaymenCodeStatusSent(
-                                    destination,
-                                    notification?.tx
+                                        destination,
+                                        notification?.tx
                                 )
                                 this.attemptBip47Payment()
                             }
@@ -367,7 +373,7 @@ class SendAmountFragment : Fragment() {
                         PaymentType.FLIPSTARTER_PAYLOAD -> {
                             val sendReq = SendRequest.createFlipstarterPledge(WalletManager.wallet, paymentContent?.addressOrPayload)
                             val peers = WalletManager.kit?.peerGroup()?.connectedPeers
-                            if(peers != null) {
+                            if (peers != null) {
                                 for (peer in peers) {
                                     val tx = sendReq.left
                                     peer.sendMessage(tx)
@@ -407,10 +413,10 @@ class SendAmountFragment : Fragment() {
             if (paymentContent != null) {
                 if (paymentContent?.paymentType == PaymentType.ADDRESS) {
                     val toAddress = AddressFactory.create()
-                        .getAddress(WalletManager.parameters, paymentContent?.addressOrPayload)
+                            .getAddress(WalletManager.parameters, paymentContent?.addressOrPayload)
                     val myTx = WalletManager.multisigWalletKit?.makeIndividualMultisigTransaction(
-                        toAddress,
-                        getCoinAmount()
+                            toAddress,
+                            getCoinAmount()
                     )
                     val needsMoreSigs = WalletManager.multisigWalletKit?.signMultisigInputs(myTx)
 
@@ -509,7 +515,7 @@ class SendAmountFragment : Fragment() {
     private fun attemptBip47Payment() {
         val destination = paymentContent?.addressOrPayload
         val paymentChannel: BIP47Channel? =
-            WalletManager.walletKit?.getBip47MetaForPaymentCode(destination)
+                WalletManager.walletKit?.getBip47MetaForPaymentCode(destination)
         var depositAddress: String? = null
         if (paymentChannel != null) {
             if (paymentChannel.isNotificationTransactionSent) {
@@ -521,7 +527,7 @@ class SendAmountFragment : Fragment() {
                 }
             } else {
                 val notification =
-                    WalletManager.walletKit?.makeNotificationTransaction(destination, true)
+                        WalletManager.walletKit?.makeNotificationTransaction(destination, true)
                 WalletManager.walletKit?.broadcastTransaction(notification?.tx)
                 WalletManager.walletKit?.putPaymenCodeStatusSent(destination, notification?.tx)
                 this.attemptBip47Payment()
@@ -631,27 +637,27 @@ class SendAmountFragment : Fragment() {
         WalletManager.wallet?.completeTx(req)
 
         val ack = session.sendPayment(
-            ImmutableList.of(req.tx),
-            WalletManager.wallet?.freshReceiveAddress(),
-            null
+                ImmutableList.of(req.tx),
+                WalletManager.wallet?.freshReceiveAddress(),
+                null
         )
         if (ack != null) {
             Futures.addCallback<PaymentProtocol.Ack>(
-                ack,
-                object : FutureCallback<PaymentProtocol.Ack> {
-                    override fun onSuccess(ack: PaymentProtocol.Ack?) {
-                        WalletManager.wallet?.commitTx(req.tx)
-                        showToast("coins sent!")
-                        activity?.runOnUiThread {
-                            (activity as? MainActivity)?.toggleSendScreen(false)
+                    ack,
+                    object : FutureCallback<PaymentProtocol.Ack> {
+                        override fun onSuccess(ack: PaymentProtocol.Ack?) {
+                            WalletManager.wallet?.commitTx(req.tx)
+                            showToast("coins sent!")
+                            activity?.runOnUiThread {
+                                (activity as? MainActivity)?.toggleSendScreen(false)
+                            }
                         }
-                    }
 
-                    override fun onFailure(throwable: Throwable) {
-                        showToast("an error occurred")
-                    }
-                },
-                MoreExecutors.directExecutor()
+                        override fun onFailure(throwable: Throwable) {
+                            showToast("an error occurred")
+                        }
+                    },
+                    MoreExecutors.directExecutor()
             )
         }
     }
@@ -669,33 +675,33 @@ class SendAmountFragment : Fragment() {
             val rawTokens = session.rawTokenAmounts
             val addresses = session.getSlpAddresses(WalletManager.parameters)
             val tx = WalletManager.walletKit?.createSlpTransactionBip70(
-                tokenId,
-                null,
-                rawTokens,
-                addresses,
-                session
+                    tokenId,
+                    null,
+                    rawTokens,
+                    addresses,
+                    session
             )
             val ack = session.sendPayment(
-                ImmutableList.of(tx!!),
-                WalletManager.wallet?.freshReceiveAddress(),
-                null
+                    ImmutableList.of(tx!!),
+                    WalletManager.wallet?.freshReceiveAddress(),
+                    null
             )
             if (ack != null) {
                 Futures.addCallback<SlpPaymentProtocol.Ack>(
-                    ack,
-                    object : FutureCallback<SlpPaymentProtocol.Ack> {
-                        override fun onSuccess(ack: SlpPaymentProtocol.Ack?) {
-                            showToast("coins sent!")
-                            activity?.runOnUiThread {
-                                (activity as? MainActivity)?.toggleSendScreen(false)
+                        ack,
+                        object : FutureCallback<SlpPaymentProtocol.Ack> {
+                            override fun onSuccess(ack: SlpPaymentProtocol.Ack?) {
+                                showToast("coins sent!")
+                                activity?.runOnUiThread {
+                                    (activity as? MainActivity)?.toggleSendScreen(false)
+                                }
                             }
-                        }
 
-                        override fun onFailure(throwable: Throwable) {
-                            showToast("an error occurred")
-                        }
-                    },
-                    MoreExecutors.directExecutor()
+                            override fun onFailure(throwable: Throwable) {
+                                showToast("an error occurred")
+                            }
+                        },
+                        MoreExecutors.directExecutor()
                 )
             }
         } else {
@@ -704,7 +710,7 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun processSlpTransaction(address: String, tokenAmount: Double, tokenId: String) {
-        val tx = if(sendingNft.value == true) {
+        val tx = if (sendingNft.value == true) {
             WalletManager.walletKit?.createNftChildSendTx(address, tokenId, tokenAmount, null)
         } else {
             WalletManager.walletKit?.createSlpTransaction(address, tokenId, tokenAmount, null)
@@ -713,18 +719,18 @@ class SendAmountFragment : Fragment() {
         val sendResult = WalletManager.walletKit?.peerGroup()?.broadcastTransaction(req.tx)
 
         Futures.addCallback(
-            sendResult?.future(),
-            object : FutureCallback<Transaction?> {
-                override fun onSuccess(@Nullable result: Transaction?) {
-                    showToast("coins sent!")
-                    (activity as? MainActivity)?.toggleSendScreen(false)
-                }
+                sendResult?.future(),
+                object : FutureCallback<Transaction?> {
+                    override fun onSuccess(@Nullable result: Transaction?) {
+                        showToast("coins sent!")
+                        (activity as? MainActivity)?.toggleSendScreen(false)
+                    }
 
-                override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
+                    override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
 
-                }
-            },
-            MoreExecutors.directExecutor()
+                    }
+                },
+                MoreExecutors.directExecutor()
         )
     }
 
@@ -741,29 +747,29 @@ class SendAmountFragment : Fragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val req: SendRequest =
-                    if (bchAmount == WalletManager.wallet?.let { WalletManager.getBalance(it) }) {
-                        SendRequest.emptyWallet(WalletManager.parameters, address)
-                    } else {
-                        SendRequest.to(WalletManager.parameters, address, bchAmount)
-                    }
+                        if (bchAmount == WalletManager.wallet?.let { WalletManager.getBalance(it) }) {
+                            SendRequest.emptyWallet(WalletManager.parameters, address)
+                        } else {
+                            SendRequest.to(WalletManager.parameters, address, bchAmount)
+                        }
 
                 req.allowUnconfirmed()
                 req.ensureMinRequiredFee = false
                 req.feePerKb = Coin.valueOf(2L * 1000L)
                 val sendResult = WalletManager.wallet?.sendCoins(req)
                 Futures.addCallback(
-                    sendResult?.broadcastComplete,
-                    object : FutureCallback<Transaction?> {
-                        override fun onSuccess(@Nullable result: Transaction?) {
-                            showToast("coins sent!")
-                            (activity as? MainActivity)?.toggleSendScreen(false)
-                        }
+                        sendResult?.broadcastComplete,
+                        object : FutureCallback<Transaction?> {
+                            override fun onSuccess(@Nullable result: Transaction?) {
+                                showToast("coins sent!")
+                                (activity as? MainActivity)?.toggleSendScreen(false)
+                            }
 
-                        override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
+                            override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
 
-                        }
-                    },
-                    MoreExecutors.directExecutor()
+                            }
+                        },
+                        MoreExecutors.directExecutor()
                 )
             } catch (e: InsufficientMoneyException) {
                 e.printStackTrace()
@@ -802,8 +808,8 @@ class SendAmountFragment : Fragment() {
                     val slpToken = WalletManager.walletKit?.getSlpToken(session.tokenId)
                     if (slpToken != null) {
                         setTokenAmount(
-                            BigDecimal.valueOf(amountWanted)
-                                .scaleByPowerOfTen(-slpToken.decimals)
+                                BigDecimal.valueOf(amountWanted)
+                                        .scaleByPowerOfTen(-slpToken.decimals)
                         )
 
                         tokenId = session.tokenId
@@ -877,23 +883,23 @@ class SendAmountFragment : Fragment() {
 
     private fun setCoinAmount(coin: Coin?) {
         val amountFormatted = coin?.toPlainString()?.toDouble()
-            ?.let { BalanceFormatter.formatBalance(it, "#.########") }
+                ?.let { BalanceFormatter.formatBalance(it, "#.########") }
         activity?.runOnUiThread {
             val bchValue = amountFormatted?.toDouble() ?: 0.0
             val price = PriceHelper.price
             val fiatValue = bchValue * price
             if (bchIsSendType) {
                 root?.send_amount_input?.setText(
-                    BalanceFormatter.formatBalance(
-                        bchValue,
-                        "#.########"
-                    )
+                        BalanceFormatter.formatBalance(
+                                bchValue,
+                                "#.########"
+                        )
                 )
                 root?.alt_currency_display?.text = BalanceFormatter.formatBalance(fiatValue, "0.00")
             } else {
                 root?.send_amount_input?.setText(BalanceFormatter.formatBalance(fiatValue, "0.00"))
                 root?.alt_currency_display?.text =
-                    BalanceFormatter.formatBalance(bchValue, "#.########")
+                        BalanceFormatter.formatBalance(bchValue, "#.########")
             }
         }
     }
@@ -928,7 +934,7 @@ class SendAmountFragment : Fragment() {
     private fun generateQR(payload: String?): Bitmap? {
         return try {
             val encoder = QRCode.from(payload).withSize(1024, 1024).withErrorCorrection(
-                ErrorCorrectionLevel.L
+                    ErrorCorrectionLevel.L
             )
             encoder.bitmap()
         } catch (e: Exception) {

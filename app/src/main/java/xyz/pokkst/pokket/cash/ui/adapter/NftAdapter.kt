@@ -15,7 +15,7 @@ import xyz.pokkst.pokket.cash.util.NFTConstants
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 
 class NftAdapter(private val dataSet: List<SlpTokenBalance>) :
-    RecyclerView.Adapter<NftAdapter.NftViewHolder>() {
+        RecyclerView.Adapter<NftAdapter.NftViewHolder>() {
 
     var listener: SlpAdapterListener? = null
 
@@ -23,7 +23,7 @@ class NftAdapter(private val dataSet: List<SlpTokenBalance>) :
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): NftViewHolder {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.token_spinner_cell, viewGroup, false)
+                .inflate(R.layout.token_spinner_cell, viewGroup, false)
         return NftViewHolder(view, listener)
     }
 
@@ -53,9 +53,9 @@ class NftAdapter(private val dataSet: List<SlpTokenBalance>) :
                             ?: error("")
             )
             try {
-                if(nft != null) {
+                if (nft != null) {
                     val nftParentId = nft.nftParentId
-                    if(nftParentId == NFTConstants.NFT_PARENT_ID_WAIFU) {
+                    if (nftParentId == NFTConstants.NFT_PARENT_ID_WAIFU) {
                         Picasso.get().load("https://icons.waifufaucet.com/64/${nft.tokenId}.png").into(slpIcon)
                         slpIcon.visibility = View.VISIBLE
                         slpImage.visibility = View.GONE

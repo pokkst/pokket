@@ -31,9 +31,9 @@ class TransactionSentFragment : Fragment() {
     var slpTransaction: SlpTransaction? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.transaction_item_expanded_sent, container, false)
         val txid = arguments?.getString("txid", "")
@@ -65,7 +65,8 @@ class TransactionSentFragment : Fragment() {
         val toAddresses = ArrayList<String?>()
         val toAmounts = ArrayList<Long>()
         val slpTx = slpTransaction
-        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId) ?: WalletManager.walletKit?.getNft(slpTx?.tokenId)
+        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId)
+                ?: WalletManager.walletKit?.getNft(slpTx?.tokenId)
         for (x in tx.outputs.indices) {
             val slpUtxo = if (slpTx != null) {
                 try {
@@ -81,13 +82,13 @@ class TransactionSentFragment : Fragment() {
                 toAddresses.add("OP_RETURN")
             } else {
                 val address =
-                    if (isSlp && (slpUtxo != null || x == slpTx?.slpOpReturn?.mintingBatonVout) && slpToken != null) {
-                        tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toSlp()
-                            .toString()
-                    } else {
-                        tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash()
-                            .toString()
-                    }
+                        if (isSlp && (slpUtxo != null || x == slpTx?.slpOpReturn?.mintingBatonVout) && slpToken != null) {
+                            tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toSlp()
+                                    .toString()
+                        } else {
+                            tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash()
+                                    .toString()
+                        }
                 toAddresses.add(address)
             }
 
@@ -96,7 +97,7 @@ class TransactionSentFragment : Fragment() {
 
         val bchSent = if (slpTx != null && slpToken != null) {
             -slpTx.getRawValue(WalletManager.wallet).scaleByPowerOfTen(-slpToken.decimals)
-                .toDouble()
+                    .toDouble()
         } else {
             -tx.getValueSentFromMe(WalletManager.wallet).toPlainString().toDouble()
         }
@@ -106,8 +107,8 @@ class TransactionSentFragment : Fragment() {
             0.0
         }
         root.tx_to_fee_amount_text.text = resources.getString(
-            R.string.tx_amount_moved,
-            "-${BalanceFormatter.formatBalance(bchFee, "#.########")}"
+                R.string.tx_amount_moved,
+                "-${BalanceFormatter.formatBalance(bchFee, "#.########")}"
         )
         root.tx_amount_text.text = if (slpTx != null && slpToken != null) {
             if (bchSent > 0) {
@@ -117,8 +118,8 @@ class TransactionSentFragment : Fragment() {
             }
         } else {
             resources.getString(
-                R.string.tx_amount_moved,
-                BalanceFormatter.formatBalance(bchSent, "#.########")
+                    R.string.tx_amount_moved,
+                    BalanceFormatter.formatBalance(bchSent, "#.########")
             )
         }
 
@@ -128,9 +129,9 @@ class TransactionSentFragment : Fragment() {
                 val feeFiatValue = bchFee * PriceHelper.price
                 activity?.runOnUiThread {
                     root.tx_to_fee_exchange_text.text =
-                        "($-${BalanceFormatter.formatBalance(feeFiatValue, "0.00")})"
+                            "($-${BalanceFormatter.formatBalance(feeFiatValue, "0.00")})"
                     root.tx_exchange_text.text =
-                        "($${BalanceFormatter.formatBalance(fiatValue, "0.00")})"
+                            "($${BalanceFormatter.formatBalance(fiatValue, "0.00")})"
                 }
             }
         }
@@ -141,17 +142,17 @@ class TransactionSentFragment : Fragment() {
     }
 
     private fun setSentFromAddresses(
-        view: LinearLayout,
-        addresses: ArrayList<String>
+            view: LinearLayout,
+            addresses: ArrayList<String>
     ) {
         val inflater = requireActivity().layoutInflater
         for (address in addresses) {
             val addressBlock =
-                inflater.inflate(R.layout.transaction_sent_from_addresses, null) as RelativeLayout
+                    inflater.inflate(R.layout.transaction_sent_from_addresses, null) as RelativeLayout
             val txFrom =
-                addressBlock.findViewById<View>(R.id.tx_from_text) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_from_text) as TextView
             val txFromDescription =
-                addressBlock.findViewById<View>(R.id.tx_from_description) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_from_description) as TextView
             //BRAnimator.showCopyBubble(activity, addressBlock, txFrom)
             if (address != null && address.isNotEmpty()) {
                 txFrom.text = address
@@ -162,13 +163,14 @@ class TransactionSentFragment : Fragment() {
     }
 
     private fun setSentToAddresses(
-        view: LinearLayout,
-        addresses: ArrayList<String?>,
-        amounts: ArrayList<Long>
+            view: LinearLayout,
+            addresses: ArrayList<String?>,
+            amounts: ArrayList<Long>
     ) {
         val inflater = requireActivity().layoutInflater
         val slpTx = slpTransaction
-        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId) ?: WalletManager.walletKit?.getNft(slpTx?.tokenId)
+        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId)
+                ?: WalletManager.walletKit?.getNft(slpTx?.tokenId)
         val txid = arguments?.getString("txid", "")
         val tx = WalletManager.wallet?.getTransaction(Sha256Hash.wrap(txid))
         for (i in addresses.indices) {
@@ -189,16 +191,16 @@ class TransactionSentFragment : Fragment() {
             }
 
             val addressBlock =
-                inflater.inflate(R.layout.transaction_sent_to_addresses, null) as RelativeLayout
+                    inflater.inflate(R.layout.transaction_sent_to_addresses, null) as RelativeLayout
 
             val txTo =
-                addressBlock.findViewById<View>(R.id.tx_to_text) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_to_text) as TextView
             val txToDescription =
-                addressBlock.findViewById<View>(R.id.tx_to_description) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_to_description) as TextView
             val txToAmount =
-                addressBlock.findViewById<View>(R.id.tx_to_amount_text) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_to_amount_text) as TextView
             val txToExchange =
-                addressBlock.findViewById<View>(R.id.tx_to_exchange_text) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_to_exchange_text) as TextView
             if (addresses[i] != null && addresses[i]!!.isNotEmpty()) {
                 txTo.text = addresses[i]
                 if (addresses[i] == "OP_RETURN") {
@@ -208,22 +210,26 @@ class TransactionSentFragment : Fragment() {
                 }
                 val amountInBch = if (slpUtxo != null && slpToken != null) {
                     slpUtxo.tokenAmountRaw.toBigDecimal().scaleByPowerOfTen(-slpToken.decimals)
-                        .toDouble()
+                            .toDouble()
                 } else {
                     amounts[i] / 100000000.0
                 }
 
                 txToAmount.text = if (slpUtxo != null && slpToken != null) {
                     if (utxoIsMine) {
-                        "${BalanceFormatter.formatBalance(
-                            amountInBch,
-                            "#.#########"
-                        )} ${slpToken.ticker}"
+                        "${
+                            BalanceFormatter.formatBalance(
+                                    amountInBch,
+                                    "#.#########"
+                            )
+                        } ${slpToken.ticker}"
                     } else {
-                        "-${BalanceFormatter.formatBalance(
-                            amountInBch,
-                            "#.#########"
-                        )} ${slpToken.ticker}"
+                        "-${
+                            BalanceFormatter.formatBalance(
+                                    amountInBch,
+                                    "#.#########"
+                            )
+                        } ${slpToken.ticker}"
                     }
                 } else {
                     if (utxoIsMine) {
@@ -231,8 +237,8 @@ class TransactionSentFragment : Fragment() {
                             "Minting Baton"
                         } else {
                             resources.getString(
-                                R.string.tx_amount_moved,
-                                "${BalanceFormatter.formatBalance(amountInBch, "#.########")}"
+                                    R.string.tx_amount_moved,
+                                    "${BalanceFormatter.formatBalance(amountInBch, "#.########")}"
                             )
                         }
                     } else {
@@ -240,8 +246,8 @@ class TransactionSentFragment : Fragment() {
                             "Minting Baton"
                         } else {
                             resources.getString(
-                                R.string.tx_amount_moved,
-                                "-${BalanceFormatter.formatBalance(amountInBch, "#.########")}"
+                                    R.string.tx_amount_moved,
+                                    "-${BalanceFormatter.formatBalance(amountInBch, "#.########")}"
                             )
                         }
                     }

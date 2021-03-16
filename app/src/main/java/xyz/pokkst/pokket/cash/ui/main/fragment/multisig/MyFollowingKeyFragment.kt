@@ -21,15 +21,15 @@ class MyFollowingKeyFragment : Fragment() {
     val args: MyFollowingKeyFragmentArgs by navArgs()
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_my_following_key, container, false)
         val seed = args.seed
         val restoring = args.restoring
         val tempWallet =
-            Wallet.fromSeed(WalletManager.parameters, DeterministicSeed(seed, null, "", 0))
+                Wallet.fromSeed(WalletManager.parameters, DeterministicSeed(seed, null, "", 0))
         val xpub = tempWallet.watchingKey.serializePubB58(WalletManager.parameters)
 
         root.the_phrase.text = xpub
@@ -40,7 +40,7 @@ class MyFollowingKeyFragment : Fragment() {
 
         root.continue_button.setOnClickListener {
             val action =
-                MyFollowingKeyFragmentDirections.navToOtherFollowingKeys(seed, xpub, restoring)
+                    MyFollowingKeyFragmentDirections.navToOtherFollowingKeys(seed, xpub, restoring)
             findNavController().navigate(action)
         }
 

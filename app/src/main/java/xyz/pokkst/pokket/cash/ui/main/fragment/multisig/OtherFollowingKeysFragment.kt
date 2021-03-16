@@ -27,9 +27,9 @@ class OtherFollowingKeysFragment : Fragment() {
     var nCurrent = 0
     var mCurrent = 0
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_other_following_keys, container, false)
         val seed = args.seed
@@ -40,7 +40,7 @@ class OtherFollowingKeysFragment : Fragment() {
 
         root.n_edittext.doAfterTextChanged { text ->
             var n = if (text.isNullOrEmpty()) 0 else text.toString().toInt()
-            if(n > 9) {
+            if (n > 9) {
                 n = 9
                 root.n_edittext.setText("9")
             }
@@ -51,10 +51,10 @@ class OtherFollowingKeysFragment : Fragment() {
                     val fixedDifference = difference - 2
                     for (x in 0..fixedDifference) {
                         val cosignerKeyInputLayout =
-                            cosignerInflater?.inflate(
-                                R.layout.fragment_component_cosigner_entry,
-                                null
-                            ) as ConstraintLayout
+                                cosignerInflater?.inflate(
+                                        R.layout.fragment_component_cosigner_entry,
+                                        null
+                                ) as ConstraintLayout
                         cosignerKeysList.addView(cosignerKeyInputLayout)
                     }
                 } else {
@@ -71,15 +71,15 @@ class OtherFollowingKeysFragment : Fragment() {
             nCurrent = n
 
             root.m_of_n_textview.text = resources.getString(
-                R.string.you_are_creating_a_m_of_n_multisig_wallet,
-                mCurrent,
-                nCurrent
+                    R.string.you_are_creating_a_m_of_n_multisig_wallet,
+                    mCurrent,
+                    nCurrent
             )
         }
 
         root.m_edittext.doAfterTextChanged { text ->
             var m = if (text.isNullOrEmpty()) 0 else text.toString().toInt()
-            if(m > 8) {
+            if (m > 8) {
                 m = 8
                 root.m_edittext.setText("8")
             }
@@ -87,16 +87,16 @@ class OtherFollowingKeysFragment : Fragment() {
             mCurrent = m
 
             root.m_of_n_textview.text = resources.getString(
-                R.string.you_are_creating_a_m_of_n_multisig_wallet,
-                mCurrent,
-                nCurrent
+                    R.string.you_are_creating_a_m_of_n_multisig_wallet,
+                    mCurrent,
+                    nCurrent
             )
         }
 
         root.m_of_n_textview.text = resources.getString(
-            R.string.you_are_creating_a_m_of_n_multisig_wallet,
-            mCurrent,
-            nCurrent
+                R.string.you_are_creating_a_m_of_n_multisig_wallet,
+                mCurrent,
+                nCurrent
         )
 
         root.continue_button.setOnClickListener {

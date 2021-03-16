@@ -9,7 +9,7 @@ class ClipboardHelper {
     companion object {
         fun copyToClipboard(activity: Activity?, text: String?) {
             val clipboard: ClipboardManager? =
-                activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                    activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
             val clip = ClipData.newPlainText("Pokket", text)
             clipboard?.setPrimaryClip(clip)
             activity?.let { Toaster.showToastMessage(it, "copied") }

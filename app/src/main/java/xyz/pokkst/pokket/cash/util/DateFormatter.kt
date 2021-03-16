@@ -1,6 +1,5 @@
 package xyz.pokkst.pokket.cash.util
 
-import android.app.Activity
 import android.content.Context
 import android.text.format.DateFormat
 import java.text.SimpleDateFormat
@@ -14,7 +13,7 @@ class DateFormatter {
             var is24HoursFormat = false
             if (app != null) {
                 is24HoursFormat =
-                    DateFormat.is24HourFormat(app.applicationContext)
+                        DateFormat.is24HourFormat(app.applicationContext)
                 if (is24HoursFormat) {
                     formatter = SimpleDateFormat("M/d H", Locale.getDefault())
                 }
@@ -22,7 +21,7 @@ class DateFormatter {
             val calendar: Calendar = Calendar.getInstance()
             calendar.timeInMillis = time
             var result: String =
-                formatter.format(calendar.time).toLowerCase().replace("am", "a").replace("pm", "p")
+                    formatter.format(calendar.time).toLowerCase().replace("am", "a").replace("pm", "p")
             if (is24HoursFormat) result += "h"
             return result
         }

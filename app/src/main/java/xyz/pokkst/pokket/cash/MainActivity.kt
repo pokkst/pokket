@@ -42,8 +42,8 @@ class MainActivity : AppCompatActivity() {
             val keysLength = keys.size - 1
             for (x in 0..keysLength) {
                 val deterministicKey =
-                    DeterministicKey.deserializeB58(keys[x], WalletManager.parameters)
-                        .setPath(DeterministicKeyChain.BIP44_ACCOUNT_ZERO_PATH)
+                        DeterministicKey.deserializeB58(keys[x], WalletManager.parameters)
+                                .setPath(DeterministicKeyChain.BIP44_ACCOUNT_ZERO_PATH)
                 followingKeys.add(deterministicKey)
             }
             m = extras.getInt("m")
@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
 
         if (!newUser && seed == null) {
             val multisigWalletFile =
-                File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.wallet")
+                    File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.wallet")
             isMultisig = multisigWalletFile.exists()
         }
 
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         if (isMultisig) {
             WalletManager.startMultisigWallet(this, seed, newUser, followingKeys, m)
         } else {
-            if(extras?.containsKey("passphrase") == true) {
+            if (extras?.containsKey("passphrase") == true) {
                 passphrase = extras.getString("passphrase")
             }
             WalletManager.startWallet(this, seed, newUser, passphrase)
@@ -112,24 +112,24 @@ class MainActivity : AppCompatActivity() {
         WalletManager.peerCount.observe(this, Observer { peers ->
             if (peers == 0) {
                 appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                    0,
-                    0,
-                    R.drawable.ic_disconnected,
-                    0
+                        0,
+                        0,
+                        R.drawable.ic_disconnected,
+                        0
                 )
             } else if (peers > 0 && peers < WalletManager.parameters.defaultPeerCount) {
                 appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                    0,
-                    0,
-                    R.drawable.ic_connected_partial,
-                    0
+                        0,
+                        0,
+                        R.drawable.ic_connected_partial,
+                        0
                 )
             } else if (peers >= WalletManager.parameters.defaultPeerCount) {
                 appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                    0,
-                    0,
-                    R.drawable.ic_connected,
-                    0
+                        0,
+                        0,
+                        R.drawable.ic_connected,
+                        0
                 )
             }
         })
@@ -158,13 +158,13 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val bch =
-                    WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
+                        WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
                 bch?.let {
                     val fiat = bch.toDouble() * PriceHelper.price
                     val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
                     this@MainActivity.runOnUiThread {
                         appbar_title.text =
-                            "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
+                                "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
                     }
                 }
             } catch (e: Exception) {

@@ -31,9 +31,9 @@ class TransactionReceivedFragment : Fragment() {
     var slpTransaction: SlpTransaction? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.transaction_item_expanded_received, container, false)
         val txid = arguments?.getString("txid", "")
@@ -65,7 +65,8 @@ class TransactionReceivedFragment : Fragment() {
         val toAddresses = ArrayList<String?>()
         val toAmounts = ArrayList<Long>()
         val slpTx = slpTransaction
-        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId) ?: WalletManager.walletKit?.getNft(slpTx?.tokenId)
+        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId)
+                ?: WalletManager.walletKit?.getNft(slpTx?.tokenId)
         for (x in tx.outputs.indices) {
             val slpUtxo = if (slpTx != null) {
                 try {
@@ -80,13 +81,13 @@ class TransactionReceivedFragment : Fragment() {
                 toAddresses.add("OP_RETURN")
             } else {
                 val address =
-                    if (isSlp && (slpUtxo != null || x == slpTx?.slpOpReturn?.mintingBatonVout) && slpToken != null) {
-                        tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toSlp()
-                            .toString()
-                    } else {
-                        tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash()
-                            .toString()
-                    }
+                        if (isSlp && (slpUtxo != null || x == slpTx?.slpOpReturn?.mintingBatonVout) && slpToken != null) {
+                            tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toSlp()
+                                    .toString()
+                        } else {
+                            tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash()
+                                    .toString()
+                        }
                 toAddresses.add(address)
             }
 
@@ -103,8 +104,8 @@ class TransactionReceivedFragment : Fragment() {
 
         } else {
             resources.getString(
-                R.string.tx_amount_moved,
-                BalanceFormatter.formatBalance(bchReceived, "#.########")
+                    R.string.tx_amount_moved,
+                    BalanceFormatter.formatBalance(bchReceived, "#.########")
             )
         }
 
@@ -113,7 +114,7 @@ class TransactionReceivedFragment : Fragment() {
                 val fiatValue = bchReceived * PriceHelper.price
                 activity?.runOnUiThread {
                     root.tx_exchange_text.text =
-                        "($${BalanceFormatter.formatBalance(fiatValue, "0.00")})"
+                            "($${BalanceFormatter.formatBalance(fiatValue, "0.00")})"
                 }
             }
         }
@@ -124,17 +125,17 @@ class TransactionReceivedFragment : Fragment() {
     }
 
     private fun setReceivedFromAddresses(
-        view: LinearLayout,
-        addresses: ArrayList<String>
+            view: LinearLayout,
+            addresses: ArrayList<String>
     ) {
         val inflater = requireActivity().layoutInflater
         for (address in addresses) {
             val addressBlock =
-                inflater.inflate(R.layout.transaction_received_from_addresses, null) as LinearLayout
+                    inflater.inflate(R.layout.transaction_received_from_addresses, null) as LinearLayout
             val txFrom =
-                addressBlock.findViewById<View>(R.id.tx_from_text) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_from_text) as TextView
             val txFromDescription =
-                addressBlock.findViewById<View>(R.id.tx_from_description) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_from_description) as TextView
             if (address != null && address.isNotEmpty()) {
                 txFrom.text = address
                 txFromDescription.text = getString(R.string.utxo)
@@ -144,13 +145,14 @@ class TransactionReceivedFragment : Fragment() {
     }
 
     private fun setReceivedToAddresses(
-        view: LinearLayout,
-        addresses: ArrayList<String?>,
-        amounts: ArrayList<Long>
+            view: LinearLayout,
+            addresses: ArrayList<String?>,
+            amounts: ArrayList<Long>
     ) {
         val inflater = requireActivity().layoutInflater
         val slpTx = slpTransaction
-        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId) ?: WalletManager.walletKit?.getNft(slpTx?.tokenId)
+        val slpToken = WalletManager.walletKit?.getSlpToken(slpTx?.tokenId)
+                ?: WalletManager.walletKit?.getNft(slpTx?.tokenId)
         val txid = arguments?.getString("txid", "")
         val tx = WalletManager.wallet?.getTransaction(Sha256Hash.wrap(txid))
         for (i in addresses.indices) {
@@ -171,15 +173,15 @@ class TransactionReceivedFragment : Fragment() {
             }
 
             val addressBlock =
-                inflater.inflate(R.layout.transaction_received_to_addresses, null) as RelativeLayout
+                    inflater.inflate(R.layout.transaction_received_to_addresses, null) as RelativeLayout
             val txTo =
-                addressBlock.findViewById<View>(R.id.tx_to_text) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_to_text) as TextView
             val txToDescription =
-                addressBlock.findViewById<View>(R.id.tx_to_description) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_to_description) as TextView
             val txToAmount =
-                addressBlock.findViewById<View>(R.id.tx_to_amount_text) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_to_amount_text) as TextView
             val txToExchange =
-                addressBlock.findViewById<View>(R.id.tx_to_exchange_text) as TextView
+                    addressBlock.findViewById<View>(R.id.tx_to_exchange_text) as TextView
             //BRAnimator.showCopyBubble(activity, addressBlock, txTo)
             if (addresses[i] != null && !addresses[i]!!.isEmpty()) {
                 txTo.text = addresses[i]
@@ -190,23 +192,25 @@ class TransactionReceivedFragment : Fragment() {
                 }
                 val amountInBch = if (slpUtxo != null && slpToken != null) {
                     slpUtxo.tokenAmountRaw.toBigDecimal().scaleByPowerOfTen(-slpToken.decimals)
-                        .toDouble()
+                            .toDouble()
                 } else {
                     amounts[i] / 100000000.0
                 }
                 txToAmount.text = if (slpUtxo != null && slpToken != null) {
-                    "${BalanceFormatter.formatBalance(
-                        amountInBch,
-                        "#.#########"
-                    )} ${slpToken.ticker}"
+                    "${
+                        BalanceFormatter.formatBalance(
+                                amountInBch,
+                                "#.#########"
+                        )
+                    } ${slpToken.ticker}"
                 } else {
                     if (utxoIsMine) {
                         if (i == slpTx?.slpOpReturn?.mintingBatonVout && isSlp && slpTx.slpOpReturn?.hasMintingBaton()!! && slpToken != null) {
                             "Minting Baton"
                         } else {
                             resources.getString(
-                                R.string.tx_amount_moved,
-                                "${BalanceFormatter.formatBalance(amountInBch, "#.########")}"
+                                    R.string.tx_amount_moved,
+                                    "${BalanceFormatter.formatBalance(amountInBch, "#.########")}"
                             )
                         }
                     } else {
@@ -214,8 +218,8 @@ class TransactionReceivedFragment : Fragment() {
                             "Minting Baton"
                         } else {
                             resources.getString(
-                                R.string.tx_amount_moved,
-                                "${BalanceFormatter.formatBalance(amountInBch, "#.########")}"
+                                    R.string.tx_amount_moved,
+                                    "${BalanceFormatter.formatBalance(amountInBch, "#.########")}"
                             )
                         }
                     }

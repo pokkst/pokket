@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -18,7 +17,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -30,7 +28,6 @@ import xyz.pokkst.pokket.cash.ui.adapter.SlpAdapter
 import xyz.pokkst.pokket.cash.ui.adapter.TokenHeaderAdapter
 import xyz.pokkst.pokket.cash.ui.listener.SlpAdapterListener
 import xyz.pokkst.pokket.cash.util.Constants
-import xyz.pokkst.pokket.cash.util.Toaster
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 
 
@@ -47,7 +44,7 @@ class ViewTokensFragment : Fragment(), SlpAdapterListener {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_MAIN_ENABLE_PAGER == intent.action) {
                 this@ViewTokensFragment.findNavController()
-                    .popBackStack(R.id.sendHomeFragment, false)
+                        .popBackStack(R.id.sendHomeFragment, false)
             }
         }
     }
@@ -62,9 +59,9 @@ class ViewTokensFragment : Fragment(), SlpAdapterListener {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         root = inflater.inflate(R.layout.fragment_view_tokens, container, false)
         (activity as? MainActivity)?.enableTokensScreen()
