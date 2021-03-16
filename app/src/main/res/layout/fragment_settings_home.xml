@@ -21,14 +21,11 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <xyz.pokkst.pokket.cash.ui.NonScrollListView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/transactions_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:divider="@color/black"
-                    android:dividerHeight="1px"
-                    android:overScrollFooter="@android:color/transparent" />
+                    android:layout_marginTop="20dp"/>
 
                 <include
                     android:id="@+id/more_transactions"

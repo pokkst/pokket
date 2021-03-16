@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.annotation.Nullable
@@ -22,17 +21,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.bitcoinj.core.Transaction
 import org.bitcoinj.core.TransactionOutput
-import org.bitcoinj.core.slp.SlpOpReturn
-import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.wallet.SendRequest
-import org.bitcoinj.wallet.Wallet
-import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.ui.PledgeEntryView
-import xyz.pokkst.pokket.cash.ui.TransactionListEntryView
-import xyz.pokkst.pokket.cash.util.BalanceFormatter
-import xyz.pokkst.pokket.cash.util.ClipboardHelper
-import xyz.pokkst.pokket.cash.util.PriceHelper
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 
 

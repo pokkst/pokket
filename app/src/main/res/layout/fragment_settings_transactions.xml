@@ -8,11 +8,8 @@
         android:layout_height="@dimen/separator_height"
         android:background="@color/gray" />
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/transactions_list"
         android:layout_width="match_parent"
-        android:divider="@color/black"
-        android:dividerHeight="1px"
-        android:overScrollFooter="@android:color/transparent"
         android:layout_height="match_parent" />
 </LinearLayout>
