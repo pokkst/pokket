@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -38,6 +39,7 @@ class ViewTokensFragment : Fragment(), SlpAdapterListener {
     var root: View? = null
     var sendingAddress: String? = null
     private var tokenList: RecyclerView? = null
+    private var swipeRefreshLayout: SwipeRefreshLayout? = null
     private var calculationJob: Job? = null
 
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -69,8 +71,13 @@ class ViewTokensFragment : Fragment(), SlpAdapterListener {
         filter.addAction(Constants.ACTION_MAIN_ENABLE_PAGER)
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, filter)
         tokenList = root?.findViewById(R.id.tokenList)
+        swipeRefreshLayout = root?.findViewById(R.id.view_tokens_srl)
         refresh()
         sendingAddress = arguments?.getString("address")
+
+        swipeRefreshLayout?.setOnRefreshListener {
+            refresh()
+        }
         return root
     }
 
@@ -88,6 +95,9 @@ class ViewTokensFragment : Fragment(), SlpAdapterListener {
                 setList()
             }
         }
+
+        val srlSlp = swipeRefreshLayout
+        if (srlSlp != null && srlSlp.isRefreshing) swipeRefreshLayout?.isRefreshing = false
     }
 
     private fun setList() {
