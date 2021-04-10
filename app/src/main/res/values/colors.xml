@@ -8,6 +8,7 @@
     <item name="red" type="color">#FFFF4444</item>
     <item name="black" type="color">#ff000000</item>
     <item name="gray" type="color">#ff787878</item>
+    <item name="light_purple" type="color">#621ACA</item>
     <item name="purple" type="color">#511aa0</item>
     <item name="purple_dark" type="color">#210647</item>
     <item name="light_gray" type="color">#ff9d9d9d</item>

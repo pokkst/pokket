@@ -6,15 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".SettingsActivity">
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/separator_height"
-        android:background="@color/gray" />
-
-    <RelativeLayout
         android:id="@+id/setting_layout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@drawable/clickable_layout"
+        android:background="@drawable/round_button"
+        android:layout_marginBottom="6dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:elevation="8dp"
         android:clickable="true">
 
         <TextView

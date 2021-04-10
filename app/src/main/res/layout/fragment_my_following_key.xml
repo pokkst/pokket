@@ -71,7 +71,9 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_margin="20dp"
-            android:background="@android:color/transparent"
+            android:background="@drawable/round_button"
+            android:stateListAnimator="@null"
+            android:elevation="4dp"
             android:text="@string/next"
             android:textColor="@color/dark_blue"
             android:textSize="18sp" />

@@ -15,8 +15,8 @@
         android:layout_height="match_parent">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true">
 
@@ -24,10 +24,14 @@
                 android:id="@+id/intro_new_wallet"
                 android:layout_width="220dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/button_white"
+                android:background="@drawable/round_button"
+                android:backgroundTint="@color/light_purple"
                 android:textAllCaps="false"
                 android:stateListAnimator="@null"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
                 android:text="@string/new_wallet"
+                android:elevation="8dp"
                 android:textColor="@color/white"
                 android:textSize="20sp" />
 
@@ -39,9 +43,12 @@
                 android:layout_below="@+id/intro_new_wallet"
                 android:textAllCaps="false"
                 android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
                 android:layout_marginTop="60dp"
-                android:background="@drawable/button_white"
+                android:background="@drawable/round_button"
+                android:backgroundTint="@color/light_purple"
                 android:text="@string/recover_wallet"
+                android:elevation="8dp"
                 android:textColor="@color/white"
                 android:textSize="20sp" />
         </RelativeLayout>
