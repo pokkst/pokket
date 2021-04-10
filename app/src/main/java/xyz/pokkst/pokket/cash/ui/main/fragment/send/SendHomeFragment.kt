@@ -60,6 +60,14 @@ class SendHomeFragment : Fragment() {
             findNavController().navigate(SendHomeFragmentDirections.navToTokens(null))
         }
 
+        root.donate_button.setOnClickListener {
+            findNavController().navigate(
+                SendHomeFragmentDirections.navToSend(
+                    Constants.DONATION_ADDRESS
+                )
+            )
+        }
+
         if (WalletManager.isMultisigKit) {
             root.view_tokens_button.visibility = View.GONE
         }

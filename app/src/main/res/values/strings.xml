@@ -367,6 +367,7 @@
     <string name="flipstarter_label">manage flipstarters</string>
     <string name="shift_service_label">exchange coins</string>
     <string name="view_tokens">view tokens</string>
+    <string name="donate">donate</string>
     <string name="utxo">utxo</string>
     <string name="create_multisig_wallet">create multisig wallet</string>
     <string name="multisig_my_key_instruction">this is your cosigner key, share this with the other users you are creating a multisig wallet with</string>

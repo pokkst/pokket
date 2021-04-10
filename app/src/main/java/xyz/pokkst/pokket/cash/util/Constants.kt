@@ -9,5 +9,7 @@ class Constants {
         val REQUEST_CODE_SCAN_QR = 100
 
         var QR_SCAN_RESULT = "SCAN_RESULT"
+
+        val DONATION_ADDRESS = "qpywztspkg2zk2lqygt2n3ftj9ftwvtsu52zz6v02e"
     }
 }
