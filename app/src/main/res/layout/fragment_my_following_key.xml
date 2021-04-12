@@ -36,13 +36,6 @@
             android:clickable="false"
             android:orientation="vertical">
 
-            <RelativeLayout
-                android:id="@+id/separator1"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/separator_height"
-                android:layout_marginBottom="10dp"
-                android:background="@color/gray" />
-
             <TextView
                 android:id="@+id/the_phrase"
                 android:layout_width="wrap_content"
@@ -54,13 +47,6 @@
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="@color/black"
                 android:textSize="@dimen/text_size" />
-
-            <RelativeLayout
-                android:id="@+id/separator2"
-                android:layout_width="match_parent"
-                android:layout_marginTop="10dp"
-                android:layout_height="@dimen/separator_height"
-                android:background="@color/gray" />
 
         </LinearLayout>
 

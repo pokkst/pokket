@@ -15,16 +15,9 @@
             android:orientation="vertical">
 
             <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/separator_height"
-                android:layout_marginTop="70dp"
-                android:background="@color/gray" />
-
-            <RelativeLayout
                 android:id="@+id/about"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/clickable_layout"
                 android:clickable="false">
 
                 <TextView
@@ -96,11 +89,6 @@
                     android:textSize="@dimen/text_size" />
 
             </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/separator_height"
-                android:background="@color/gray" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
