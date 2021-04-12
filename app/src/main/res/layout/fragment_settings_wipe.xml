@@ -54,6 +54,7 @@
         android:layout_marginTop="30dp"
         android:gravity="top"
         android:imeOptions="actionDone"
+        android:background="@drawable/edit_text_background"
         android:inputType="textVisiblePassword|textMultiLine"
         android:lines="5"
         android:scrollHorizontally="false"

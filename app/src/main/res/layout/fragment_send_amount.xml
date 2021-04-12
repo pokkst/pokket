@@ -95,6 +95,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="enter address"
+            android:background="@drawable/edit_text_background"
             android:maxLines="2"
             android:ellipsize="end"
             android:textSize="20sp"

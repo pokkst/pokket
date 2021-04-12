@@ -34,12 +34,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:clickable="false">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/separator_height"
-            android:layout_marginBottom="10dp"
-            android:background="@color/gray" />
-
         <EditText
             android:id="@+id/the_ip"
             android:layout_width="match_parent"
@@ -47,20 +41,16 @@
             android:layout_gravity="center"
             android:fontFamily="sans-serif"
             android:gravity="center"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginStart="24dp"
             android:inputType="numberDecimal"
+            android:background="@drawable/edit_text_background"
             android:digits="1234567890."
             android:hint="@string/node_ip_hint"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/black"
             android:textSize="@dimen/text_size" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/separator_height"
-            android:layout_marginTop="10dp"
-            android:background="@color/gray" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
