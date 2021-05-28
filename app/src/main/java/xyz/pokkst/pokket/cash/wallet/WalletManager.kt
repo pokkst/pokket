@@ -79,6 +79,8 @@ class WalletManager {
                     peerGroup()?.addDisconnectedEventListener { peer, peerCount ->
                         _peerCount.postValue(peerCount)
                     }
+                    val privateMode = PrefsHelper.instance(null)?.getBoolean("private_mode", false) ?: false
+                    peerGroup()?.isBloomFilteringEnabled = !privateMode
                     wallet().saveToFile(vWalletFile)
                 }
             }

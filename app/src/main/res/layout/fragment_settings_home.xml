@@ -71,6 +71,10 @@
                     layout="@layout/fragment_component_setting"/>
 
                 <include
+                    android:id="@+id/private_mode"
+                    layout="@layout/fragment_component_setting"/>
+
+                <include
                     android:id="@+id/flipstarters"
                     layout="@layout/fragment_component_service"/>
 

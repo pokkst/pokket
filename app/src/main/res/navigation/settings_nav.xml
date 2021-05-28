@@ -28,6 +28,9 @@
             android:id="@+id/nav_to_node"
             app:destination="@id/settingsNodeFragment" />
         <action
+            android:id="@+id/nav_to_chain_privacy"
+            app:destination="@id/settingsChainPrivacyFragment" />
+        <action
             android:id="@+id/nav_to_tx_received"
             app:destination="@id/transactionReceivedFragment">
             <argument
@@ -69,6 +72,12 @@
         android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsNodeFragment"
         android:label="fragment_settings_about"
         tools:layout="@layout/fragment_settings_node">
+    </fragment>
+    <fragment
+        android:id="@+id/settingsChainPrivacyFragment"
+        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.setting.SettingsChainPrivacyFragment"
+        android:label="fragment_settings_about"
+        tools:layout="@layout/fragment_settings_chain_privacy">
     </fragment>
     <fragment
         android:id="@+id/settingsEpkFragment"

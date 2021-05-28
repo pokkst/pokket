@@ -364,6 +364,7 @@
     <string name="appbar_temp">&#384;0 ($0.00)</string>
     <string name="node_label">custom node</string>
     <string name="epk_label">extended public key</string>
+    <string name="chain_privacy_label">chain download privacy</string>
     <string name="flipstarter_label">manage flipstarters</string>
     <string name="shift_service_label">exchange coins</string>
     <string name="view_tokens">view tokens</string>
@@ -383,8 +384,10 @@
     <string name="not_syncing">not syncing</string>
     <string name="epk_desc">this is your extended public key, also known as your "watching key"</string>
     <string name="node_desc">enter an ip address here to connect to custom node upon startup</string>
+    <string name="chain_privacy_desc">enabling this will disable the use of bloom filters. this will not expose any information about your wallet to the network, but will increase data used by the app significantly.</string>
     <string name="node_ip_hint">192.168.1.1</string>
     <string name="cancel_pledge">cancel pledge</string>
     <string name="copy_pledge">copy pledge</string>
+    <string name="private_mode">private mode</string>
 
 </resources>

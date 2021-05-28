@@ -58,8 +58,15 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
         root.extended_public_key.findViewById<TextView>(R.id.setting_label).text =
                 resources.getString(R.string.epk_label)
 
+        root.private_mode.findViewById<RelativeLayout>(R.id.setting_layout)
+                .setOnClickListener {
+                    navigate(R.id.nav_to_chain_privacy)
+                }
+        root.private_mode.findViewById<TextView>(R.id.setting_label).text =
+                resources.getString(R.string.chain_privacy_label)
+
         root.shift_service.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
-            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://shift.pokket.cash/a/mmG1iwJRO"))
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://shift.pokket.cash"))
             startActivity(browserIntent)
         }
         root.shift_service.findViewById<TextView>(R.id.setting_label).text =
