@@ -744,7 +744,7 @@ class SendAmountFragment : Fragment() {
 
                 req.allowUnconfirmed()
                 req.ensureMinRequiredFee = false
-                req.feePerKb = Coin.valueOf(2L * 1000L)
+                req.feePerKb = Coin.valueOf(1L * 1000L) //1 sat/byte
                 val sendResult = WalletManager.wallet?.sendCoins(req)
                 Futures.addCallback(
                         sendResult?.broadcastComplete,
