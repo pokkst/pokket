@@ -50,7 +50,7 @@ dependencies {
     implementation "androidx.navigation:navigation-runtime-ktx:$nav_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
-    implementation('com.github.pokkst:bitcoincashj:c2272722') {
+    implementation('com.github.pokkst:bitcoincashj:0.26.1') {
         exclude group: "org.json"
     }
     implementation 'com.squareup.picasso:picasso:2.71828'
