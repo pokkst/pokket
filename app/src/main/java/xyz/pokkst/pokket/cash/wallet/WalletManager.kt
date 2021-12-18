@@ -9,6 +9,7 @@ import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.core.PeerAddress
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.crypto.DeterministicKey
+import org.bitcoinj.kits.BIP47AppKit
 import org.bitcoinj.kits.MultisigAppKit
 import org.bitcoinj.kits.SlpBIP47AppKit
 import org.bitcoinj.kits.WalletKitCore
@@ -29,7 +30,7 @@ import java.util.concurrent.Executor
 class WalletManager {
     companion object {
         lateinit var walletDir: File
-        var walletKit: SlpBIP47AppKit? = null
+        var walletKit: BIP47AppKit? = null
         var multisigWalletKit: MultisigAppKit? = null
         val wallet: Wallet?
             get() {
@@ -50,15 +51,15 @@ class WalletManager {
         val refreshEvents: LiveData<Event<String>> = _refreshEvents
         private val _peerCount: MutableLiveData<Int> = MutableLiveData(0)
         val peerCount: LiveData<Int> = _peerCount
-        const val walletFileName = "pokket"
-        const val multisigWalletFileName = "pokket_multisig"
+        const val walletFileName = "pokket2"
+        const val multisigWalletFileName = "pokket2_multisig"
         fun startWallet(activity: Activity, seed: String?, newUser: Boolean, passphrase: String?) {
             setBitcoinSDKThread()
 
-            walletKit = object : SlpBIP47AppKit(
+            walletKit = object : BIP47AppKit(
                     parameters,
                     Script.ScriptType.P2PKH,
-                    KeyChainGroupStructure.SLP,
+                    KeyChainGroupStructure.DEFAULT,
                     walletDir,
                     walletFileName
             ) {
