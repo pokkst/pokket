@@ -63,38 +63,13 @@ class MainFragment : Fragment() {
             swapAddressButton = root.findViewById(R.id.swap_address_button)
 
             receiveText?.setOnClickListener {
-                when(currentAddressViewType) {
-                    AddressViewType.CASH -> {
-                        ClipboardHelper.copyToClipboard(
-                            activity,
-                            "${WalletManager.parameters.cashAddrPrefix}:${receiveText?.text.toString()}"
-                        )
-                    }
-                    AddressViewType.SLP -> {
-                        ClipboardHelper.copyToClipboard(
-                            activity,
-                            "${WalletManager.parameters.simpleledgerPrefix}:${receiveText?.text.toString()}"
-                        )
-                    }
-                    AddressViewType.BIP47 -> {
-                        ClipboardHelper.copyToClipboard(
-                            activity,
-                            receiveText?.text.toString()
-                        )
-                    }
-                }
+                copyToClipboard()
             }
             receiveQr?.setOnClickListener {
-                ClipboardHelper.copyToClipboard(
-                        activity,
-                        receiveText?.text.toString()
-                )
+                copyToClipboard()
             }
             receiveQrCoinIcon?.setOnClickListener {
-                ClipboardHelper.copyToClipboard(
-                        activity,
-                        receiveText?.text.toString()
-                )
+                copyToClipboard()
             }
             swapAddressButton?.setOnClickListener {
                 currentAddressViewType = when (currentAddressViewType) {
@@ -135,6 +110,29 @@ class MainFragment : Fragment() {
         })
 
         return root
+    }
+
+    private fun copyToClipboard() {
+        when(currentAddressViewType) {
+            AddressViewType.CASH -> {
+                ClipboardHelper.copyToClipboard(
+                    activity,
+                    "${WalletManager.parameters.cashAddrPrefix}:${receiveText?.text.toString()}"
+                )
+            }
+            AddressViewType.SLP -> {
+                ClipboardHelper.copyToClipboard(
+                    activity,
+                    "${WalletManager.parameters.simpleledgerPrefix}:${receiveText?.text.toString()}"
+                )
+            }
+            AddressViewType.BIP47 -> {
+                ClipboardHelper.copyToClipboard(
+                    activity,
+                    receiveText?.text.toString()
+                )
+            }
+        }
     }
 
     private fun refresh() {

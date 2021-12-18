@@ -36,6 +36,7 @@ import net.glxn.qrgen.android.QRCode
 import org.bitcoinj.core.*
 import org.bitcoinj.core.bip47.BIP47Channel
 import org.bitcoinj.core.flipstarter.FlipstarterInvoicePayload
+import org.bitcoinj.core.slp.SlpOpReturn
 import org.bitcoinj.protocols.payments.PaymentProtocol
 import org.bitcoinj.protocols.payments.PaymentProtocolException
 import org.bitcoinj.protocols.payments.slp.SlpPaymentProtocol
@@ -324,7 +325,7 @@ class SendAmountFragment : Fragment() {
             }
 
             val balance =
-                    WalletManager.walletKit?.getTokenBalance(tokenId)?.balance
+                    WalletManager.walletKit?.getTokenBalance(SlpOpReturn.SlpTokenType.SLP, tokenId)?.balance
             text1?.text = String.format(
                     Locale.ENGLISH, "%.${
                 slpToken?.decimals
