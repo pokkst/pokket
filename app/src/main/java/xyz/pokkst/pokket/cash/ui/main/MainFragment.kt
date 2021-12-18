@@ -74,16 +74,13 @@ class MainFragment : Fragment() {
             swapAddressButton?.setOnClickListener {
                 currentAddressViewType = when (currentAddressViewType) {
                     AddressViewType.CASH -> {
-                        refresh(
-                                WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
-                                R.drawable.logo_slp
-                        )
-                        AddressViewType.SLP
-                    }
-                    AddressViewType.SLP -> {
                         refresh(WalletManager.walletKit?.paymentCode, R.drawable.logo_bch_bip47)
                         AddressViewType.BIP47
                     }
+                    /*AddressViewType.SLP -> {
+                        refresh(WalletManager.walletKit?.paymentCode, R.drawable.logo_bch_bip47)
+                        AddressViewType.BIP47
+                    }*/ //TODO phase out SLP
                     AddressViewType.BIP47 -> {
                         refresh(
                                 WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
@@ -91,6 +88,7 @@ class MainFragment : Fragment() {
                         )
                         AddressViewType.CASH
                     }
+                    else -> { AddressViewType.CASH }
                 }
             }
 

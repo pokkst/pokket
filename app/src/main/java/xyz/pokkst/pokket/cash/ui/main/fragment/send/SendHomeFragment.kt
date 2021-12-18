@@ -56,9 +56,9 @@ class SendHomeFragment : Fragment() {
             }
         }
 
-        root.view_tokens_button.setOnClickListener {
+        /*root.view_tokens_button.setOnClickListener {
             findNavController().navigate(SendHomeFragmentDirections.navToTokens(null))
-        }
+        }*/ //TODO phase out SLP
 
         root.donate_button.setOnClickListener {
             findNavController().navigate(
@@ -68,9 +68,9 @@ class SendHomeFragment : Fragment() {
             )
         }
 
-        if (WalletManager.isMultisigKit) {
+        /*if (WalletManager.isMultisigKit) {
             root.view_tokens_button.visibility = View.GONE
-        }
+        }*/ //TODO phase out SLP
 
         return root
     }

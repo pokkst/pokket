@@ -95,10 +95,6 @@ class UriHelper {
                                 "cashacct:",
                                 ""
                         )
-                        uri.startsWith(params.simpleledgerPrefix) -> getQueryBaseAddress(uri).replace(
-                                "${params.simpleledgerPrefix}:",
-                                ""
-                        )
                         else -> getQueryBaseAddress(uri)
                     }
 
@@ -115,12 +111,6 @@ class UriHelper {
                         return PaymentContent(addressOrPayload, amount, PaymentType.ADDRESS)
                     } else if (Address.isValidPaymentCode(addressOrPayload)) {
                         return PaymentContent(addressOrPayload, amount, PaymentType.PAYMENT_CODE)
-                    } else if (Address.isValidSlpAddress(
-                                    WalletManager.parameters,
-                                    addressOrPayload
-                            )
-                    ) {
-                        return PaymentContent(addressOrPayload, amount, PaymentType.SLP_ADDRESS)
                     }
                 }
 

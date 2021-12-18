@@ -388,18 +388,6 @@ class SendAmountFragment : Fragment() {
                         PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
                         null -> showToast("please enter a valid destination")
                     }
-                } else {
-                    if (paymentContent?.paymentType == PaymentType.SLP_ADDRESS) {
-                        val amount = root?.send_amount_input?.text?.toString()?.toDouble() ?: 0.0
-                        val slpTokenId = tokenId
-                        if (destination != null && slpTokenId != null) {
-                            this.processSlpTransaction(destination, amount, slpTokenId)
-                        }
-                    } else if (paymentContent?.paymentType == PaymentType.BIP70) {
-                        destination?.let { this.processBIP70(it) }
-                    } else {
-                        showToast("invalid slp address")
-                    }
                 }
             } else {
                 showToast("please enter an address")
