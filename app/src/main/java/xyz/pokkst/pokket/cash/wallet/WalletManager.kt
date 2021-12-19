@@ -86,6 +86,8 @@ class WalletManager {
                 initWeb3(seed, false, null)
             } else if(clientExists) {
                 initWeb3(null, true, clientSbchWallet)
+            } else if(seed != null && !newUser) {
+                initWeb3(seed, false, null)
             }
 
             walletKit = object : BIP47AppKit(
@@ -116,7 +118,7 @@ class WalletManager {
                     peerGroup()?.isBloomFilteringEnabled = !privateMode
                     wallet().saveToFile(vWalletFile)
 
-                    if(!clientExists && !newUser) {
+                    if(seed == null && !clientExists && !newUser) {
                         val web3Seed = wallet().keyChainSeed.mnemonicCode?.joinToString { " " }
                         initWeb3(web3Seed, false, null)
                     }
