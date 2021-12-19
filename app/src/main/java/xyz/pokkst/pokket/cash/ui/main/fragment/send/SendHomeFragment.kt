@@ -39,26 +39,13 @@ class SendHomeFragment : Fragment() {
                     requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val pasteData = clipBoard.primaryClip?.getItemAt(0)?.text.toString()
             if (isValidPaymentType(pasteData) || PayloadHelper.isMultisigPayload(pasteData)) {
-                val paymentType = UriHelper.parse(pasteData)?.paymentType
-                if (paymentType == PaymentType.SLP_ADDRESS) {
-                    findNavController().navigate(
-                            SendHomeFragmentDirections.navToTokens(
-                                    pasteData
-                            )
+                findNavController().navigate(
+                    SendHomeFragmentDirections.navToSend(
+                        pasteData
                     )
-                } else {
-                    findNavController().navigate(
-                            SendHomeFragmentDirections.navToSend(
-                                    pasteData
-                            )
-                    )
-                }
+                )
             }
         }
-
-        /*root.view_tokens_button.setOnClickListener {
-            findNavController().navigate(SendHomeFragmentDirections.navToTokens(null))
-        }*/ //TODO phase out SLP
 
         root.donate_button.setOnClickListener {
             findNavController().navigate(
@@ -67,10 +54,6 @@ class SendHomeFragment : Fragment() {
                 )
             )
         }
-
-        /*if (WalletManager.isMultisigKit) {
-            root.view_tokens_button.visibility = View.GONE
-        }*/ //TODO phase out SLP
 
         return root
     }
@@ -83,20 +66,11 @@ class SendHomeFragment : Fragment() {
                     val scanData = data.getStringExtra(Constants.QR_SCAN_RESULT)
                     if (scanData != null) {
                         if (isValidPaymentType(scanData) || PayloadHelper.isMultisigPayload(scanData)) {
-                            val paymentType = UriHelper.parse(scanData)?.paymentType
-                            if (paymentType == PaymentType.SLP_ADDRESS) {
-                                findNavController().navigate(
-                                        SendHomeFragmentDirections.navToTokens(
-                                                scanData
-                                        )
+                            findNavController().navigate(
+                                SendHomeFragmentDirections.navToSend(
+                                    scanData
                                 )
-                            } else {
-                                findNavController().navigate(
-                                        SendHomeFragmentDirections.navToSend(
-                                                scanData
-                                        )
-                                )
-                            }
+                            )
                         }
                     }
                 }

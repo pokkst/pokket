@@ -17,20 +17,20 @@ import xyz.pokkst.pokket.cash.util.PriceHelper
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 
 class TransactionAdapter(private val dataSet: List<Transaction>) :
-        RecyclerView.Adapter<TransactionAdapter.NftAdapter>() {
+        RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
     var listener: TxAdapterListener? = null
 
     // Create new views (invoked by the layout manager)
-    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): NftAdapter {
+    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): TransactionViewHolder {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
                 .inflate(R.layout.transaction_list_item, viewGroup, false)
-        return NftAdapter(view, listener)
+        return TransactionViewHolder(view, listener)
     }
 
     // Replace the contents of a view (invoked by the layout manager)
-    override fun onBindViewHolder(viewHolder: NftAdapter, position: Int) {
+    override fun onBindViewHolder(viewHolder: TransactionViewHolder, position: Int) {
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
@@ -40,7 +40,7 @@ class TransactionAdapter(private val dataSet: List<Transaction>) :
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = dataSet.size
 
-    class NftAdapter(itemView: View, private val listener: TxAdapterListener?) : RecyclerView.ViewHolder(itemView) {
+    class TransactionViewHolder(itemView: View, private val listener: TxAdapterListener?) : RecyclerView.ViewHolder(itemView) {
 
         fun bind(tx: Transaction) {
             itemView.setOnClickListener {
@@ -51,25 +51,8 @@ class TransactionAdapter(private val dataSet: List<Transaction>) :
             val bitsMoved = itemView.findViewById<TextView>(R.id.transaction_amount_bits)
             val dollarsMoved = itemView.findViewById<TextView>(R.id.transaction_amount_dollars)
 
-            val isSlp = SlpOpReturn.isSlpTx(tx) || SlpOpReturn.isNftChildTx(tx)
             val value = tx.getValue(WalletManager.wallet)
-            var ticker = ""
-            val amountStr = if (isSlp) {
-                val slpTx = SlpTransaction(tx)
-                val slpToken =
-                        WalletManager.walletKit?.getSlpToken(slpTx.tokenId)
-                                ?: WalletManager.walletKit?.getNft(slpTx.tokenId)
-                if (slpToken != null) {
-                    ticker = slpToken.ticker
-                    val slpAmount = slpTx.getRawValue(WalletManager.wallet)
-                            .scaleByPowerOfTen(-slpToken.decimals).toDouble()
-                    BalanceFormatter.formatBalance(slpAmount, "#.#########")
-                } else {
-                    value.toPlainString()
-                }
-            } else {
-                value.toPlainString()
-            }
+            val amountStr = value.toPlainString()
             val action = if (value.isPositive) "received" else "sent"
             val received = action == "received"
             val fiatAmount = BalanceFormatter.formatBalance(
@@ -80,13 +63,11 @@ class TransactionAdapter(private val dataSet: List<Transaction>) :
             sentReceivedTextView.setBackgroundResource(if (received) R.drawable.received_label else R.drawable.sent_label)
             sentReceivedTextView.setTextColor(if (received) Color.parseColor("#00BF00") else Color.parseColor("#FF5454"))
             sentReceivedTextView.text = action
-            bitsMoved.text =
-                    if (isSlp && ticker != "") "$amountStr $ticker" else itemView.resources?.getString(
-                            R.string.tx_amount_moved,
-                            amountStr
-                    )
-            dollarsMoved.text =
-                    if (isSlp && ticker != "") null else "($$fiatAmount)"
+            bitsMoved.text = itemView.resources?.getString(
+                R.string.tx_amount_moved,
+                amountStr
+            )
+            dollarsMoved.text = "($$fiatAmount)"
             dateTextView.text = if (timestamp != 0L) {
                 timestamp.let {
                     DateFormatter.getFormattedDateFromLong(

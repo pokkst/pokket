@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.wallet.DeterministicKeyChain
+import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
 import xyz.pokkst.pokket.cash.ui.ToggleViewPager
 import xyz.pokkst.pokket.cash.ui.main.SectionsPagerAdapter
 import xyz.pokkst.pokket.cash.util.*
@@ -157,15 +158,16 @@ class MainActivity : AppCompatActivity() {
     private fun refresh() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val bch =
-                        WalletManager.wallet?.let { WalletManager.getBalance(it).toPlainString() }
-                bch?.let {
-                    val fiat = bch.toDouble() * PriceHelper.price
-                    val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
-                    this@MainActivity.runOnUiThread {
-                        appbar_title.text =
-                                "${resources.getString(R.string.appbar_title, bch)} ($${fiatStr})"
-                    }
+                val balanceInteractor = BalanceInteractor.getInstance()
+                val sbch = balanceInteractor.getSmartBalance()
+                val bch = balanceInteractor.getBitcoinBalance()
+                val totalBalance = sbch.add(bch)
+                val bchStr = BalanceFormatter.formatBalance(totalBalance.toDouble(), "#.########")
+                val fiat = totalBalance.toDouble() * PriceHelper.price
+                val fiatStr = BalanceFormatter.formatBalance(fiat, "0.00")
+                this@MainActivity.runOnUiThread {
+                    appbar_title.text =
+                        "${resources.getString(R.string.appbar_title, bchStr)} ($${fiatStr})"
                 }
             } catch (e: Exception) {
             }

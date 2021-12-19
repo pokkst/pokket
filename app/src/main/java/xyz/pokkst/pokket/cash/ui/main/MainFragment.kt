@@ -32,7 +32,7 @@ class MainFragment : Fragment() {
 
     enum class AddressViewType {
         CASH,
-        SLP,
+        SMARTBCH,
         BIP47
     }
 
@@ -74,13 +74,13 @@ class MainFragment : Fragment() {
             swapAddressButton?.setOnClickListener {
                 currentAddressViewType = when (currentAddressViewType) {
                     AddressViewType.CASH -> {
+                        refresh(WalletManager.getSmartBchAddress(), R.drawable.logo_sbch)
+                        AddressViewType.SMARTBCH
+                    }
+                    AddressViewType.SMARTBCH -> {
                         refresh(WalletManager.walletKit?.paymentCode, R.drawable.logo_bch_bip47)
                         AddressViewType.BIP47
                     }
-                    /*AddressViewType.SLP -> {
-                        refresh(WalletManager.walletKit?.paymentCode, R.drawable.logo_bch_bip47)
-                        AddressViewType.BIP47
-                    }*/ //TODO phase out SLP
                     AddressViewType.BIP47 -> {
                         refresh(
                                 WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
@@ -88,7 +88,6 @@ class MainFragment : Fragment() {
                         )
                         AddressViewType.CASH
                     }
-                    else -> { AddressViewType.CASH }
                 }
             }
 
@@ -102,7 +101,6 @@ class MainFragment : Fragment() {
 
         WalletManager.refreshEvents.observe(viewLifecycleOwner, Observer { event ->
             if (event != null) {
-                println("Refresh Event...")
                 refresh()
             }
         })
@@ -118,10 +116,10 @@ class MainFragment : Fragment() {
                     "${WalletManager.parameters.cashAddrPrefix}:${receiveText?.text.toString()}"
                 )
             }
-            AddressViewType.SLP -> {
+            AddressViewType.SMARTBCH -> {
                 ClipboardHelper.copyToClipboard(
                     activity,
-                    "${WalletManager.parameters.simpleledgerPrefix}:${receiveText?.text.toString()}"
+                    receiveText?.text.toString()
                 )
             }
             AddressViewType.BIP47 -> {
@@ -135,10 +133,10 @@ class MainFragment : Fragment() {
 
     private fun refresh() {
         when (currentAddressViewType) {
-            AddressViewType.SLP -> {
+            AddressViewType.SMARTBCH -> {
                 refresh(
-                        WalletManager.walletKit?.currentSlpReceiveAddress().toString(),
-                        R.drawable.logo_slp
+                        WalletManager.getSmartBchAddress(),
+                        R.drawable.logo_sbch
                 )
             }
             AddressViewType.BIP47 -> {

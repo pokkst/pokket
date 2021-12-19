@@ -13,7 +13,7 @@
         android:orientation="horizontal"
         android:gravity="end|bottom"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/selected_token_layout">
+        app:layout_constraintBottom_toTopOf="@id/input_numpad">
         <TextView
             android:id="@+id/alt_currency_symbol"
             android:layout_width="wrap_content"
@@ -61,22 +61,13 @@
 
     </LinearLayout>
 
-    <include
-        android:id="@+id/selected_token_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        layout="@layout/token_list_cell"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/input_numpad"
-        app:layout_constraintTop_toBottomOf="@id/input_area"/>
-
     <LinearLayout
         android:id="@+id/input_numpad"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/selected_token_layout"
+        app:layout_constraintTop_toBottomOf="@id/input_area"
         app:layout_constraintBottom_toTopOf="@id/to_field">
         <include
             layout="@layout/component_input_numpad"/>

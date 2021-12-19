@@ -53,6 +53,9 @@ dependencies {
     implementation('com.github.pokkst:bitcoincashj:0.26.1') {
         exclude group: "org.json"
     }
+    implementation('org.web3j:core:4.8.7') {
+        exclude group: "org.bouncycastle"
+    }
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.luminiasoft.ethereum:blockiesandroid:0.1.0'
     implementation 'com.github.kenglxn.QRGen:android:2.5.0'

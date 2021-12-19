@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Handler
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.*
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.core.PeerAddress
@@ -11,7 +12,6 @@ import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.kits.BIP47AppKit
 import org.bitcoinj.kits.MultisigAppKit
-import org.bitcoinj.kits.SlpBIP47AppKit
 import org.bitcoinj.kits.WalletKitCore
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.script.Script
@@ -19,6 +19,7 @@ import org.bitcoinj.utils.Threading
 import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.KeyChainGroupStructure
 import org.bitcoinj.wallet.Wallet
+import org.web3j.protocol.Web3j
 import xyz.pokkst.pokket.cash.livedata.Event
 import xyz.pokkst.pokket.cash.util.PrefsHelper
 import java.io.File
@@ -26,10 +27,23 @@ import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
 import java.util.concurrent.Executor
+import org.web3j.protocol.http.HttpService
+import org.web3j.crypto.Credentials
+
+import org.web3j.crypto.WalletUtils
+import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
+import java.lang.Runnable
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
+
 
 class WalletManager {
     companion object {
         lateinit var walletDir: File
+        var web3: Web3j? = null
+        private var credentials: Credentials? = null
+        private val password = "rhfk4zr2uPXbxbnhkCMDTQ3yEH3skkuMNVXDojTcCCqWUT6v9YvwFLLSkMZzF" // not actually supposed to be private
         var walletKit: BIP47AppKit? = null
         var multisigWalletKit: MultisigAppKit? = null
         val wallet: Wallet?
@@ -53,8 +67,26 @@ class WalletManager {
         val peerCount: LiveData<Int> = _peerCount
         const val walletFileName = "pokket2"
         const val multisigWalletFileName = "pokket2_multisig"
+
+        private fun startPeriodicRefresher() {
+            val refreshRunnable = Runnable {
+                _refreshEvents.postValue(Event(""))
+            }
+            val exec: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+            exec.scheduleAtFixedRate(refreshRunnable, 30L, 20L, TimeUnit.SECONDS)
+        }
+
         fun startWallet(activity: Activity, seed: String?, newUser: Boolean, passphrase: String?) {
             setBitcoinSDKThread()
+            startPeriodicRefresher()
+
+            val clientSbchWallet = getClientWalletFile(walletDir)
+            val clientExists = clientSbchWallet != null
+            if(newUser) {
+                initWeb3(seed, false, null)
+            } else if(clientExists) {
+                initWeb3(null, true, clientSbchWallet)
+            }
 
             walletKit = object : BIP47AppKit(
                     parameters,
@@ -83,6 +115,11 @@ class WalletManager {
                     val privateMode = PrefsHelper.instance(null)?.getBoolean("private_mode", false) ?: false
                     peerGroup()?.isBloomFilteringEnabled = !privateMode
                     wallet().saveToFile(vWalletFile)
+
+                    if(!clientExists && !newUser) {
+                        val web3Seed = wallet().keyChainSeed.mnemonicCode?.joinToString { " " }
+                        initWeb3(web3Seed, false, null)
+                    }
                 }
             }
 
@@ -190,8 +227,19 @@ class WalletManager {
             return wallet.getBalance(Wallet.BalanceType.ESTIMATED)
         }
 
+        fun getTotalBalance(wallet: Wallet): String {
+            return if(web3 != null) {
+                val balanceInteractor = BalanceInteractor.getInstance()
+                val sbchBalance = balanceInteractor.getSmartBalance()
+                val bchBalance = balanceInteractor.getBitcoinBalance()
+                val totalBalance = sbchBalance.add(bchBalance)
+                totalBalance.toString()
+            } else {
+                wallet.getBalance(Wallet.BalanceType.ESTIMATED).toPlainString()
+            }
+        }
 
-        fun setBitcoinSDKThread() {
+        private fun setBitcoinSDKThread() {
             val handler = Handler()
             Threading.USER_THREAD = Executor { handler.post(it) }
         }
@@ -201,6 +249,32 @@ class WalletManager {
             kit?.awaitTerminated()
             walletKit = null
             multisigWalletKit = null
+        }
+
+        private fun getClientWalletFile(clientDirectory: File): File? {
+            return clientDirectory.listFiles().firstOrNull { file -> file.name.contains(".json") }
+        }
+
+        private fun initWeb3(seed: String?, clientExists: Boolean, clientSbchWallet: File?) {
+            GlobalScope.launch(Dispatchers.IO) {
+                val httpService = HttpService("https://smartbch.fountainhead.cash/mainnet")
+                web3 = Web3j.build(httpService)
+                var walletFile = ""
+                if (clientExists) {
+                    if (clientSbchWallet != null) walletFile = clientSbchWallet.name
+                } else {
+                    walletFile = WalletUtils.generateBip39WalletFromMnemonic(password, seed, walletDir).filename
+                }
+                credentials = WalletUtils.loadCredentials(
+                    password,
+                    File(walletDir, walletFile)
+                )
+                _refreshEvents.postValue(Event(""))
+            }
+        }
+
+        fun getSmartBchAddress(): String? {
+            return credentials?.address
         }
     }
 }

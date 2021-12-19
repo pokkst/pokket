@@ -16,37 +16,11 @@
                 android:name="address"
                 app:argType="string" />
         </action>
-        <action
-            android:id="@+id/nav_to_tokens"
-            app:destination="@id/viewTokensFragment">
-            <argument
-                android:name="address"
-                app:nullable="true"
-                app:argType="string" />
-        </action>
     </fragment>
     <fragment
         android:id="@+id/sendAmountFragment"
         android:name="xyz.pokkst.pokket.cash.ui.main.fragment.send.SendAmountFragment"
         android:label="fragment_send_amount"
         tools:layout="@layout/fragment_send_amount">
-    </fragment>
-    <fragment
-        android:id="@+id/viewTokensFragment"
-        android:name="xyz.pokkst.pokket.cash.ui.main.fragment.token.ViewTokensFragment"
-        android:label="fragment_view_tokens"
-        tools:layout="@layout/fragment_view_tokens">
-        <action
-            android:id="@+id/nav_to_send_from_view_tokens"
-            app:destination="@id/sendAmountFragment">
-            <argument
-                android:name="address"
-                app:nullable="true"
-                app:argType="string" />
-            <argument
-                android:name="tokenId"
-                app:nullable="true"
-                app:argType="string" />
-        </action>
     </fragment>
 </navigation>
