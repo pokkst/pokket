@@ -108,10 +108,12 @@ class MainActivity : AppCompatActivity() {
                         val dialog = builder.show()
                         val swapMinimum = BigDecimal.valueOf(0.01)
                         val swapMaximum = BigDecimal.valueOf(10.0)
-                        val swapToSbchButton =
-                            dialog?.findViewById<Button>(R.id.swap_to_sbch_button)
+                        val swapToSbchButton = dialog?.findViewById<Button>(R.id.swap_to_sbch_button)
                         val swapToBchButton = dialog?.findViewById<Button>(R.id.swap_to_bch_button)
-                        if (bchBalance > swapMinimum && bchBalance < swapMaximum) {
+                        swapToSbchButton?.visibility = View.GONE
+                        swapToBchButton?.visibility = View.GONE
+                        //TODO wait for im_uname to fix his shit
+                        /*if (bchBalance > swapMinimum && bchBalance < swapMaximum) {
                             swapToSbchButton?.setTextColor(
                                 ContextCompat.getColor(
                                     this@MainActivity,
@@ -145,9 +147,9 @@ class MainActivity : AppCompatActivity() {
                                 )
                             )
                             swapToBchButton?.isEnabled = false
-                        }
+                        }*/
 
-                        swapToSbchButton?.setOnClickListener {
+                        /*swapToSbchButton?.setOnClickListener {
                             val intent = Intent(Constants.ACTION_HOP_TO_SBCH)
                             LocalBroadcastManager.getInstance(this@MainActivity)
                                 .sendBroadcast(intent)
@@ -158,7 +160,7 @@ class MainActivity : AppCompatActivity() {
                             LocalBroadcastManager.getInstance(this@MainActivity)
                                 .sendBroadcast(intent)
                             dialog.dismiss()
-                        }
+                        }*/
                         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                     }
                 }

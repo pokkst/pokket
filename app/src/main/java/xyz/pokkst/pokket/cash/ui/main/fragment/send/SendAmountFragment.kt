@@ -72,7 +72,6 @@ class SendAmountFragment : Fragment() {
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Constants.ACTION_MAIN_ENABLE_PAGER == intent.action) {
-                println("RETURNING...")
                 this@SendAmountFragment.findNavController().navigateUp()
             } else if (Constants.ACTION_FRAGMENT_SEND_SEND == intent.action) {
                 if (getCoinAmount() != Coin.ZERO) {
