@@ -31,11 +31,11 @@ class WalletInteractor {
     }
 
     fun getBitcoinAddress(): Address? {
-        return getBitcoinWallet()?.currentReceiveAddress()
+        return getBitcoinWallet()?.currentReceiveAddress()?.toCash()
     }
 
     fun getFreshBitcoinAddress(): Address? {
-        return getBitcoinWallet()?.freshReceiveAddress()
+        return getBitcoinWallet()?.freshReceiveAddress()?.toCash()
     }
 
     fun getSmartAddress(): String {

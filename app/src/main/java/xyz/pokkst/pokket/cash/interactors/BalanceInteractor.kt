@@ -8,7 +8,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 class BalanceInteractor {
-    val walletInteractor = WalletInteractor.getInstance()
+    private val walletInteractor = WalletInteractor.getInstance()
     private var lastUpdateTimeMs: Long = 0
     private var cachedSmartBalance: BigInteger = BigInteger.ZERO
 

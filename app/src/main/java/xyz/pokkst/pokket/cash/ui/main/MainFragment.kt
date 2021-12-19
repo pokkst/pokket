@@ -14,6 +14,7 @@ import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import net.glxn.qrgen.android.QRCode
 import xyz.pokkst.pokket.cash.R
+import xyz.pokkst.pokket.cash.interactors.WalletInteractor
 import xyz.pokkst.pokket.cash.util.ClipboardHelper
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 import java.lang.Exception
@@ -23,7 +24,7 @@ import java.lang.Exception
  * A placeholder fragment containing a simple view.
  */
 class MainFragment : Fragment() {
-
+    private val walletInteractor = WalletInteractor.getInstance()
     private lateinit var pageViewModel: PageViewModel
     private var page: Int = 0
     var receiveQr: ImageView? = null
@@ -75,7 +76,7 @@ class MainFragment : Fragment() {
             swapAddressButton?.setOnClickListener {
                 currentAddressViewType = when (currentAddressViewType) {
                     AddressViewType.CASH -> {
-                        refresh(WalletManager.getSmartBchAddress(), R.drawable.logo_sbch)
+                        refresh(walletInteractor.getSmartAddress(), R.drawable.logo_sbch)
                         AddressViewType.SMARTBCH
                     }
                     AddressViewType.SMARTBCH -> {
@@ -83,10 +84,7 @@ class MainFragment : Fragment() {
                         AddressViewType.BIP47
                     }
                     AddressViewType.BIP47 -> {
-                        refresh(
-                                WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
-                                R.drawable.logo_bch
-                        )
+                        refresh(walletInteractor.getFreshBitcoinAddress()?.toString(), R.drawable.logo_bch)
                         AddressViewType.CASH
                     }
                 }
@@ -110,45 +108,19 @@ class MainFragment : Fragment() {
     }
 
     private fun copyToClipboard() {
+        val address = receiveText?.text.toString()
         when(currentAddressViewType) {
-            AddressViewType.CASH -> {
-                ClipboardHelper.copyToClipboard(
-                    activity,
-                    "${WalletManager.parameters.cashAddrPrefix}:${receiveText?.text.toString()}"
-                )
-            }
-            AddressViewType.SMARTBCH -> {
-                ClipboardHelper.copyToClipboard(
-                    activity,
-                    receiveText?.text.toString()
-                )
-            }
-            AddressViewType.BIP47 -> {
-                ClipboardHelper.copyToClipboard(
-                    activity,
-                    receiveText?.text.toString()
-                )
-            }
+            AddressViewType.CASH -> ClipboardHelper.copyToClipboard(activity, "${WalletManager.parameters.cashAddrPrefix}:${address}")
+            AddressViewType.SMARTBCH -> ClipboardHelper.copyToClipboard(activity, address)
+            AddressViewType.BIP47 -> ClipboardHelper.copyToClipboard(activity, address)
         }
     }
 
     private fun refresh() {
         when (currentAddressViewType) {
-            AddressViewType.SMARTBCH -> {
-                refresh(
-                        WalletManager.getSmartBchAddress(),
-                        R.drawable.logo_sbch
-                )
-            }
-            AddressViewType.BIP47 -> {
-                refresh(WalletManager.walletKit?.paymentCode, R.drawable.logo_bch_bip47)
-            }
-            AddressViewType.CASH -> {
-                refresh(
-                        WalletManager.wallet?.currentReceiveAddress()?.toCash().toString(),
-                        R.drawable.logo_bch
-                )
-            }
+            AddressViewType.SMARTBCH -> refresh(walletInteractor.getSmartAddress(), R.drawable.logo_sbch)
+            AddressViewType.BIP47 -> refresh(WalletManager.walletKit?.paymentCode, R.drawable.logo_bch_bip47)
+            AddressViewType.CASH -> refresh(walletInteractor.getBitcoinAddress().toString(), R.drawable.logo_bch)
         }
     }
 

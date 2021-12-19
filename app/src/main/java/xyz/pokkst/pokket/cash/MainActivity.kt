@@ -22,6 +22,7 @@ import java.io.File
 
 class MainActivity : AppCompatActivity() {
     var inFragment = false
+    val balanceInteractor = BalanceInteractor.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,8 +88,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         appbar_title.setOnClickListener {
-            val intent = Intent(Constants.ACTION_FRAGMENT_SEND_MAX)
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+            if(isSendScreenEnabled()) {
+                val intent = Intent(Constants.ACTION_FRAGMENT_SEND_MAX)
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+            } else {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    println("BCH balance: ${balanceInteractor.getBitcoinBalance().toPlainString()}")
+                    println("sBCH balance: ${balanceInteractor.getSmartBalance().toPlainString()}")
+                }
+            }
         }
 
         settings_button.setOnClickListener {
@@ -191,16 +199,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun enablePayButton() {
-        pay_button.isEnabled = true
+    fun isSendScreenEnabled(): Boolean {
+        return pay_button.visibility == View.VISIBLE
     }
 
-    fun enableTokensScreen() {
-        val viewPager: ToggleViewPager = findViewById(R.id.view_pager)
-        val tabs: TabLayout = findViewById(R.id.tabs)
-        viewPager.setPagingEnabled(false)
-        settings_button.setImageResource(R.drawable.navigationback)
-        tabs.visibility = View.GONE
-        inFragment = true
+    fun enablePayButton() {
+        pay_button.isEnabled = true
     }
 }
