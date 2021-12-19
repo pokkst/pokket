@@ -1,8 +1,11 @@
 package xyz.pokkst.pokket.cash
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -19,6 +22,8 @@ import xyz.pokkst.pokket.cash.ui.main.SectionsPagerAdapter
 import xyz.pokkst.pokket.cash.util.*
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 import java.io.File
+import androidx.appcompat.app.AlertDialog
+
 
 class MainActivity : AppCompatActivity() {
     var inFragment = false
@@ -93,8 +98,20 @@ class MainActivity : AppCompatActivity() {
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
             } else {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    println("BCH balance: ${balanceInteractor.getBitcoinBalance().toPlainString()}")
-                    println("sBCH balance: ${balanceInteractor.getSmartBalance().toPlainString()}")
+                    val bchBalance = balanceInteractor.getBitcoinBalance().toPlainString()
+                    val sbchBalance = balanceInteractor.getSmartBalance().toPlainString()
+
+                    this@MainActivity.runOnUiThread {
+                        val inflater = layoutInflater
+                        val dialoglayout: View = inflater.inflate(R.layout.dialog_balances, null)
+                        dialoglayout.findViewById<TextView>(R.id.bch_balance_textview)?.text = resources.getString(R.string.bch_balance, bchBalance)
+                        dialoglayout.findViewById<TextView>(R.id.sbch_balance_textview)?.text = resources.getString(R.string.bch_balance, sbchBalance)
+
+                        val builder = AlertDialog.Builder(this@MainActivity)
+                        builder.setView(dialoglayout)
+                        val dialog = builder.show()
+                        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                    }
                 }
             }
         }
