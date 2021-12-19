@@ -16,6 +16,7 @@ import net.glxn.qrgen.android.QRCode
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.util.ClipboardHelper
 import xyz.pokkst.pokket.cash.wallet.WalletManager
+import java.lang.Exception
 
 
 /**
@@ -165,7 +166,7 @@ class MainFragment : Fragment() {
             receiveQr?.setImageBitmap(qrCode)
             receiveText?.text = address?.replace("${WalletManager.parameters.cashAddrPrefix}:", "")
                     ?.replace("${WalletManager.parameters.simpleledgerPrefix}:", "")
-        } catch (e: WriterException) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
