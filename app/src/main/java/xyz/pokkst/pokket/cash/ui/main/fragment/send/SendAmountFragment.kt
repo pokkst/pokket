@@ -62,6 +62,8 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 
 import org.web3j.protocol.Web3j
 import org.web3j.utils.Convert
+import xyz.pokkst.pokket.cash.interactors.TransactionInteractor
+import java.math.BigInteger
 
 
 /**
@@ -73,6 +75,7 @@ class SendAmountFragment : Fragment() {
     private var sendMax: Boolean = false
     val walletInteractor = WalletInteractor.getInstance()
     val balanceInteractor = BalanceInteractor.getInstance()
+    val transactionInteractor = TransactionInteractor.getInstance()
 
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -284,8 +287,64 @@ class SendAmountFragment : Fragment() {
                         showFlipstarterPledge(pledgePayload)
                     }
                     PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
-                    null -> showToast("please enter a valid destination")
                     PaymentType.SMARTBCH_ADDRESS -> this.processSmartBchTransaction()
+                    PaymentType.HOP_TO_SBCH -> {
+                        val req = transactionInteractor.createHopToSmartBch(this.sendMax, getCoinAmount())
+                        req.allowUnconfirmed()
+                        req.ensureMinRequiredFee = false
+                        req.feePerKb = Coin.valueOf(1L * 1000L) //1 sat/byte
+                        val sendResult = WalletManager.wallet?.sendCoins(req)
+                        Futures.addCallback(
+                            sendResult?.broadcastComplete,
+                            object : FutureCallback<Transaction?> {
+                                override fun onSuccess(@Nullable result: Transaction?) {
+                                    showToast("coins sent!")
+                                    (activity as? MainActivity)?.toggleSendScreen(false)
+                                }
+
+                                override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
+
+                                }
+                            },
+                            MoreExecutors.directExecutor()
+                        )
+                    }
+                    PaymentType.HOP_TO_BCH -> {
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            val wallet = walletInteractor.getSmartWallet()
+                            val totalBalance = balanceInteractor.getSmartBalanceRaw()
+                            if(totalBalance == BigInteger.ZERO) {
+                                showToast("balance is zero")
+                                return@launch
+                            }
+                            val nonce = wallet?.ethGetTransactionCount(walletInteractor.getSmartAddress(), DefaultBlockParameterName.LATEST as DefaultBlockParameter)?.send()?.transactionCount
+                            if(nonce == null) {
+                                showToast("could not fetch nonce")
+                                return@launch
+                            }
+                            val gasPrice = wallet.ethGasPrice().send().gasPrice
+                            if(gasPrice == null) {
+                                showToast("could not fetch gas price")
+                                return@launch
+                            }
+                            val tx = if(this@SendAmountFragment.sendMax) {
+                                transactionInteractor.createHopToBitcoin(this@SendAmountFragment.sendMax, nonce, gasPrice, totalBalance)
+                            } else {
+                                val amount = getCoinAmount().toBtc()
+                                val amountWei = Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger()
+                                transactionInteractor.createHopToBitcoin(this@SendAmountFragment.sendMax, nonce, gasPrice, amountWei)
+                            }
+
+                            val response = walletInteractor.getSmartWallet()?.ethSendTransaction(tx)?.send()
+                            if(response?.hasError() == false) {
+                                activity?.runOnUiThread {
+                                    showToast("coins sent!")
+                                    (activity as? MainActivity)?.toggleSendScreen(false)
+                                }
+                            }
+                        }
+                    }
+                    null -> showToast("please enter a valid destination")
                 }
             } else {
                 showToast("please enter an address")
@@ -546,7 +605,6 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun processSmartBchTransaction() {
-        println("sending smart bch...")
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val wallet = walletInteractor.getSmartWallet()
@@ -556,16 +614,13 @@ class SendAmountFragment : Fragment() {
                     return@launch
                 }
                 val nonce = wallet?.ethGetTransactionCount(walletInteractor.getSmartAddress(), DefaultBlockParameterName.LATEST as DefaultBlockParameter)?.send()?.transactionCount
-                println("nonce: $nonce")
                 val gasPrice = wallet?.ethGasPrice()?.send()?.gasPrice
-                println("gas price: $gasPrice")
                 if(gasPrice == null) {
                     showToast("could not fetch gas price")
                     return@launch
                 }
                 if(sendMax) {
                     val totalBalance = balanceInteractor.getSmartBalanceRaw()
-                    println("total balance: $totalBalance")
                     val req = org.web3j.protocol.core.methods.request.Transaction.createEtherTransaction(walletInteractor.getSmartAddress(), nonce, gasPrice, Transfer.GAS_LIMIT, address, totalBalance)
                     val gasEstimate = wallet.ethEstimateGas(req)?.send()?.amountUsed
                     val gasValue = gasEstimate?.multiply(gasPrice)
@@ -586,7 +641,7 @@ class SendAmountFragment : Fragment() {
                         return@launch
                     }
                 } else {
-                    val sendValueEther = BalanceFormatter.toEtherBalance(getCoinAmount().value)
+                    val sendValueEther = getCoinAmount().toBtc()
                     if(sendValueEther == null) {
                         showToast("could not calculate send value")
                         return@launch

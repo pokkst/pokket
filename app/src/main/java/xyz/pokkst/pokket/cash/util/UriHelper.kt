@@ -102,19 +102,22 @@ class UriHelper {
 
                     if (addressOrPayload?.contains("#") == true) {
                         return PaymentContent(addressOrPayload, amount, PaymentType.CASH_ACCOUNT)
-                    } else if (Address.isValidCashAddr(
-                                    WalletManager.parameters,
-                                    addressOrPayload
-                            ) || Address.isValidLegacyAddress(
-                                    WalletManager.parameters,
-                                    addressOrPayload
-                            )
-                    ) {
-                        return PaymentContent(addressOrPayload, amount, PaymentType.ADDRESS)
+                    } else if (Address.isValidCashAddr(WalletManager.parameters, addressOrPayload) || Address.isValidLegacyAddress(WalletManager.parameters, addressOrPayload)) {
+                        val address = addressOrPayload
+                        return if(address == Constants.HOPCASH_BCH_INCOMING) {
+                            PaymentContent(addressOrPayload, amount, PaymentType.HOP_TO_SBCH)
+                        } else {
+                            PaymentContent(addressOrPayload, amount, PaymentType.ADDRESS)
+                        }
                     } else if (Address.isValidPaymentCode(addressOrPayload)) {
                         return PaymentContent(addressOrPayload, amount, PaymentType.PAYMENT_CODE)
                     } else if(addressOrPayload?.startsWith(SMARTBCH_PREFIX) == true) {
-                        return PaymentContent(addressOrPayload, amount, PaymentType.SMARTBCH_ADDRESS)
+                        val address = addressOrPayload
+                        return if(address.equals(Constants.HOPCASH_SBCH_INCOMING, ignoreCase = true)) {
+                            PaymentContent(addressOrPayload, amount, PaymentType.HOP_TO_BCH)
+                        } else {
+                            PaymentContent(addressOrPayload, amount, PaymentType.SMARTBCH_ADDRESS)
+                        }
                     }
                 }
 
