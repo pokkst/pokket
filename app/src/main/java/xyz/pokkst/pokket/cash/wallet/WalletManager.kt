@@ -225,22 +225,6 @@ class WalletManager {
             }
         }
 
-        fun getBalance(wallet: Wallet): Coin {
-            return wallet.getBalance(Wallet.BalanceType.ESTIMATED)
-        }
-
-        fun getTotalBalance(wallet: Wallet): String {
-            return if(web3 != null) {
-                val balanceInteractor = BalanceInteractor.getInstance()
-                val sbchBalance = balanceInteractor.getSmartBalance()
-                val bchBalance = balanceInteractor.getBitcoinBalance()
-                val totalBalance = sbchBalance.add(bchBalance)
-                totalBalance.toString()
-            } else {
-                wallet.getBalance(Wallet.BalanceType.ESTIMATED).toPlainString()
-            }
-        }
-
         private fun setBitcoinSDKThread() {
             val handler = Handler()
             Threading.USER_THREAD = Executor { handler.post(it) }
