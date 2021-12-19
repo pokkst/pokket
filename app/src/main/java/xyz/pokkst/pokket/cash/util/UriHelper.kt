@@ -9,6 +9,7 @@ import java.util.*
 
 class UriHelper {
     companion object {
+        private const val SMARTBCH_PREFIX = "0x"
         private var addressOrPayload: String? = null
         private var amount: Coin? = null
 
@@ -88,6 +89,7 @@ class UriHelper {
                     }
 
                     addressOrPayload = when {
+                        uri.startsWith(SMARTBCH_PREFIX) -> getQueryBaseAddress(uri).toLowerCase()
                         uri.startsWith(params.cashAddrPrefix) -> getQueryBaseAddress(
                                 uri
                         ).replace("${params.cashAddrPrefix}:", "")
@@ -111,6 +113,8 @@ class UriHelper {
                         return PaymentContent(addressOrPayload, amount, PaymentType.ADDRESS)
                     } else if (Address.isValidPaymentCode(addressOrPayload)) {
                         return PaymentContent(addressOrPayload, amount, PaymentType.PAYMENT_CODE)
+                    } else if(addressOrPayload?.startsWith(SMARTBCH_PREFIX) == true) {
+                        return PaymentContent(addressOrPayload, amount, PaymentType.SMARTBCH_ADDRESS)
                     }
                 }
 

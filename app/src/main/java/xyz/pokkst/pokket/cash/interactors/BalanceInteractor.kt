@@ -5,11 +5,12 @@ import org.web3j.protocol.core.DefaultBlockParameterName
 import xyz.pokkst.pokket.cash.util.BalanceFormatter
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 import java.math.BigDecimal
+import java.math.BigInteger
 
 class BalanceInteractor {
     val walletInteractor = WalletInteractor.getInstance()
     private var lastUpdateTimeMs: Long = 0
-    private var cachedSmartBalance: BigDecimal = BigDecimal.ZERO
+    private var cachedSmartBalance: BigInteger = BigInteger.ZERO
 
     fun getBitcoinBalance(): BigDecimal {
         val balance = walletInteractor.getBitcoinWallet()?.getBalance(Wallet.BalanceType.ESTIMATED)
@@ -19,19 +20,24 @@ class BalanceInteractor {
             balance.toBtc()
     }
 
-    fun getSmartBalance(): BigDecimal {
+    fun getSmartBalanceRaw(): BigInteger {
         val currentTimeMs = System.currentTimeMillis()
         val updateBalance = updateSmartBalance(currentTimeMs)
         if(updateBalance) {
             val sbchAddress = walletInteractor.getSmartAddress()
             val sbchWeiBalance =
-                WalletManager.web3?.ethGetBalance(sbchAddress, DefaultBlockParameterName.LATEST)
+                walletInteractor.getSmartWallet()?.ethGetBalance(sbchAddress, DefaultBlockParameterName.LATEST)
                     ?.send()?.balance
-            val sbchBalance = sbchWeiBalance?.toLong()?.let { BalanceFormatter.toEtherBalance(it) }
-            cachedSmartBalance = sbchBalance ?: BigDecimal.ZERO
+            cachedSmartBalance = sbchWeiBalance ?: BigInteger.ZERO
         }
 
         return cachedSmartBalance
+    }
+
+    fun getSmartBalance(): BigDecimal {
+        val rawBalance = getSmartBalanceRaw()
+        val sbchBalance = rawBalance.toLong().let { BalanceFormatter.toEtherBalance(it) }
+        return sbchBalance ?: BigDecimal.ZERO
     }
 
     private fun updateSmartBalance(currentTimeMs: Long): Boolean {

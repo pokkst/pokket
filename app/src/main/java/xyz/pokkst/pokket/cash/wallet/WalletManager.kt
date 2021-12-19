@@ -42,7 +42,7 @@ class WalletManager {
     companion object {
         lateinit var walletDir: File
         var web3: Web3j? = null
-        private var credentials: Credentials? = null
+        var credentials: Credentials? = null
         private val password = "rhfk4zr2uPXbxbnhkCMDTQ3yEH3skkuMNVXDojTcCCqWUT6v9YvwFLLSkMZzF" // not actually supposed to be private
         var walletKit: BIP47AppKit? = null
         var multisigWalletKit: MultisigAppKit? = null

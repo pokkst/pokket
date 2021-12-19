@@ -5,6 +5,7 @@ import org.bitcoinj.kits.BIP47AppKit
 import org.bitcoinj.kits.MultisigAppKit
 import org.bitcoinj.kits.WalletKitCore
 import org.bitcoinj.wallet.Wallet
+import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import xyz.pokkst.pokket.cash.wallet.WalletManager
 
@@ -25,8 +26,16 @@ class WalletInteractor {
         return WalletManager.web3
     }
 
+    fun getCredentials(): Credentials? {
+        return WalletManager.credentials
+    }
+
     fun getBitcoinAddress(): Address? {
         return getBitcoinWallet()?.currentReceiveAddress()
+    }
+
+    fun getFreshBitcoinAddress(): Address? {
+        return getBitcoinWallet()?.freshReceiveAddress()
     }
 
     fun getSmartAddress(): String {
