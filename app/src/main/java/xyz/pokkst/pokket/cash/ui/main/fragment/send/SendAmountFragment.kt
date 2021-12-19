@@ -40,6 +40,7 @@ import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
 import org.bouncycastle.util.encoders.Hex
 import org.web3j.crypto.Credentials
+import org.web3j.crypto.TransactionEncoder
 import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
@@ -62,6 +63,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 
 import org.web3j.protocol.Web3j
 import org.web3j.utils.Convert
+import org.web3j.utils.Numeric
 import xyz.pokkst.pokket.cash.interactors.TransactionInteractor
 import java.math.BigInteger
 
@@ -100,7 +102,7 @@ class SendAmountFragment : Fragment() {
                 }
             } else if (Constants.ACTION_FRAGMENT_SEND_MAX == intent.action) {
                 this@SendAmountFragment.sendMax = true
-                if(paymentContent?.paymentType == PaymentType.SMARTBCH_ADDRESS) {
+                if(paymentContent?.paymentType == PaymentType.SMARTBCH_ADDRESS || paymentContent?.paymentType == PaymentType.HOP_TO_BCH) {
                     lifecycleScope.launch(Dispatchers.IO) {
                         val balance = balanceInteractor.getSmartBalance().toDouble()
                         val formattedBalance = BalanceFormatter.formatBalance(balance, "#.########")
@@ -288,62 +290,8 @@ class SendAmountFragment : Fragment() {
                     }
                     PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
                     PaymentType.SMARTBCH_ADDRESS -> this.processSmartBchTransaction()
-                    PaymentType.HOP_TO_SBCH -> {
-                        val req = transactionInteractor.createHopToSmartBch(this.sendMax, getCoinAmount())
-                        req.allowUnconfirmed()
-                        req.ensureMinRequiredFee = false
-                        req.feePerKb = Coin.valueOf(1L * 1000L) //1 sat/byte
-                        val sendResult = WalletManager.wallet?.sendCoins(req)
-                        Futures.addCallback(
-                            sendResult?.broadcastComplete,
-                            object : FutureCallback<Transaction?> {
-                                override fun onSuccess(@Nullable result: Transaction?) {
-                                    showToast("coins sent!")
-                                    (activity as? MainActivity)?.toggleSendScreen(false)
-                                }
-
-                                override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
-
-                                }
-                            },
-                            MoreExecutors.directExecutor()
-                        )
-                    }
-                    PaymentType.HOP_TO_BCH -> {
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            val wallet = walletInteractor.getSmartWallet()
-                            val totalBalance = balanceInteractor.getSmartBalanceRaw()
-                            if(totalBalance == BigInteger.ZERO) {
-                                showToast("balance is zero")
-                                return@launch
-                            }
-                            val nonce = wallet?.ethGetTransactionCount(walletInteractor.getSmartAddress(), DefaultBlockParameterName.LATEST as DefaultBlockParameter)?.send()?.transactionCount
-                            if(nonce == null) {
-                                showToast("could not fetch nonce")
-                                return@launch
-                            }
-                            val gasPrice = wallet.ethGasPrice().send().gasPrice
-                            if(gasPrice == null) {
-                                showToast("could not fetch gas price")
-                                return@launch
-                            }
-                            val tx = if(this@SendAmountFragment.sendMax) {
-                                transactionInteractor.createHopToBitcoin(this@SendAmountFragment.sendMax, nonce, gasPrice, totalBalance)
-                            } else {
-                                val amount = getCoinAmount().toBtc()
-                                val amountWei = Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger()
-                                transactionInteractor.createHopToBitcoin(this@SendAmountFragment.sendMax, nonce, gasPrice, amountWei)
-                            }
-
-                            val response = walletInteractor.getSmartWallet()?.ethSendTransaction(tx)?.send()
-                            if(response?.hasError() == false) {
-                                activity?.runOnUiThread {
-                                    showToast("coins sent!")
-                                    (activity as? MainActivity)?.toggleSendScreen(false)
-                                }
-                            }
-                        }
-                    }
+                    PaymentType.HOP_TO_SBCH -> hopToSbch()
+                    PaymentType.HOP_TO_BCH -> hopToBch()
                     null -> showToast("please enter a valid destination")
                 }
             } else {
@@ -351,6 +299,68 @@ class SendAmountFragment : Fragment() {
             }
         } else {
             showToast("wallet balance is zero")
+        }
+    }
+
+    private fun hopToSbch() {
+        val req = transactionInteractor.createHopToSmartBch(this.sendMax, getCoinAmount())
+        req.allowUnconfirmed()
+        req.ensureMinRequiredFee = false
+        req.feePerKb = Coin.valueOf(1L * 1000L) //1 sat/byte
+        req.shuffleOutputs = false
+        val sendResult = walletInteractor.getBitcoinWallet()?.sendCoins(req)
+        Futures.addCallback(
+            sendResult?.broadcastComplete,
+            object : FutureCallback<Transaction?> {
+                override fun onSuccess(@Nullable result: Transaction?) {
+                    showToast("coins sent!")
+                    (activity as? MainActivity)?.toggleSendScreen(false)
+                }
+
+                override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
+
+                }
+            },
+            MoreExecutors.directExecutor()
+        )
+    }
+
+    private fun hopToBch() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val wallet = walletInteractor.getSmartWallet()
+            val totalBalance = balanceInteractor.getSmartBalanceRaw()
+            if(totalBalance == BigInteger.ZERO) {
+                showToast("balance is zero")
+                return@launch
+            }
+            val nonce = wallet?.ethGetTransactionCount(walletInteractor.getSmartAddress(), DefaultBlockParameterName.LATEST as DefaultBlockParameter)?.send()?.transactionCount
+            if(nonce == null) {
+                showToast("could not fetch nonce")
+                return@launch
+            }
+            val gasPrice = wallet.ethGasPrice().send().gasPrice
+            if(gasPrice == null) {
+                showToast("could not fetch gas price")
+                return@launch
+            }
+            val tx = if(this@SendAmountFragment.sendMax) {
+                transactionInteractor.createHopToBitcoin(this@SendAmountFragment.sendMax, nonce, gasPrice, totalBalance)
+            } else {
+                val amount = getCoinAmount().toBtc()
+                val amountWei = Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger()
+                transactionInteractor.createHopToBitcoin(this@SendAmountFragment.sendMax, nonce, gasPrice, amountWei)
+            }
+
+            val signedMessage = TransactionEncoder.signMessage(tx, walletInteractor.getCredentials())
+            val signedTx = Numeric.toHexString(signedMessage);
+
+            val response = walletInteractor.getSmartWallet()?.ethSendRawTransaction(signedTx)?.send()
+            if(response?.hasError() == false) {
+                activity?.runOnUiThread {
+                    showToast("coins sent!")
+                    (activity as? MainActivity)?.toggleSendScreen(false)
+                }
+            }
         }
     }
 

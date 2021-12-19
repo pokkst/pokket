@@ -12,7 +12,7 @@ class Constants {
 
         val DONATION_ADDRESS = "qpywztspkg2zk2lqygt2n3ftj9ftwvtsu52zz6v02e"
 
-        val HOPCASH_BCH_INCOMING = "bitcoincash:qqa0dj5rwaw2s4tz88m3xmcpjyzry356gglq7zvu80"
+        val HOPCASH_BCH_INCOMING = "qqa0dj5rwaw2s4tz88m3xmcpjyzry356gglq7zvu80"
         val HOPCASH_SBCH_INCOMING = "0x3207d65b4D45CF617253467625AF6C1b687F720b"
     }
 }
