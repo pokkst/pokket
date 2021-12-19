@@ -18,7 +18,8 @@ class TransactionInteractor {
     fun createHopToSmartBch(sendMax: Boolean, amount: Coin): SendRequest {
         val incomingAddress = CashAddressFactory.create()
             .getFromFormattedAddress(WalletManager.parameters, Constants.HOPCASH_BCH_INCOMING)
-        val opReturnData = ScriptBuilder.createOpReturnScript(walletInteractor.getSmartAddress().toByteArray())
+        val opReturnData =
+            ScriptBuilder.createOpReturnScript(walletInteractor.getSmartAddress().toByteArray())
         return if (sendMax) {
             val tempReq = SendRequest.emptyWallet(incomingAddress)
             tempReq.tx.addOutput(Coin.ZERO, opReturnData)
@@ -30,19 +31,51 @@ class TransactionInteractor {
         }
     }
 
-    fun createHopToBitcoin(sendMax: Boolean, nonce: BigInteger, gasPrice: BigInteger, amount: BigInteger): RawTransaction? {
+    fun createHopToBitcoin(
+        sendMax: Boolean,
+        nonce: BigInteger,
+        gasPrice: BigInteger,
+        amount: BigInteger
+    ): RawTransaction? {
         val ourAddress = walletInteractor.getSmartAddress()
         val incomingAddress = Constants.HOPCASH_SBCH_INCOMING
-        val dataField = Numeric.prependHexPrefix(Hex.toHexString(walletInteractor.getBitcoinAddress()?.toCash().toString().toByteArray()))
+        val dataField = Numeric.prependHexPrefix(
+            Hex.toHexString(
+                walletInteractor.getBitcoinAddress()?.toCash().toString().toByteArray()
+            )
+        )
         return if (sendMax) {
-            val tempReq = Transaction.createFunctionCallTransaction(ourAddress, nonce, gasPrice, BigInteger.valueOf(25000), incomingAddress, amount, dataField)
-            val gasEstimate = walletInteractor.getSmartWallet()?.ethEstimateGas(tempReq)?.send()?.amountUsed
+            val tempReq = Transaction.createFunctionCallTransaction(
+                ourAddress,
+                nonce,
+                gasPrice,
+                BigInteger.valueOf(25000),
+                incomingAddress,
+                amount,
+                dataField
+            )
+            val gasEstimate =
+                walletInteractor.getSmartWallet()?.ethEstimateGas(tempReq)?.send()?.amountUsed
             val gasValue = gasEstimate?.multiply(gasPrice) ?: return null
             val sendValue = amount.subtract(gasValue)
-            val req = RawTransaction.createTransaction(nonce, gasPrice, BigInteger.valueOf(25000), incomingAddress, sendValue, dataField)
+            val req = RawTransaction.createTransaction(
+                nonce,
+                gasPrice,
+                BigInteger.valueOf(25000),
+                incomingAddress,
+                sendValue,
+                dataField
+            )
             req
         } else {
-            val req = RawTransaction.createTransaction(nonce, gasPrice, BigInteger.valueOf(25000), incomingAddress, amount, dataField)
+            val req = RawTransaction.createTransaction(
+                nonce,
+                gasPrice,
+                BigInteger.valueOf(25000),
+                incomingAddress,
+                amount,
+                dataField
+            )
             req
         }
     }
@@ -50,7 +83,7 @@ class TransactionInteractor {
     companion object {
         private var instance: TransactionInteractor? = null
         fun getInstance(): TransactionInteractor {
-            if(instance == null) {
+            if (instance == null) {
                 instance = TransactionInteractor()
             }
             return instance as TransactionInteractor

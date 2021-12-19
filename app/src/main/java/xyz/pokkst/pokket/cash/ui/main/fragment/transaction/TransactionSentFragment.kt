@@ -13,7 +13,6 @@ import kotlinx.android.synthetic.main.transaction_item_expanded_sent.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.bitcoinj.core.Sha256Hash
-import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.script.ScriptPattern
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.interactors.WalletInteractor
@@ -29,14 +28,15 @@ import java.util.*
  */
 class TransactionSentFragment : Fragment() {
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val walletInteractor = WalletInteractor.getInstance()
         val root = inflater.inflate(R.layout.transaction_item_expanded_sent, container, false)
         val txid = arguments?.getString("txid", "")
-        val tx = walletInteractor.getBitcoinWallet()?.getTransaction(Sha256Hash.wrap(txid)) ?: return null
+        val tx = walletInteractor.getBitcoinWallet()?.getTransaction(Sha256Hash.wrap(txid))
+            ?: return null
         root.tx_id.setOnClickListener {
             ClipboardHelper.copyToClipboard(activity, txid)
         }
@@ -60,14 +60,17 @@ class TransactionSentFragment : Fragment() {
             if (ScriptPattern.isOpReturn(tx.outputs[x].scriptPubKey)) {
                 toAddresses.add("OP_RETURN")
             } else {
-                val address = tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash().toString()
+                val address =
+                    tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash()
+                        .toString()
                 toAddresses.add(address)
             }
 
             toAmounts.add(tx.outputs[x].value.value)
         }
 
-        val bchSent = -tx.getValueSentFromMe(walletInteractor.getBitcoinWallet()).toPlainString().toDouble()
+        val bchSent =
+            -tx.getValueSentFromMe(walletInteractor.getBitcoinWallet()).toPlainString().toDouble()
 
         val bchFee = if (tx.fee != null) {
             tx.fee.toPlainString().toDouble()
@@ -75,8 +78,8 @@ class TransactionSentFragment : Fragment() {
             0.0
         }
         root.tx_to_fee_amount_text.text = resources.getString(
-                R.string.tx_amount_moved,
-                "-${BalanceFormatter.formatBalance(bchFee, "#.########")}"
+            R.string.tx_amount_moved,
+            "-${BalanceFormatter.formatBalance(bchFee, "#.########")}"
         )
         root.tx_amount_text.text = resources.getString(
             R.string.tx_amount_moved,
@@ -100,17 +103,17 @@ class TransactionSentFragment : Fragment() {
     }
 
     private fun setSentFromAddresses(
-            view: LinearLayout,
-            addresses: ArrayList<String>
+        view: LinearLayout,
+        addresses: ArrayList<String>
     ) {
         val inflater = requireActivity().layoutInflater
         for (address in addresses) {
             val addressBlock =
-                    inflater.inflate(R.layout.transaction_sent_from_addresses, null) as RelativeLayout
+                inflater.inflate(R.layout.transaction_sent_from_addresses, null) as RelativeLayout
             val txFrom =
-                    addressBlock.findViewById<View>(R.id.tx_from_text) as TextView
+                addressBlock.findViewById<View>(R.id.tx_from_text) as TextView
             val txFromDescription =
-                    addressBlock.findViewById<View>(R.id.tx_from_description) as TextView
+                addressBlock.findViewById<View>(R.id.tx_from_description) as TextView
             //BRAnimator.showCopyBubble(activity, addressBlock, txFrom)
             if (address.isNotEmpty()) {
                 txFrom.text = address
@@ -121,9 +124,9 @@ class TransactionSentFragment : Fragment() {
     }
 
     private fun setSentToAddresses(
-            view: LinearLayout,
-            addresses: ArrayList<String?>,
-            amounts: ArrayList<Long>
+        view: LinearLayout,
+        addresses: ArrayList<String?>,
+        amounts: ArrayList<Long>
     ) {
         val inflater = requireActivity().layoutInflater
         val walletInteractor = WalletInteractor.getInstance()
@@ -138,15 +141,15 @@ class TransactionSentFragment : Fragment() {
             }
 
             val addressBlock =
-                    inflater.inflate(R.layout.transaction_sent_to_addresses, null) as RelativeLayout
+                inflater.inflate(R.layout.transaction_sent_to_addresses, null) as RelativeLayout
             val txTo =
-                    addressBlock.findViewById<View>(R.id.tx_to_text) as TextView
+                addressBlock.findViewById<View>(R.id.tx_to_text) as TextView
             val txToDescription =
-                    addressBlock.findViewById<View>(R.id.tx_to_description) as TextView
+                addressBlock.findViewById<View>(R.id.tx_to_description) as TextView
             val txToAmount =
-                    addressBlock.findViewById<View>(R.id.tx_to_amount_text) as TextView
+                addressBlock.findViewById<View>(R.id.tx_to_amount_text) as TextView
             val txToExchange =
-                    addressBlock.findViewById<View>(R.id.tx_to_exchange_text) as TextView
+                addressBlock.findViewById<View>(R.id.tx_to_exchange_text) as TextView
             if (addresses[i] != null && addresses[i]!!.isNotEmpty()) {
                 txTo.text = addresses[i]
                 if (addresses[i] == "OP_RETURN") {

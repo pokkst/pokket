@@ -3,7 +3,6 @@ package xyz.pokkst.pokket.cash.interactors
 import org.bitcoinj.core.Address
 import org.bitcoinj.kits.BIP47AppKit
 import org.bitcoinj.kits.MultisigAppKit
-import org.bitcoinj.kits.WalletKitCore
 import org.bitcoinj.wallet.Wallet
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
@@ -45,7 +44,7 @@ class WalletInteractor {
     companion object {
         private var instance: WalletInteractor? = null
         fun getInstance(): WalletInteractor {
-            if(instance == null) {
+            if (instance == null) {
                 instance = WalletInteractor()
             }
             return instance as WalletInteractor

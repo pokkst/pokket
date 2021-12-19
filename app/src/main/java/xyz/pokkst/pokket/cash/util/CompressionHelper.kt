@@ -27,9 +27,9 @@ object CompressionHelper {
         }
         if (isCompressed(compressed)) {
             val gis =
-                    GZIPInputStream(ByteArrayInputStream(compressed))
+                GZIPInputStream(ByteArrayInputStream(compressed))
             val bufferedReader =
-                    BufferedReader(InputStreamReader(gis, "UTF-8"))
+                BufferedReader(InputStreamReader(gis, "UTF-8"))
             var line: String?
             while (bufferedReader.readLine().also { line = it } != null) {
                 outStr.append(line)

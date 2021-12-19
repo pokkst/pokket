@@ -15,9 +15,9 @@ import xyz.pokkst.pokket.cash.wallet.WalletManager
  */
 class SettingsPhraseFragment : Fragment() {
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_phrase, container, false)
         root.the_phrase.text = WalletManager.wallet?.keyChainSeed?.mnemonicString

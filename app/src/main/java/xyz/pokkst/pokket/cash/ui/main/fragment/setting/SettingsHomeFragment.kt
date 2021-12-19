@@ -27,9 +27,9 @@ import xyz.pokkst.pokket.cash.wallet.WalletManager
  */
 class SettingsHomeFragment : Fragment(), TxAdapterListener {
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_home, container, false)
 
@@ -37,46 +37,46 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
             navigate(R.id.nav_to_about)
         }
         root.about.findViewById<TextView>(R.id.setting_label).text =
-                resources.getString(R.string.about)
+            resources.getString(R.string.about)
 
         root.recovery_phrase.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
             navigate(R.id.nav_to_phrase)
         }
         root.recovery_phrase.findViewById<TextView>(R.id.setting_label).text =
-                resources.getString(R.string.recovery_phrase_label)
+            resources.getString(R.string.recovery_phrase_label)
 
         root.custom_node.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
             navigate(R.id.nav_to_node)
         }
         root.custom_node.findViewById<TextView>(R.id.setting_label).text =
-                resources.getString(R.string.node_label)
+            resources.getString(R.string.node_label)
 
         root.extended_public_key.findViewById<RelativeLayout>(R.id.setting_layout)
-                .setOnClickListener {
-                    navigate(R.id.nav_to_epk)
-                }
+            .setOnClickListener {
+                navigate(R.id.nav_to_epk)
+            }
         root.extended_public_key.findViewById<TextView>(R.id.setting_label).text =
-                resources.getString(R.string.epk_label)
+            resources.getString(R.string.epk_label)
 
         root.private_mode.findViewById<RelativeLayout>(R.id.setting_layout)
-                .setOnClickListener {
-                    navigate(R.id.nav_to_chain_privacy)
-                }
+            .setOnClickListener {
+                navigate(R.id.nav_to_chain_privacy)
+            }
         root.private_mode.findViewById<TextView>(R.id.setting_label).text =
-                resources.getString(R.string.chain_privacy_label)
+            resources.getString(R.string.chain_privacy_label)
 
         root.shift_service.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://shift.pokket.cash"))
             startActivity(browserIntent)
         }
         root.shift_service.findViewById<TextView>(R.id.setting_label).text =
-                resources.getString(R.string.shift_service_label)
+            resources.getString(R.string.shift_service_label)
 
         root.flipstarters.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
             navigate(R.id.nav_to_flipstarters)
         }
         root.flipstarters.findViewById<TextView>(R.id.setting_label).text =
-                resources.getString(R.string.flipstarter_label)
+            resources.getString(R.string.flipstarter_label)
 
         root.start_recovery_wallet.setOnClickListener {
             navigate(R.id.nav_to_wipe)
@@ -138,17 +138,17 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
         val isSlp = SlpOpReturn.isSlpTx(tx) || SlpOpReturn.isNftChildTx(tx)
         if (amount?.isPositive == true) {
             findNavController().navigate(
-                    SettingsHomeFragmentDirections.navToTxReceived(
-                            txid,
-                            isSlp
-                    )
+                SettingsHomeFragmentDirections.navToTxReceived(
+                    txid,
+                    isSlp
+                )
             )
         } else if (amount?.isNegative == true) {
             findNavController().navigate(
-                    SettingsHomeFragmentDirections.navToTxSent(
-                            txid,
-                            isSlp
-                    )
+                SettingsHomeFragmentDirections.navToTxSent(
+                    txid,
+                    isSlp
+                )
             )
         }
     }

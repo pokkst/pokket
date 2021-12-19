@@ -16,9 +16,9 @@ import xyz.pokkst.pokket.cash.wallet.WalletManager
  */
 class SettingsEpkFragment : Fragment() {
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_epk, container, false)
         val xpub = WalletManager.wallet?.watchingKey?.serializePubB58(WalletManager.parameters)

@@ -17,13 +17,13 @@ class UriHelper {
             try {
                 val params = HashMap<String, List<String>>()
                 val urlParts =
-                        url.split("\\?".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    url.split("\\?".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 if (urlParts.size > 1) {
                     val query = urlParts[1]
                     for (param in query.split("&".toRegex()).dropLastWhile { it.isEmpty() }
-                            .toTypedArray()) {
+                        .toTypedArray()) {
                         val pair =
-                                param.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                            param.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                         val key = URLDecoder.decode(pair[0], "UTF-8")
                         var value = ""
                         if (pair.size > 1) {
@@ -58,8 +58,8 @@ class UriHelper {
             val params = WalletManager.parameters
             val mappedVariables = getQueryParams(uri)
             val destinationWithoutPrefix =
-                    uri.replace("${params.cashAddrPrefix}:", "")
-                            .replace("${params.simpleledgerPrefix}:", "")
+                uri.replace("${params.cashAddrPrefix}:", "")
+                    .replace("${params.simpleledgerPrefix}:", "")
             if (destinationWithoutPrefix.contains("http")) {
                 addressOrPayload = if (mappedVariables["r"] != null) {
                     (mappedVariables["r"] ?: error(""))[0]
@@ -70,15 +70,15 @@ class UriHelper {
             } else {
                 if (PayloadHelper.isMultisigPayload(destinationWithoutPrefix)) {
                     return PaymentContent(
-                            destinationWithoutPrefix,
-                            null,
-                            PaymentType.MULTISIG_PAYLOAD
+                        destinationWithoutPrefix,
+                        null,
+                        PaymentType.MULTISIG_PAYLOAD
                     )
                 } else if (PayloadHelper.isFlipstarterPayload(destinationWithoutPrefix)) {
                     return PaymentContent(
-                            destinationWithoutPrefix,
-                            null,
-                            PaymentType.FLIPSTARTER_PAYLOAD
+                        destinationWithoutPrefix,
+                        null,
+                        PaymentType.FLIPSTARTER_PAYLOAD
                     )
                 } else {
                     amount = if (mappedVariables["amount"] != null) {
@@ -91,30 +91,42 @@ class UriHelper {
                     addressOrPayload = when {
                         uri.startsWith(SMARTBCH_PREFIX) -> getQueryBaseAddress(uri).toLowerCase()
                         uri.startsWith(params.cashAddrPrefix) -> getQueryBaseAddress(
-                                uri
+                            uri
                         ).replace("${params.cashAddrPrefix}:", "")
                         uri.startsWith("cashacct") -> getQueryBaseAddress(uri).replace(
-                                "cashacct:",
-                                ""
+                            "cashacct:",
+                            ""
                         )
                         else -> getQueryBaseAddress(uri)
                     }
 
                     if (addressOrPayload?.contains("#") == true) {
                         return PaymentContent(addressOrPayload, amount, PaymentType.CASH_ACCOUNT)
-                    } else if (Address.isValidCashAddr(WalletManager.parameters, addressOrPayload) || Address.isValidLegacyAddress(WalletManager.parameters, addressOrPayload)) {
+                    } else if (Address.isValidCashAddr(
+                            WalletManager.parameters,
+                            addressOrPayload
+                        ) || Address.isValidLegacyAddress(
+                            WalletManager.parameters,
+                            addressOrPayload
+                        )
+                    ) {
                         val address = addressOrPayload
-                        val addressModified = address?.replace(WalletManager.parameters.cashAddrPrefix+":", "")
-                        return if(addressModified == Constants.HOPCASH_BCH_INCOMING) {
+                        val addressModified =
+                            address?.replace(WalletManager.parameters.cashAddrPrefix + ":", "")
+                        return if (addressModified == Constants.HOPCASH_BCH_INCOMING) {
                             PaymentContent(addressOrPayload, amount, PaymentType.HOP_TO_SBCH)
                         } else {
                             PaymentContent(addressOrPayload, amount, PaymentType.ADDRESS)
                         }
                     } else if (Address.isValidPaymentCode(addressOrPayload)) {
                         return PaymentContent(addressOrPayload, amount, PaymentType.PAYMENT_CODE)
-                    } else if(addressOrPayload?.startsWith(SMARTBCH_PREFIX) == true) {
+                    } else if (addressOrPayload?.startsWith(SMARTBCH_PREFIX) == true) {
                         val address = addressOrPayload
-                        return if(address.equals(Constants.HOPCASH_SBCH_INCOMING, ignoreCase = true)) {
+                        return if (address.equals(
+                                Constants.HOPCASH_SBCH_INCOMING,
+                                ignoreCase = true
+                            )
+                        ) {
                             println("HOPPING")
                             PaymentContent(addressOrPayload, amount, PaymentType.HOP_TO_BCH)
                         } else {

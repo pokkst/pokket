@@ -10,7 +10,7 @@ class PriceHelper {
                 if (cachedPrice == 0.0 || currentTime - lastChecked >= 300L) {
                     lastChecked = currentTime
                     cachedPrice =
-                            readPriceFromUrl("https://api.cryptowat.ch/markets/coinbase-pro/bchusd/price")
+                        readPriceFromUrl("https://api.cryptowat.ch/markets/coinbase-pro/bchusd/price")
                 }
                 return cachedPrice
             }

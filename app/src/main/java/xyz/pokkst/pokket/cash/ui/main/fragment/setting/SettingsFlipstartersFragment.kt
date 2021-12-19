@@ -34,9 +34,9 @@ class SettingsFlipstartersFragment : Fragment() {
     private var pledges = ArrayList<TransactionOutput>()
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_flipstarters, container, false)
         val frozenUtxos = WalletManager.wallet?.unspents?.filter { it.isFrozen }
@@ -74,16 +74,16 @@ class SettingsFlipstartersFragment : Fragment() {
             }
 
             val itemsAdapter = object : SimpleAdapter(
-                    requireContext(),
-                    pledgesFormatted,
-                    R.layout.pledge_item_cell,
-                    null,
-                    null
+                requireContext(),
+                pledgesFormatted,
+                R.layout.pledge_item_cell,
+                null,
+                null
             ) {
                 override fun getView(
-                        position: Int,
-                        convertView: View?,
-                        parent: ViewGroup
+                    position: Int,
+                    convertView: View?,
+                    parent: ViewGroup
                 ): View {
                     return PledgeEntryView.instanceOf(activity, position, pledgesFormatted)
                 }
@@ -104,17 +104,17 @@ class SettingsFlipstartersFragment : Fragment() {
             val cancelReq = SendRequest.cancelFlipstarterPledge(WalletManager.wallet, utxo)
             val sendResult = WalletManager.wallet?.sendCoins(cancelReq)
             Futures.addCallback(
-                    sendResult?.broadcastComplete,
-                    object : FutureCallback<Transaction?> {
-                        override fun onSuccess(@Nullable result: Transaction?) {
-                            dialog.dismiss()
-                        }
+                sendResult?.broadcastComplete,
+                object : FutureCallback<Transaction?> {
+                    override fun onSuccess(@Nullable result: Transaction?) {
+                        dialog.dismiss()
+                    }
 
-                        override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
+                    override fun onFailure(t: Throwable) { // We died trying to empty the wallet.
 
-                        }
-                    },
-                    MoreExecutors.directExecutor()
+                    }
+                },
+                MoreExecutors.directExecutor()
             )
         }
         closeButton?.setOnClickListener {

@@ -27,9 +27,9 @@ class OtherFollowingKeysFragment : Fragment() {
     var nCurrent = 0
     var mCurrent = 0
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_other_following_keys, container, false)
         val seed = args.seed
@@ -51,10 +51,10 @@ class OtherFollowingKeysFragment : Fragment() {
                     val fixedDifference = difference - 2
                     for (x in 0..fixedDifference) {
                         val cosignerKeyInputLayout =
-                                cosignerInflater?.inflate(
-                                        R.layout.fragment_component_cosigner_entry,
-                                        null
-                                ) as ConstraintLayout
+                            cosignerInflater?.inflate(
+                                R.layout.fragment_component_cosigner_entry,
+                                null
+                            ) as ConstraintLayout
                         cosignerKeysList.addView(cosignerKeyInputLayout)
                     }
                 } else {
@@ -71,9 +71,9 @@ class OtherFollowingKeysFragment : Fragment() {
             nCurrent = n
 
             root.m_of_n_textview.text = resources.getString(
-                    R.string.you_are_creating_a_m_of_n_multisig_wallet,
-                    mCurrent,
-                    nCurrent
+                R.string.you_are_creating_a_m_of_n_multisig_wallet,
+                mCurrent,
+                nCurrent
             )
         }
 
@@ -87,16 +87,16 @@ class OtherFollowingKeysFragment : Fragment() {
             mCurrent = m
 
             root.m_of_n_textview.text = resources.getString(
-                    R.string.you_are_creating_a_m_of_n_multisig_wallet,
-                    mCurrent,
-                    nCurrent
+                R.string.you_are_creating_a_m_of_n_multisig_wallet,
+                mCurrent,
+                nCurrent
             )
         }
 
         root.m_of_n_textview.text = resources.getString(
-                R.string.you_are_creating_a_m_of_n_multisig_wallet,
-                mCurrent,
-                nCurrent
+            R.string.you_are_creating_a_m_of_n_multisig_wallet,
+            mCurrent,
+            nCurrent
         )
 
         root.continue_button.setOnClickListener {

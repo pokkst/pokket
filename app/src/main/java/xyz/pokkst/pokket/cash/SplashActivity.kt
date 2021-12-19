@@ -27,8 +27,8 @@ class SplashActivity : AppCompatActivity() {
         setupBouncyCastle()
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         this.window.setFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
         setContentView(R.layout.activity_splash)
         lifecycleScope.launch(Dispatchers.Default) {
@@ -39,11 +39,11 @@ class SplashActivity : AppCompatActivity() {
             }
 
             val newUser = !File(
-                    applicationInfo.dataDir,
-                    "${WalletManager.walletFileName}.wallet"
+                applicationInfo.dataDir,
+                "${WalletManager.walletFileName}.wallet"
             ).exists() && !File(
-                    applicationInfo.dataDir,
-                    "${WalletManager.multisigWalletFileName}.wallet"
+                applicationInfo.dataDir,
+                "${WalletManager.multisigWalletFileName}.wallet"
             ).exists()
             if (newUser) {
                 val intent = Intent(baseContext, NewUserActivity::class.java)
@@ -52,12 +52,12 @@ class SplashActivity : AppCompatActivity() {
                 finish()
             } else {
                 val km =
-                        getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+                    getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
                 if (km.isKeyguardSecure) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         val securityIntent = km.createConfirmDeviceCredentialIntent(
-                                "Unlock Wallet",
-                                null
+                            "Unlock Wallet",
+                            null
                         )
                         startActivityForResult(securityIntent, CODE_AUTHENTICATION_VERIFICATION)
                     } else {
@@ -79,9 +79,9 @@ class SplashActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(
-            requestCode: Int,
-            resultCode: Int,
-            data: Intent?
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
     ) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -92,7 +92,7 @@ class SplashActivity : AppCompatActivity() {
             finish()
         } else {
             Toast.makeText(this, "Unlock failed. Try again.", Toast.LENGTH_SHORT)
-                    .show()
+                .show()
         }
     }
 
@@ -101,7 +101,7 @@ class SplashActivity : AppCompatActivity() {
      */
     private fun setupBouncyCastle() {
         val provider: Provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME)
-                ?: return
+            ?: return
         if (provider.javaClass == BouncyCastleProvider::class.java) { // BC with same package name, shouldn't happen in real life.
             return
         }

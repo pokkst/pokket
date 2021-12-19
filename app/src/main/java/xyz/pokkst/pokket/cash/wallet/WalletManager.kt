@@ -4,8 +4,9 @@ import android.app.Activity
 import android.os.Handler
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import kotlinx.coroutines.*
-import org.bitcoinj.core.Coin
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.core.PeerAddress
 import org.bitcoinj.core.listeners.DownloadProgressTracker
@@ -19,7 +20,10 @@ import org.bitcoinj.utils.Threading
 import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.KeyChainGroupStructure
 import org.bitcoinj.wallet.Wallet
+import org.web3j.crypto.Credentials
+import org.web3j.crypto.WalletUtils
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.http.HttpService
 import xyz.pokkst.pokket.cash.livedata.Event
 import xyz.pokkst.pokket.cash.util.PrefsHelper
 import java.io.File
@@ -27,12 +31,6 @@ import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
 import java.util.concurrent.Executor
-import org.web3j.protocol.http.HttpService
-import org.web3j.crypto.Credentials
-
-import org.web3j.crypto.WalletUtils
-import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
-import java.lang.Runnable
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -43,7 +41,8 @@ class WalletManager {
         lateinit var walletDir: File
         var web3: Web3j? = null
         var credentials: Credentials? = null
-        private val password = "rhfk4zr2uPXbxbnhkCMDTQ3yEH3skkuMNVXDojTcCCqWUT6v9YvwFLLSkMZzF" // not actually supposed to be private
+        private val password =
+            "rhfk4zr2uPXbxbnhkCMDTQ3yEH3skkuMNVXDojTcCCqWUT6v9YvwFLLSkMZzF" // not actually supposed to be private
         var walletKit: BIP47AppKit? = null
         var multisigWalletKit: MultisigAppKit? = null
         val wallet: Wallet?
@@ -82,20 +81,20 @@ class WalletManager {
 
             val clientSbchWallet = getClientWalletFile(walletDir)
             val clientExists = clientSbchWallet != null
-            if(newUser) {
+            if (newUser) {
                 initWeb3(seed, false, null)
-            } else if(clientExists) {
+            } else if (clientExists) {
                 initWeb3(null, true, clientSbchWallet)
-            } else if(seed != null && !newUser) {
+            } else if (seed != null && !newUser) {
                 initWeb3(seed, false, null)
             }
 
             walletKit = object : BIP47AppKit(
-                    parameters,
-                    Script.ScriptType.P2PKH,
-                    KeyChainGroupStructure.DEFAULT,
-                    walletDir,
-                    walletFileName
+                parameters,
+                Script.ScriptType.P2PKH,
+                KeyChainGroupStructure.DEFAULT,
+                walletDir,
+                walletFileName
             ) {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
@@ -114,11 +113,12 @@ class WalletManager {
                     peerGroup()?.addDisconnectedEventListener { peer, peerCount ->
                         _peerCount.postValue(peerCount)
                     }
-                    val privateMode = PrefsHelper.instance(null)?.getBoolean("private_mode", false) ?: false
+                    val privateMode =
+                        PrefsHelper.instance(null)?.getBoolean("private_mode", false) ?: false
                     peerGroup()?.isBloomFilteringEnabled = !privateMode
                     wallet().saveToFile(vWalletFile)
 
-                    if(seed == null && !clientExists && !newUser) {
+                    if (seed == null && !clientExists && !newUser) {
                         val web3Seed = wallet().keyChainSeed.mnemonicCode?.joinToString { " " }
                         initWeb3(web3Seed, false, null)
                     }
@@ -139,8 +139,10 @@ class WalletManager {
 
             val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1560281760L
             if (seed != null) {
-                val deterministicSeed = DeterministicSeed(seed, null, passphrase
-                        ?: "", creationDate)
+                val deterministicSeed = DeterministicSeed(
+                    seed, null, passphrase
+                        ?: "", creationDate
+                )
                 walletKit?.restoreWalletFromSeed(deterministicSeed)
             }
 
@@ -152,16 +154,16 @@ class WalletManager {
         }
 
         fun startMultisigWallet(
-                activity: Activity,
-                seed: String?,
-                newUser: Boolean,
-                followingKeys: List<DeterministicKey>,
-                m: Int
+            activity: Activity,
+            seed: String?,
+            newUser: Boolean,
+            followingKeys: List<DeterministicKey>,
+            m: Int
         ) {
             setBitcoinSDKThread()
 
             multisigWalletKit = object :
-                    MultisigAppKit(parameters, walletDir, multisigWalletFileName, followingKeys, m) {
+                MultisigAppKit(parameters, walletDir, multisigWalletFileName, followingKeys, m) {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
                     wallet().allowSpendingUnconfirmedTransactions()
@@ -249,7 +251,11 @@ class WalletManager {
                 if (clientExists) {
                     if (clientSbchWallet != null) walletFile = clientSbchWallet.name
                 } else {
-                    walletFile = WalletUtils.generateBip39WalletFromMnemonic(password, seed, walletDir).filename
+                    walletFile = WalletUtils.generateBip39WalletFromMnemonic(
+                        password,
+                        seed,
+                        walletDir
+                    ).filename
                 }
                 credentials = WalletUtils.loadCredentials(
                     password,

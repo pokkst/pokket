@@ -13,7 +13,6 @@ import kotlinx.android.synthetic.main.transaction_item_expanded_received.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.bitcoinj.core.Sha256Hash
-import org.bitcoinj.core.slp.SlpTransaction
 import org.bitcoinj.script.ScriptPattern
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.interactors.WalletInteractor
@@ -30,13 +29,14 @@ import java.util.*
 class TransactionReceivedFragment : Fragment() {
     private val walletInteractor = WalletInteractor.getInstance()
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.transaction_item_expanded_received, container, false)
         val txid = arguments?.getString("txid", "")
-        val tx = walletInteractor.getBitcoinWallet()?.getTransaction(Sha256Hash.wrap(txid)) ?: return null
+        val tx = walletInteractor.getBitcoinWallet()?.getTransaction(Sha256Hash.wrap(txid))
+            ?: return null
         root.tx_id.setOnClickListener {
             ClipboardHelper.copyToClipboard(activity, txid)
         }
@@ -60,14 +60,17 @@ class TransactionReceivedFragment : Fragment() {
             if (ScriptPattern.isOpReturn(tx.outputs[x].scriptPubKey)) {
                 toAddresses.add("OP_RETURN")
             } else {
-                val address = tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash().toString()
+                val address =
+                    tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash()
+                        .toString()
                 toAddresses.add(address)
             }
 
             toAmounts.add(tx.outputs[x].value.value)
         }
 
-        val bchReceived = tx.getValueSentToMe(walletInteractor.getBitcoinWallet()).toPlainString().toDouble()
+        val bchReceived =
+            tx.getValueSentToMe(walletInteractor.getBitcoinWallet()).toPlainString().toDouble()
         root.tx_amount_text.text = resources.getString(
             R.string.tx_amount_moved,
             BalanceFormatter.formatBalance(bchReceived, "#.########")
@@ -87,17 +90,17 @@ class TransactionReceivedFragment : Fragment() {
     }
 
     private fun setReceivedFromAddresses(
-            view: LinearLayout,
-            addresses: ArrayList<String>
+        view: LinearLayout,
+        addresses: ArrayList<String>
     ) {
         val inflater = requireActivity().layoutInflater
         for (address in addresses) {
             val addressBlock =
-                    inflater.inflate(R.layout.transaction_received_from_addresses, null) as LinearLayout
+                inflater.inflate(R.layout.transaction_received_from_addresses, null) as LinearLayout
             val txFrom =
-                    addressBlock.findViewById<View>(R.id.tx_from_text) as TextView
+                addressBlock.findViewById<View>(R.id.tx_from_text) as TextView
             val txFromDescription =
-                    addressBlock.findViewById<View>(R.id.tx_from_description) as TextView
+                addressBlock.findViewById<View>(R.id.tx_from_description) as TextView
             if (address.isNotEmpty()) {
                 txFrom.text = address
                 txFromDescription.text = getString(R.string.utxo)
@@ -107,9 +110,9 @@ class TransactionReceivedFragment : Fragment() {
     }
 
     private fun setReceivedToAddresses(
-            view: LinearLayout,
-            addresses: ArrayList<String?>,
-            amounts: ArrayList<Long>
+        view: LinearLayout,
+        addresses: ArrayList<String?>,
+        amounts: ArrayList<Long>
     ) {
         val wallet = walletInteractor.getBitcoinWallet()
         val inflater = requireActivity().layoutInflater
@@ -123,15 +126,15 @@ class TransactionReceivedFragment : Fragment() {
             }
 
             val addressBlock =
-                    inflater.inflate(R.layout.transaction_received_to_addresses, null) as RelativeLayout
+                inflater.inflate(R.layout.transaction_received_to_addresses, null) as RelativeLayout
             val txTo =
-                    addressBlock.findViewById<View>(R.id.tx_to_text) as TextView
+                addressBlock.findViewById<View>(R.id.tx_to_text) as TextView
             val txToDescription =
-                    addressBlock.findViewById<View>(R.id.tx_to_description) as TextView
+                addressBlock.findViewById<View>(R.id.tx_to_description) as TextView
             val txToAmount =
-                    addressBlock.findViewById<View>(R.id.tx_to_amount_text) as TextView
+                addressBlock.findViewById<View>(R.id.tx_to_amount_text) as TextView
             val txToExchange =
-                    addressBlock.findViewById<View>(R.id.tx_to_exchange_text) as TextView
+                addressBlock.findViewById<View>(R.id.tx_to_exchange_text) as TextView
 
             if (addresses[i] != null && !addresses[i].isNullOrEmpty()) {
                 txTo.text = addresses[i]

@@ -23,12 +23,12 @@ class PayloadHelper {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 return try {
                     val payloadBytes: ByteArray =
-                            Base64.decode(base64Payload)
+                        Base64.decode(base64Payload)
                     val invoiceJson =
-                            String(payloadBytes, StandardCharsets.UTF_16LE)
+                        String(payloadBytes, StandardCharsets.UTF_16LE)
                     Gson().fromJson(
-                            invoiceJson,
-                            FlipstarterInvoicePayload::class.java
+                        invoiceJson,
+                        FlipstarterInvoicePayload::class.java
                     )
                 } catch (e: java.lang.Exception) {
                     null
@@ -51,8 +51,8 @@ class PayloadHelper {
         fun decodeMultisigPayload(base64Payload: String): MultisigPayload? {
             return try {
                 Gson().fromJson(
-                        CompressionHelper.decompress(Base64.decode(base64Payload)),
-                        MultisigPayload::class.java
+                    CompressionHelper.decompress(Base64.decode(base64Payload)),
+                    MultisigPayload::class.java
                 )
             } catch (e: java.lang.Exception) {
                 null

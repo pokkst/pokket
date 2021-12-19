@@ -18,9 +18,9 @@ import java.io.File
  */
 class SettingsWipeFragment : Fragment() {
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_wipe, container, false)
         root.continue_button.setOnClickListener {
@@ -39,10 +39,10 @@ class SettingsWipeFragment : Fragment() {
     private fun wipeAndRestart(intent: Intent) {
         val walletFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}.wallet")
         val multisigWalletFile =
-                File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.wallet")
+            File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.wallet")
         val spvChainFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}.spvchain")
         val multisigSpvChainFile =
-                File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.spvchain")
+            File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.spvchain")
         walletFile.delete()
         multisigWalletFile.delete()
         spvChainFile.delete()

@@ -14,9 +14,9 @@ import xyz.pokkst.pokket.cash.R
  */
 class NewUserFragment : Fragment() {
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_new_user, container, false)
         root.intro_new_wallet.setOnClickListener {

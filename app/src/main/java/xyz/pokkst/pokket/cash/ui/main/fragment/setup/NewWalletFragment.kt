@@ -17,9 +17,9 @@ import xyz.pokkst.pokket.cash.util.StatusBarHelper
  */
 class NewWalletFragment : Fragment() {
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_new_wallet, container, false)
         root.intro_new_wallet_generate.setOnClickListener {
@@ -34,10 +34,10 @@ class NewWalletFragment : Fragment() {
             val bip39passphrase = root.bip39_passphrase_edit_text.text.toString().trim()
 
             val action =
-                    NewWalletFragmentDirections.navToGeneratedSeed(
-                            isMultisigChecked,
-                            bip39passphrase
-                    )
+                NewWalletFragmentDirections.navToGeneratedSeed(
+                    isMultisigChecked,
+                    bip39passphrase
+                )
             findNavController().navigate(action)
             StatusBarHelper.setStatusBarColor(activity, R.color.extra_light_grey)
         }

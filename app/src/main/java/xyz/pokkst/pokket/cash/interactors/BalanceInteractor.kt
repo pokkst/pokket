@@ -3,7 +3,6 @@ package xyz.pokkst.pokket.cash.interactors
 import org.bitcoinj.wallet.Wallet
 import org.web3j.protocol.core.DefaultBlockParameterName
 import xyz.pokkst.pokket.cash.util.BalanceFormatter
-import xyz.pokkst.pokket.cash.wallet.WalletManager
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -14,7 +13,7 @@ class BalanceInteractor {
 
     fun getBitcoinBalance(): BigDecimal {
         val balance = walletInteractor.getBitcoinWallet()?.getBalance(Wallet.BalanceType.ESTIMATED)
-        return if(balance == null || balance.isZero)
+        return if (balance == null || balance.isZero)
             BigDecimal.ZERO
         else
             balance.toBtc()
@@ -23,10 +22,11 @@ class BalanceInteractor {
     fun getSmartBalanceRaw(): BigInteger {
         val currentTimeMs = System.currentTimeMillis()
         val updateBalance = updateSmartBalance(currentTimeMs)
-        if(updateBalance) {
+        if (updateBalance) {
             val sbchAddress = walletInteractor.getSmartAddress()
             val sbchWeiBalance =
-                walletInteractor.getSmartWallet()?.ethGetBalance(sbchAddress, DefaultBlockParameterName.LATEST)
+                walletInteractor.getSmartWallet()
+                    ?.ethGetBalance(sbchAddress, DefaultBlockParameterName.LATEST)
                     ?.send()?.balance
             cachedSmartBalance = sbchWeiBalance ?: BigInteger.ZERO
         }
@@ -48,7 +48,7 @@ class BalanceInteractor {
     companion object {
         private var instance: BalanceInteractor? = null
         fun getInstance(): BalanceInteractor {
-            if(instance == null) {
+            if (instance == null) {
                 instance = BalanceInteractor()
             }
             return instance as BalanceInteractor

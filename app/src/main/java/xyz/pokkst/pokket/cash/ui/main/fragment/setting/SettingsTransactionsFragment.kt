@@ -23,9 +23,9 @@ import xyz.pokkst.pokket.cash.wallet.WalletManager
  */
 class SettingsTransactionsFragment : Fragment(), TxAdapterListener {
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_transactions, container, false)
         this.setArrayAdapter(root, WalletManager.wallet)
@@ -51,17 +51,17 @@ class SettingsTransactionsFragment : Fragment(), TxAdapterListener {
         val isSlp = SlpOpReturn.isSlpTx(tx) || SlpOpReturn.isNftChildTx(tx)
         if (amount?.isPositive == true) {
             findNavController().navigate(
-                    SettingsHomeFragmentDirections.navToTxReceived(
-                            txid,
-                            isSlp
-                    )
+                SettingsHomeFragmentDirections.navToTxReceived(
+                    txid,
+                    isSlp
+                )
             )
         } else if (amount?.isNegative == true) {
             findNavController().navigate(
-                    SettingsHomeFragmentDirections.navToTxSent(
-                            txid,
-                            isSlp
-                    )
+                SettingsHomeFragmentDirections.navToTxSent(
+                    txid,
+                    isSlp
+                )
             )
         }
     }

@@ -1,18 +1,19 @@
 package xyz.pokkst.pokket.cash.ui.main.fragment.send
 
 import android.app.Activity
-import android.content.ClipboardManager
+import android.content.*
 import android.content.Context.CLIPBOARD_SERVICE
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_send_home.view.*
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.qr.QRHelper
+import xyz.pokkst.pokket.cash.ui.main.MainFragmentDirections
 import xyz.pokkst.pokket.cash.util.Constants
 import xyz.pokkst.pokket.cash.util.PayloadHelper
 import xyz.pokkst.pokket.cash.util.PaymentType
@@ -23,10 +24,24 @@ import xyz.pokkst.pokket.cash.wallet.WalletManager
  * A placeholder fragment containing a simple view.
  */
 class SendHomeFragment : Fragment() {
+    private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            try {
+                if (Constants.ACTION_HOP_TO_BCH == intent.action) {
+                    findNavController().navigate(MainFragmentDirections.navToSend(Constants.HOPCASH_SBCH_INCOMING))
+                } else if (Constants.ACTION_HOP_TO_SBCH == intent.action) {
+                    findNavController().navigate(MainFragmentDirections.navToSend(Constants.HOPCASH_BCH_INCOMING))
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+    }
+
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_send_home, container, false)
 
@@ -36,11 +51,11 @@ class SendHomeFragment : Fragment() {
 
         root.paste_address_button.setOnClickListener {
             val clipBoard =
-                    requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                requireActivity().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val pasteData = clipBoard.primaryClip?.getItemAt(0)?.text.toString()
             if (isValidPaymentType(pasteData) || PayloadHelper.isMultisigPayload(pasteData)) {
                 findNavController().navigate(
-                    SendHomeFragmentDirections.navToSend(
+                    MainFragmentDirections.navToSend(
                         pasteData
                     )
                 )
@@ -49,11 +64,16 @@ class SendHomeFragment : Fragment() {
 
         root.donate_button.setOnClickListener {
             findNavController().navigate(
-                SendHomeFragmentDirections.navToSend(
+                MainFragmentDirections.navToSend(
                     Constants.DONATION_ADDRESS
                 )
             )
         }
+
+        val filter = IntentFilter()
+        filter.addAction(Constants.ACTION_HOP_TO_BCH)
+        filter.addAction(Constants.ACTION_HOP_TO_SBCH)
+        activity?.let { LocalBroadcastManager.getInstance(it).registerReceiver(receiver, filter) }
 
         return root
     }
@@ -67,7 +87,7 @@ class SendHomeFragment : Fragment() {
                     if (scanData != null) {
                         if (isValidPaymentType(scanData) || PayloadHelper.isMultisigPayload(scanData)) {
                             findNavController().navigate(
-                                SendHomeFragmentDirections.navToSend(
+                                MainFragmentDirections.navToSend(
                                     scanData
                                 )
                             )

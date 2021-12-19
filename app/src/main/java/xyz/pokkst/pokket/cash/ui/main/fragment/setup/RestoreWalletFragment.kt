@@ -20,9 +20,9 @@ import xyz.pokkst.pokket.cash.util.StatusBarHelper
  */
 class RestoreWalletFragment : Fragment() {
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_restore_wallet, container, false)
 
