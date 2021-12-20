@@ -51,7 +51,7 @@ class RestoreWalletFragment : Fragment() {
                             intent.putExtra(Constants.EXTRA_PASSPHRASE, bip39passphrase)
                         }
                         if (customPath.isNotEmpty() && root.custom_path_checkbox.isChecked) {
-                            PrefsHelper.instance(context)?.edit()?.putString("derivation_path", customPath)?.apply()
+                            PrefsHelper.instance(context)?.edit()?.putString(Constants.PREF_DERIVATION_PATH, customPath)?.apply()
                             intent.putExtra(Constants.EXTRA_DERIVATION, customPath)
                         }
                         startActivity(intent)
