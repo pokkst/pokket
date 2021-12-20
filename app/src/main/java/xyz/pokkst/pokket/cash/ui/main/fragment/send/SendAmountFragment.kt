@@ -295,6 +295,11 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun hopToSbch() {
+        val swapMaximum = BigDecimal.valueOf(10.0)
+        if(getCoinAmount().toBtc() >= swapMaximum) {
+            showToast("cannot swap more than 10 bch")
+            return
+        }
         val req = transactionInteractor.createHopToSmartBch(this.sendMax, getCoinAmount())
         req.allowUnconfirmed()
         req.ensureMinRequiredFee = false
@@ -337,7 +342,13 @@ class SendAmountFragment : Fragment() {
                 showToast("could not fetch gas price")
                 return@launch
             }
+            val swapMaximum = BigDecimal.valueOf(10.0)
             val tx = if (this@SendAmountFragment.sendMax) {
+                val amount = BalanceFormatter.toEtherBalance(totalBalance.toLong())
+                if(amount != null && amount >= swapMaximum) {
+                    showToast("cannot swap more than 10 bch")
+                    return@launch
+                }
                 transactionInteractor.createHopToBitcoin(
                     this@SendAmountFragment.sendMax,
                     nonce,
@@ -346,6 +357,10 @@ class SendAmountFragment : Fragment() {
                 )
             } else {
                 val amount = getCoinAmount().toBtc()
+                if(amount >= swapMaximum) {
+                    showToast("cannot swap more than 10 bch")
+                    return@launch
+                }
                 val amountWei = Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger()
                 transactionInteractor.createHopToBitcoin(
                     this@SendAmountFragment.sendMax,

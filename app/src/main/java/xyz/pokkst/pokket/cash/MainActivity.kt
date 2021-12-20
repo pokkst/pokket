@@ -121,15 +121,14 @@ class MainActivity : AppCompatActivity() {
                         builder.setView(dialoglayout)
                         val dialog = builder.show()
                         val swapMinimum = BigDecimal.valueOf(0.01)
-                        val swapMaximum = BigDecimal.valueOf(10.0)
                         val swapToSbchButton = dialog?.findViewById<Button>(R.id.swap_to_sbch_button)
                         val swapToBchButton = dialog?.findViewById<Button>(R.id.swap_to_bch_button)
 
-                        val bchBalanceSatisfied = bchBalance > swapMinimum && bchBalance < swapMaximum
+                        val bchBalanceSatisfied = bchBalance > swapMinimum
                         swapToSbchButton?.setTextColor(ContextCompat.getColor(this@MainActivity, if(bchBalanceSatisfied) R.color.dark_blue else R.color.gray))
                         swapToSbchButton?.isEnabled = bchBalanceSatisfied
 
-                        val sbchBalanceSatisfied = sbchBalance > swapMinimum && sbchBalance < swapMaximum
+                        val sbchBalanceSatisfied = sbchBalance > swapMinimum
                         swapToBchButton?.setTextColor(ContextCompat.getColor(this@MainActivity, if(sbchBalanceSatisfied) R.color.dark_blue else R.color.gray))
                         swapToBchButton?.isEnabled = sbchBalanceSatisfied
 
