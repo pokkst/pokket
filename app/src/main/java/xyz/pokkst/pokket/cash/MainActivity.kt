@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -123,6 +124,13 @@ class MainActivity : AppCompatActivity() {
                         val swapMinimum = BigDecimal.valueOf(0.01)
                         val swapToSbchButton = dialog?.findViewById<Button>(R.id.swap_to_sbch_button)
                         val swapToBchButton = dialog?.findViewById<Button>(R.id.swap_to_bch_button)
+
+                        if(WalletManager.isMultisigKit) {
+                            dialog?.findViewById<ImageView>(R.id.sbch_balance_imageview)?.visibility = View.GONE
+                            dialog?.findViewById<TextView>(R.id.sbch_balance_textview)?.visibility = View.GONE
+                            swapToSbchButton?.visibility = View.GONE
+                            swapToBchButton?.visibility = View.GONE
+                        }
 
                         val bchBalanceSatisfied = bchBalance > swapMinimum
                         swapToSbchButton?.setTextColor(ContextCompat.getColor(this@MainActivity, if(bchBalanceSatisfied) R.color.dark_blue else R.color.gray))
