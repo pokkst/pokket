@@ -79,16 +79,6 @@ class WalletManager {
             setBitcoinSDKThread()
             startPeriodicRefresher()
 
-            val clientSbchWallet = getClientWalletFile(walletDir)
-            val clientExists = clientSbchWallet != null
-            if (config.newUser) {
-                initWeb3(config.seed, false, null)
-            } else if (clientExists) {
-                initWeb3(null, true, clientSbchWallet)
-            } else if (config.seed != null && !config.newUser) {
-                initWeb3(config.seed, false, null)
-            }
-
             walletKit = object : BIP47AppKit(
                 parameters,
                 Script.ScriptType.P2PKH,
@@ -118,10 +108,8 @@ class WalletManager {
                     peerGroup()?.isBloomFilteringEnabled = !privateMode
                     wallet().saveToFile(vWalletFile)
 
-                    if (config.seed == null && !clientExists && !config.newUser) {
-                        val web3Seed = wallet().keyChainSeed.mnemonicString
-                        initWeb3(web3Seed, false, null)
-                    }
+                    val web3Seed = wallet().keyChainSeed.mnemonicString
+                    web3Seed?.let { seed -> initWeb3(seed) }
                 }
             }
 
@@ -236,32 +224,13 @@ class WalletManager {
             multisigWalletKit = null
         }
 
-        private fun getClientWalletFile(clientDirectory: File): File? {
-            return clientDirectory.listFiles().firstOrNull { file -> file.name.contains(".json") && file.name.startsWith("UTC") }
-        }
-
-        fun deleteClientWalletFile(clientDirectory: File): Boolean {
-            val file = getClientWalletFile(clientDirectory)
-            return file?.delete() == true
-        }
-
-        private fun initWeb3(seed: String?, clientExists: Boolean, clientSbchWallet: File?) {
+        private fun initWeb3(seed: String) {
             GlobalScope.launch(Dispatchers.IO) {
                 val httpService = HttpService("https://smartbch.fountainhead.cash/mainnet")
                 web3 = Web3j.build(httpService)
-                var walletFile = ""
-                if (clientExists) {
-                    if (clientSbchWallet != null) walletFile = clientSbchWallet.name
-                } else {
-                    walletFile = WalletUtils.generateBip39WalletFromMnemonic(
-                        "",
-                        seed,
-                        walletDir
-                    ).filename
-                }
-                credentials = WalletUtils.loadCredentials(
+                credentials = WalletUtils.loadBip39Credentials(
                     "",
-                    File(walletDir, walletFile)
+                    seed
                 )
                 _refreshEvents.postValue(Event(""))
             }
