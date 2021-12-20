@@ -82,7 +82,6 @@ class GeneratedSeedFragment : Fragment() {
             } else {
                 val intent = Intent(requireActivity(), MainActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                println(seedStr)
                 intent.putExtra(Constants.EXTRA_SEED, seedStr)
                 intent.putExtra(Constants.EXTRA_NEW, true)
                 intent.putExtra(Constants.EXTRA_MULTISIG, isMultisig)

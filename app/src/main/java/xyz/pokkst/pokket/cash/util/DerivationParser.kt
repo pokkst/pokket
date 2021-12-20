@@ -24,7 +24,6 @@ class DerivationParser {
                                 hdPath?.extend(ChildNumber(childNumber, true))
                             }
                         }
-                        println("PATH:: $hdPath")
                         KeyChainGroupStructure { hdPath }
                     } catch (e: Exception) {
                         null

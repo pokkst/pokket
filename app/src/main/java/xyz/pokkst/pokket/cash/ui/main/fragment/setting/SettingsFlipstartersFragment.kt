@@ -44,7 +44,6 @@ class SettingsFlipstartersFragment : Fragment() {
             val utxo = pledges[position]
             showCancelDialog(utxo)
         }
-        println(frozenUtxos)
         val flipstarterPledges = ArrayList<TransactionOutput>()
         if (frozenUtxos != null) {
             for (utxo in frozenUtxos) {
@@ -56,8 +55,6 @@ class SettingsFlipstartersFragment : Fragment() {
                 }
             }
         }
-
-        println(flipstarterPledges)
         setListViewShit(root, flipstarterPledges)
         return root
     }
