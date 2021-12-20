@@ -119,7 +119,7 @@ class WalletManager {
                     wallet().saveToFile(vWalletFile)
 
                     if (config.seed == null && !clientExists && !config.newUser) {
-                        val web3Seed = wallet().keyChainSeed.mnemonicCode?.joinToString { " " }
+                        val web3Seed = wallet().keyChainSeed.mnemonicString
                         initWeb3(web3Seed, false, null)
                     }
                 }
