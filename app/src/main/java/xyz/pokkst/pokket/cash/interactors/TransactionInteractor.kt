@@ -56,7 +56,7 @@ class TransactionInteractor {
                 ourAddress,
                 nonce,
                 gasPrice,
-                BigInteger.valueOf(25000),
+                BigInteger.valueOf(22000),
                 incomingAddress,
                 amount,
                 dataField
@@ -68,7 +68,7 @@ class TransactionInteractor {
             val req = RawTransaction.createTransaction(
                 nonce,
                 gasPrice,
-                BigInteger.valueOf(25000),
+                BigInteger.valueOf(22000),
                 incomingAddress,
                 sendValue,
                 dataField
@@ -78,7 +78,7 @@ class TransactionInteractor {
             val req = RawTransaction.createTransaction(
                 nonce,
                 gasPrice,
-                BigInteger.valueOf(25000),
+                BigInteger.valueOf(22000),
                 incomingAddress,
                 amount,
                 dataField
