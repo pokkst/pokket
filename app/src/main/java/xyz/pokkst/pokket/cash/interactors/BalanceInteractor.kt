@@ -23,6 +23,7 @@ class BalanceInteractor {
         val currentTimeMs = System.currentTimeMillis()
         val updateBalance = updateSmartBalance(currentTimeMs)
         if (updateBalance) {
+            if(walletInteractor.getSmartWallet() == null || walletInteractor.getCredentials() == null) return BigInteger.ZERO
             val sbchAddress = walletInteractor.getSmartAddress()
             val sbchWeiBalance =
                 walletInteractor.getSmartWallet()

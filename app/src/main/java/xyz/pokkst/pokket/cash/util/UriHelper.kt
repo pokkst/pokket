@@ -114,7 +114,7 @@ class UriHelper {
                         val addressModified =
                             address?.replace(WalletManager.parameters.cashAddrPrefix + ":", "")
                         return if (addressModified == Constants.HOPCASH_BCH_INCOMING) {
-                            PaymentContent(addressOrPayload, amount, PaymentType.ADDRESS) //TODO wait for im_uname to fix his shit
+                            PaymentContent(addressOrPayload, amount, PaymentType.HOP_TO_SBCH)
                         } else {
                             PaymentContent(addressOrPayload, amount, PaymentType.ADDRESS)
                         }
@@ -127,7 +127,7 @@ class UriHelper {
                                 ignoreCase = true
                             )
                         ) {
-                            PaymentContent(addressOrPayload, amount, PaymentType.SMARTBCH_ADDRESS) //TODO wait for im_uname to fix his shit
+                            PaymentContent(addressOrPayload, amount, PaymentType.HOP_TO_BCH)
                         } else {
                             PaymentContent(addressOrPayload, amount, PaymentType.SMARTBCH_ADDRESS)
                         }

@@ -55,7 +55,7 @@ class RestoreWalletFragment : Fragment() {
                         intent.putExtra(Constants.EXTRA_DERIVATION, customPath)
                     }
 
-                    if(path == null && customPath.isNotEmpty() && root.custom_path_checkbox.isChecked) {
+                    if((customPath.isEmpty() && root.custom_path_checkbox.isChecked) || (path == null && customPath.isNotEmpty() && root.custom_path_checkbox.isChecked)) {
                         context?.let { it1 -> Toaster.showToastMessage(it1, "invalid derivation path") }
                         return@setOnClickListener
                     }

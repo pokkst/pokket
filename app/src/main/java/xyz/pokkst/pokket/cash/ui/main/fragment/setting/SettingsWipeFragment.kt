@@ -43,6 +43,7 @@ class SettingsWipeFragment : Fragment() {
         val spvChainFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}.spvchain")
         val multisigSpvChainFile =
             File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.spvchain")
+        val smartbchWalletFile = WalletManager.deleteClientWalletFile(WalletManager.walletDir)
         walletFile.delete()
         multisigWalletFile.delete()
         spvChainFile.delete()

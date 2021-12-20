@@ -124,46 +124,16 @@ class MainActivity : AppCompatActivity() {
                         val swapMaximum = BigDecimal.valueOf(10.0)
                         val swapToSbchButton = dialog?.findViewById<Button>(R.id.swap_to_sbch_button)
                         val swapToBchButton = dialog?.findViewById<Button>(R.id.swap_to_bch_button)
-                        swapToSbchButton?.visibility = View.GONE
-                        swapToBchButton?.visibility = View.GONE
-                        //TODO wait for im_uname to fix his shit
-                        /*if (bchBalance > swapMinimum && bchBalance < swapMaximum) {
-                            swapToSbchButton?.setTextColor(
-                                ContextCompat.getColor(
-                                    this@MainActivity,
-                                    R.color.dark_blue
-                                )
-                            )
-                            swapToSbchButton?.isEnabled = true
-                        } else {
-                            swapToSbchButton?.setTextColor(
-                                ContextCompat.getColor(
-                                    this@MainActivity,
-                                    R.color.gray
-                                )
-                            )
-                            swapToSbchButton?.isEnabled = false
-                        }
 
-                        if (sbchBalance > swapMinimum && sbchBalance < swapMaximum) {
-                            swapToBchButton?.setTextColor(
-                                ContextCompat.getColor(
-                                    this@MainActivity,
-                                    R.color.dark_blue
-                                )
-                            )
-                            swapToBchButton?.isEnabled = true
-                        } else {
-                            swapToBchButton?.setTextColor(
-                                ContextCompat.getColor(
-                                    this@MainActivity,
-                                    R.color.gray
-                                )
-                            )
-                            swapToBchButton?.isEnabled = false
-                        }*/
+                        val bchBalanceSatisfied = bchBalance > swapMinimum && bchBalance < swapMaximum
+                        swapToSbchButton?.setTextColor(ContextCompat.getColor(this@MainActivity, if(bchBalanceSatisfied) R.color.dark_blue else R.color.gray))
+                        swapToSbchButton?.isEnabled = bchBalanceSatisfied
 
-                        /*swapToSbchButton?.setOnClickListener {
+                        val sbchBalanceSatisfied = sbchBalance > swapMinimum && sbchBalance < swapMaximum
+                        swapToBchButton?.setTextColor(ContextCompat.getColor(this@MainActivity, if(sbchBalanceSatisfied) R.color.dark_blue else R.color.gray))
+                        swapToBchButton?.isEnabled = sbchBalanceSatisfied
+
+                        swapToSbchButton?.setOnClickListener {
                             val intent = Intent(Constants.ACTION_HOP_TO_SBCH)
                             LocalBroadcastManager.getInstance(this@MainActivity)
                                 .sendBroadcast(intent)
@@ -174,7 +144,8 @@ class MainActivity : AppCompatActivity() {
                             LocalBroadcastManager.getInstance(this@MainActivity)
                                 .sendBroadcast(intent)
                             dialog.dismiss()
-                        }*/
+                        }
+
                         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                     }
                 }

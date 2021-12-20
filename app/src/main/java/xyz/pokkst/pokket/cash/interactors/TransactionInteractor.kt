@@ -20,13 +20,20 @@ class TransactionInteractor {
             .getFromFormattedAddress(WalletManager.parameters, Constants.HOPCASH_BCH_INCOMING)
         val opReturnData =
             ScriptBuilder.createOpReturnScript(walletInteractor.getSmartAddress().toByteArray())
+        val tempTx = org.bitcoinj.core.Transaction(WalletManager.parameters)
         return if (sendMax) {
-            val tempReq = SendRequest.emptyWallet(incomingAddress)
-            tempReq.tx.addOutput(Coin.ZERO, opReturnData)
+            tempTx.addOutput(Coin.ZERO, opReturnData)
+            tempTx.addOutput(Coin.ZERO, incomingAddress)
+            val tempReq = SendRequest.forTx(tempTx)
+            tempReq.shuffleOutputs = false
+            tempReq.emptyWalletOutput = 1
+            tempReq.emptyWallet = true
             tempReq
         } else {
-            val tempReq = SendRequest.to(incomingAddress, amount)
-            tempReq.tx.addOutput(Coin.ZERO, opReturnData)
+            tempTx.addOutput(Coin.ZERO, opReturnData)
+            tempTx.addOutput(amount, incomingAddress)
+            val tempReq = SendRequest.forTx(tempTx)
+            tempReq.shuffleOutputs = false
             tempReq
         }
     }

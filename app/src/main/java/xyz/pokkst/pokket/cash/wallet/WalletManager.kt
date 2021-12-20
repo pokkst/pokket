@@ -43,8 +43,6 @@ class WalletManager {
         lateinit var walletDir: File
         var web3: Web3j? = null
         var credentials: Credentials? = null
-        private val password =
-            "rhfk4zr2uPXbxbnhkCMDTQ3yEH3skkuMNVXDojTcCCqWUT6v9YvwFLLSkMZzF" // not actually supposed to be private
         var walletKit: BIP47AppKit? = null
         var multisigWalletKit: MultisigAppKit? = null
         val wallet: Wallet?
@@ -229,14 +227,22 @@ class WalletManager {
         }
 
         fun stopWallets() {
+            web3?.shutdown()
             kit?.stopAsync()
             kit?.awaitTerminated()
+            web3 = null
+            credentials = null
             walletKit = null
             multisigWalletKit = null
         }
 
         private fun getClientWalletFile(clientDirectory: File): File? {
-            return clientDirectory.listFiles().firstOrNull { file -> file.name.contains(".json") }
+            return clientDirectory.listFiles().firstOrNull { file -> file.name.contains(".json") && file.name.startsWith("UTC") }
+        }
+
+        fun deleteClientWalletFile(clientDirectory: File): Boolean {
+            val file = getClientWalletFile(clientDirectory)
+            return file?.delete() == true
         }
 
         private fun initWeb3(seed: String?, clientExists: Boolean, clientSbchWallet: File?) {
@@ -248,13 +254,13 @@ class WalletManager {
                     if (clientSbchWallet != null) walletFile = clientSbchWallet.name
                 } else {
                     walletFile = WalletUtils.generateBip39WalletFromMnemonic(
-                        password,
+                        "",
                         seed,
                         walletDir
                     ).filename
                 }
                 credentials = WalletUtils.loadCredentials(
-                    password,
+                    "",
                     File(walletDir, walletFile)
                 )
                 _refreshEvents.postValue(Event(""))
