@@ -65,7 +65,7 @@ class ReceiveFragment : Fragment() {
                 }
                 AddressViewType.BIP47 -> {
                     refresh(
-                        walletInteractor.getFreshBitcoinAddress()?.toString(),
+                        walletInteractor.getBitcoinAddress()?.toString(),
                         R.drawable.logo_bch
                     )
                     AddressViewType.CASH
