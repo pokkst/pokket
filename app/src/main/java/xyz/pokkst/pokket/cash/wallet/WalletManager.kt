@@ -64,8 +64,8 @@ class WalletManager {
         val refreshEvents: LiveData<Event<String>> = _refreshEvents
         private val _peerCount: MutableLiveData<Int> = MutableLiveData(0)
         val peerCount: LiveData<Int> = _peerCount
-        const val walletFileName = "pokket2"
-        const val multisigWalletFileName = "pokket2_multisig"
+        const val walletFileName = "pokket"
+        const val multisigWalletFileName = "pokket_multisig"
 
         private fun startPeriodicRefresher() {
             val refreshRunnable = Runnable {
@@ -92,7 +92,7 @@ class WalletManager {
             walletKit = object : BIP47AppKit(
                 parameters,
                 Script.ScriptType.P2PKH,
-                KeyChainGroupStructure.DEFAULT,
+                KeyChainGroupStructure.SLP,
                 walletDir,
                 walletFileName
             ) {
