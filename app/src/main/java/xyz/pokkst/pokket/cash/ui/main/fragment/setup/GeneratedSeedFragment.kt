@@ -15,6 +15,7 @@ import org.bitcoinj.crypto.MnemonicException
 import org.bitcoinj.wallet.DeterministicSeed
 import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.R
+import xyz.pokkst.pokket.cash.util.Constants
 import xyz.pokkst.pokket.cash.util.StatusBarHelper
 import java.security.SecureRandom
 
@@ -82,11 +83,11 @@ class GeneratedSeedFragment : Fragment() {
                 val intent = Intent(requireActivity(), MainActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                 println(seedStr)
-                intent.putExtra("seed", seedStr)
-                intent.putExtra("new", true)
-                intent.putExtra("multisig", isMultisig)
+                intent.putExtra(Constants.EXTRA_SEED, seedStr)
+                intent.putExtra(Constants.EXTRA_NEW, true)
+                intent.putExtra(Constants.EXTRA_MULTISIG, isMultisig)
                 if (!isMultisig && bip39Passphrase.isNotEmpty()) {
-                    intent.putExtra("passphrase", bip39Passphrase)
+                    intent.putExtra(Constants.EXTRA_PASSPHRASE, bip39Passphrase)
                 }
                 startActivity(intent)
             }

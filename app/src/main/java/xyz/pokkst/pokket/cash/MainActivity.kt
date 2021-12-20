@@ -20,7 +20,9 @@ import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.wallet.DeterministicKeyChain
 import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
 import xyz.pokkst.pokket.cash.util.*
+import xyz.pokkst.pokket.cash.wallet.MultisigWalletStartupConfig
 import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletStartupConfig
 import java.io.File
 import java.math.BigDecimal
 
@@ -35,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         PrefsHelper.instance(this)
         WalletManager.walletDir = File(applicationInfo.dataDir)
         val extras = intent.extras
+        var derivationPath: String? = null
         var seed: String? = null
         var newUser: Boolean = false
         var passphrase: String? = null
@@ -42,10 +45,12 @@ class MainActivity : AppCompatActivity() {
         val followingKeys = ArrayList<DeterministicKey>()
         var m = 0
         if (extras != null) {
-            seed = extras.getString("seed")
-            newUser = extras.getBoolean("new")
-            isMultisig = extras.getBoolean("multisig")
-            val keys = extras.getStringArrayList("followingKeys") ?: ArrayList()
+            passphrase = extras.getString(Constants.EXTRA_PASSPHRASE)
+            derivationPath = extras.getString(Constants.EXTRA_DERIVATION)
+            seed = extras.getString(Constants.EXTRA_SEED)
+            newUser = extras.getBoolean(Constants.EXTRA_NEW)
+            isMultisig = extras.getBoolean(Constants.EXTRA_MULTISIG)
+            val keys = extras.getStringArrayList(Constants.EXTRA_FOLLOWING_KEYS) ?: ArrayList()
             val keysLength = keys.size - 1
             for (x in 0..keysLength) {
                 val deterministicKey =
@@ -53,7 +58,15 @@ class MainActivity : AppCompatActivity() {
                         .setPath(DeterministicKeyChain.BIP44_ACCOUNT_ZERO_PATH)
                 followingKeys.add(deterministicKey)
             }
-            m = extras.getInt("m")
+            m = extras.getInt(Constants.EXTRA_M)
+        } else {
+            if(!newUser && seed == null) {
+                val exists = PrefsHelper.instance(this)?.contains(Constants.PREF_DERIVATION_PATH) == true
+                if(exists) {
+                    val pathPref = PrefsHelper.instance(this)?.getString(Constants.PREF_DERIVATION_PATH, Constants.DERIVATION_PATH_DEFAULT)
+                    derivationPath = pathPref
+                }
+            }
         }
 
         if (!newUser && seed == null) {
@@ -65,13 +78,14 @@ class MainActivity : AppCompatActivity() {
         prepareViews()
         setListeners()
 
+        val path = derivationPath?.let { DerivationParser.parse(it) }
+
         if (isMultisig) {
-            WalletManager.startMultisigWallet(this, seed, newUser, followingKeys, m)
+            val config = MultisigWalletStartupConfig(this, seed, newUser, followingKeys, m)
+            WalletManager.startMultisigWallet(config)
         } else {
-            if (extras?.containsKey("passphrase") == true) {
-                passphrase = extras.getString("passphrase")
-            }
-            WalletManager.startWallet(this, seed, newUser, passphrase)
+            val config = WalletStartupConfig(this, seed, newUser, passphrase, path)
+            WalletManager.startWallet(config)
         }
     }
 

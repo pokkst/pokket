@@ -35,6 +35,8 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
+data class WalletStartupConfig(val activity: Activity, val seed: String?, val newUser: Boolean, val passphrase: String?, val derivationPath: KeyChainGroupStructure?)
+data class MultisigWalletStartupConfig(val activity: Activity, val seed: String?, val newUser: Boolean, val followingKeys: List<DeterministicKey>, val m: Int)
 
 class WalletManager {
     companion object {
@@ -75,24 +77,24 @@ class WalletManager {
             exec.scheduleAtFixedRate(refreshRunnable, 30L, 20L, TimeUnit.SECONDS)
         }
 
-        fun startWallet(activity: Activity, seed: String?, newUser: Boolean, passphrase: String?) {
+        fun startWallet(config: WalletStartupConfig) {
             setBitcoinSDKThread()
             startPeriodicRefresher()
 
             val clientSbchWallet = getClientWalletFile(walletDir)
             val clientExists = clientSbchWallet != null
-            if (newUser) {
-                initWeb3(seed, false, null)
+            if (config.newUser) {
+                initWeb3(config.seed, false, null)
             } else if (clientExists) {
                 initWeb3(null, true, clientSbchWallet)
-            } else if (seed != null && !newUser) {
-                initWeb3(seed, false, null)
+            } else if (config.seed != null && !config.newUser) {
+                initWeb3(config.seed, false, null)
             }
 
             walletKit = object : BIP47AppKit(
                 parameters,
                 Script.ScriptType.P2PKH,
-                KeyChainGroupStructure.SLP,
+                config.derivationPath ?: KeyChainGroupStructure.SLP,
                 walletDir,
                 walletFileName
             ) {
@@ -118,7 +120,7 @@ class WalletManager {
                     peerGroup()?.isBloomFilteringEnabled = !privateMode
                     wallet().saveToFile(vWalletFile)
 
-                    if (seed == null && !clientExists && !newUser) {
+                    if (config.seed == null && !clientExists && !config.newUser) {
                         val web3Seed = wallet().keyChainSeed.mnemonicCode?.joinToString { " " }
                         initWeb3(web3Seed, false, null)
                     }
@@ -137,33 +139,27 @@ class WalletManager {
                 }
             })
 
-            val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1560281760L
-            if (seed != null) {
+            val creationDate = if (config.newUser) System.currentTimeMillis() / 1000L else 1560281760L
+            if (config.seed != null) {
                 val deterministicSeed = DeterministicSeed(
-                    seed, null, passphrase
+                    config.seed, null, config.passphrase
                         ?: "", creationDate
                 )
                 walletKit?.restoreWalletFromSeed(deterministicSeed)
             }
 
             walletKit?.setBlockingStartup(false)
-            val checkpointsInputStream = activity.assets.open("checkpoints.txt")
+            val checkpointsInputStream = config.activity.assets.open("checkpoints.txt")
             walletKit?.setCheckpoints(checkpointsInputStream)
             setupNodeOnStart()
             walletKit?.startAsync()
         }
 
-        fun startMultisigWallet(
-            activity: Activity,
-            seed: String?,
-            newUser: Boolean,
-            followingKeys: List<DeterministicKey>,
-            m: Int
-        ) {
+        fun startMultisigWallet(config: MultisigWalletStartupConfig) {
             setBitcoinSDKThread()
 
             multisigWalletKit = object :
-                MultisigAppKit(parameters, walletDir, multisigWalletFileName, followingKeys, m) {
+                MultisigAppKit(parameters, walletDir, multisigWalletFileName, config.followingKeys, config.m) {
                 override fun onSetupCompleted() {
                     wallet().isAcceptRiskyTransactions = true
                     wallet().allowSpendingUnconfirmedTransactions()
@@ -199,14 +195,14 @@ class WalletManager {
                 }
             })
 
-            val creationDate = if (newUser) System.currentTimeMillis() / 1000L else 1611541003L
-            if (seed != null) {
-                val deterministicSeed = DeterministicSeed(seed, null, "", creationDate)
+            val creationDate = if (config.newUser) System.currentTimeMillis() / 1000L else 1611541003L
+            if (config.seed != null) {
+                val deterministicSeed = DeterministicSeed(config.seed, null, "", creationDate)
                 multisigWalletKit?.restoreWalletFromSeed(deterministicSeed)
             }
 
             multisigWalletKit?.setBlockingStartup(false)
-            val checkpointsInputStream = activity.assets.open("checkpoints.txt")
+            val checkpointsInputStream = config.activity.assets.open("checkpoints.txt")
             multisigWalletKit?.setCheckpoints(checkpointsInputStream)
             setupNodeOnStart()
             multisigWalletKit?.startAsync()

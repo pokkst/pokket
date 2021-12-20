@@ -248,4 +248,6 @@
     <string name="hop_to_sbch">swap to sbch</string>
     <string name="hop_to_bch">swap to bch</string>
     <string name="bch_balance">%1$s BCH</string>
+    <string name="custom_path_checkbox">use custom derivation path</string>
+    <string name="custom_path_default">m/44\'/245\'/0\'</string>
 </resources>

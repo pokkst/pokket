@@ -8,6 +8,17 @@ class Constants {
         const val ACTION_HOP_TO_BCH = "ACTION_HOP_TO_BCH"
         const val ACTION_HOP_TO_SBCH = "ACTION_HOP_TO_SBCH"
 
+        const val PREF_DERIVATION_PATH = "derivation_path"
+        const val DERIVATION_PATH_DEFAULT = "m/44'/245'/0'"
+
+        const val EXTRA_DERIVATION = "derivation"
+        const val EXTRA_SEED = "seed"
+        const val EXTRA_NEW = "new"
+        const val EXTRA_MULTISIG = "multisig"
+        const val EXTRA_FOLLOWING_KEYS = "followingKeys"
+        const val EXTRA_PASSPHRASE = "passphrase"
+        const val EXTRA_M = "m"
+
         const val REQUEST_CODE_SCAN_QR = 100
 
         const val QR_SCAN_RESULT = "SCAN_RESULT"

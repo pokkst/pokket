@@ -16,6 +16,7 @@ import kotlinx.android.synthetic.main.fragment_generated_seed.view.continue_butt
 import kotlinx.android.synthetic.main.fragment_other_following_keys.view.*
 import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.R
+import xyz.pokkst.pokket.cash.util.Constants
 
 
 /**
@@ -114,11 +115,11 @@ class OtherFollowingKeysFragment : Fragment() {
                 if (keysEntered) {
                     val intent = Intent(requireActivity(), MainActivity::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                    intent.putExtra("seed", seed)
-                    intent.putExtra("new", !restoring)
-                    intent.putExtra("multisig", true)
-                    intent.putExtra("followingKeys", followingKeys)
-                    intent.putExtra("m", mCurrent)
+                    intent.putExtra(Constants.EXTRA_SEED, seed)
+                    intent.putExtra(Constants.EXTRA_NEW, !restoring)
+                    intent.putExtra(Constants.EXTRA_MULTISIG, true)
+                    intent.putExtra(Constants.EXTRA_FOLLOWING_KEYS, followingKeys)
+                    intent.putExtra(Constants.EXTRA_M, mCurrent)
                     startActivity(intent)
                 }
             }
