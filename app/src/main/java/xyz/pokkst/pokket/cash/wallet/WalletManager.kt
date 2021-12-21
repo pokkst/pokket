@@ -1,5 +1,6 @@
 package xyz.pokkst.pokket.cash.wallet
 
+import android.R.attr
 import android.app.Activity
 import android.os.Handler
 import androidx.lifecycle.LiveData
@@ -20,6 +21,7 @@ import org.bitcoinj.utils.Threading
 import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.KeyChainGroupStructure
 import org.bitcoinj.wallet.Wallet
+import org.web3j.crypto.Bip32ECKeyPair
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.WalletUtils
 import org.web3j.protocol.Web3j
@@ -34,6 +36,13 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import android.R.attr.password
+import org.web3j.crypto.Bip32ECKeyPair.HARDENED_BIT
+
+import org.web3j.crypto.MnemonicUtils
+
+
+
 
 data class WalletStartupConfig(val activity: Activity, val seed: String?, val newUser: Boolean, val passphrase: String?, val derivationPath: KeyChainGroupStructure?)
 data class MultisigWalletStartupConfig(val activity: Activity, val seed: String?, val newUser: Boolean, val followingKeys: List<DeterministicKey>, val m: Int)
@@ -228,10 +237,14 @@ class WalletManager {
             GlobalScope.launch(Dispatchers.IO) {
                 val httpService = HttpService("https://smartbch.fountainhead.cash/mainnet")
                 web3 = Web3j.build(httpService)
-                credentials = WalletUtils.loadBip39Credentials(
-                    "",
-                    seed
-                )
+
+                // generates the same private key as MetaMask would given the seed
+                val seedBytes = MnemonicUtils.generateSeed(seed, "")
+                val masterKeypair = Bip32ECKeyPair.generateKeyPair(seedBytes)
+                val path = intArrayOf(44 or HARDENED_BIT, 60 or HARDENED_BIT, 0 or HARDENED_BIT, 0, 0)
+                val childKeypair = Bip32ECKeyPair.deriveKeyPair(masterKeypair, path)
+                credentials = Credentials.create(childKeypair)
+
                 _refreshEvents.postValue(Event(""))
             }
         }
