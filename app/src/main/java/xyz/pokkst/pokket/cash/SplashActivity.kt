@@ -18,6 +18,10 @@ import xyz.pokkst.pokket.cash.wallet.WalletManager
 import java.io.File
 import java.security.Provider
 import java.security.Security
+import org.torproject.jni.TorService
+
+
+
 
 
 class SplashActivity : AppCompatActivity() {
@@ -76,6 +80,8 @@ class SplashActivity : AppCompatActivity() {
             }
 
         }
+
+        startService(Intent(this, TorService::class.java))
     }
 
     override fun onActivityResult(

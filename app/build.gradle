@@ -65,5 +65,6 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     implementation 'com.google.zxing:core:3.4.0'
     implementation 'com.journeyapps:zxing-android-embedded:4.0.2@aar'
-    implementation 'org.slf4j:slf4j-api:1.7.30'
+    implementation 'info.guardianproject:tor-android:0.4.6.9'
+    implementation 'info.guardianproject:jtorctl:0.4.5.7'
 }

@@ -228,7 +228,7 @@ class MainActivity : AppCompatActivity() {
                         val utxos: List<TransactionOutput> = wallet.utxos.toList()
                         if (utxos.isNotEmpty()) {
                             val filteredUtxos: ArrayList<TransactionOutput> = ArrayList()
-                            val inputCount = 2
+                            val inputCount = 5
                             for (x in 0 until inputCount) {
                                 val randIndex: Int = Random().nextInt(utxos.size)
                                 val utxo: TransactionOutput = utxos[randIndex]
