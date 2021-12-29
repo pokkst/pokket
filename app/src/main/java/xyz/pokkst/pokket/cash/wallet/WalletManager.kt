@@ -69,8 +69,8 @@ class WalletManager {
                 return multisigWalletKit != null && walletKit == null
             }
         val parameters: NetworkParameters = MainNetParams.get()
-        private val _readyForFusion: MutableLiveData<Boolean> = MutableLiveData(false);
-        val readyForFusion: LiveData<Boolean> = _readyForFusion;
+        private val _updateUtxosForFusion: MutableLiveData<Event<Int>> = MutableLiveData();
+        val updateUtxosForFusion: LiveData<Event<Int>> = _updateUtxosForFusion;
         private val _syncPercentage: MutableLiveData<Int> = MutableLiveData(0)
         val syncPercentage: LiveData<Int> = _syncPercentage
         private val _refreshEvents: MutableLiveData<Event<String>> = MutableLiveData()
@@ -109,6 +109,7 @@ class WalletManager {
                     }
                     wallet().addCoinsSentEventListener { wallet, tx, prevBalance, newBalance ->
                         _refreshEvents.postValue(Event(tx.txId.toString()))
+                        _updateUtxosForFusion.postValue(Event(Random().nextInt(8)+1))
                     }
                     peerGroup()?.addConnectedEventListener { peer, peerCount ->
                         _peerCount.postValue(peerCount)
@@ -121,7 +122,7 @@ class WalletManager {
                     peerGroup()?.isBloomFilteringEnabled = !privateMode
                     wallet().saveToFile(vWalletFile)
 
-                    _readyForFusion.postValue(true);
+                    _updateUtxosForFusion.postValue(Event(6))
 
                     val web3Seed = wallet().keyChainSeed.mnemonicString
                     web3Seed?.let { seed -> initWeb3(seed) }

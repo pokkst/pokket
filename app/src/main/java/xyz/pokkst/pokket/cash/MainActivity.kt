@@ -220,29 +220,30 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        WalletManager.readyForFusion.observe(this, { ready ->
-            if(ready == true && WalletManager.fusionClient == null) {
-                lifecycleScope.launch(Dispatchers.IO) {
+        WalletManager.updateUtxosForFusion.observe(this, { event ->
+            lifecycleScope.launch(Dispatchers.IO) {
+                var inputCount = event.getContentIfNotHandled()
+                if(inputCount != null && inputCount != 0) {
                     try {
                         val wallet = WalletManager.wallet ?: return@launch
-                        val utxos: List<TransactionOutput> = wallet.utxos.toList()
+                        val utxos: List<TransactionOutput> = wallet.utxos.toList().shuffled()
                         if (utxos.isNotEmpty()) {
                             val filteredUtxos: ArrayList<TransactionOutput> = ArrayList()
-                            val inputCount = 5
+                            if(utxos.size < inputCount) inputCount = utxos.size
                             for (x in 0 until inputCount) {
-                                val randIndex: Int = Random().nextInt(utxos.size)
-                                val utxo: TransactionOutput = utxos[randIndex]
-                                if (!filteredUtxos.contains(utxo)) {
-                                    filteredUtxos.add(utxo)
-                                }
+                                val utxo: TransactionOutput = utxos[x]
+                                filteredUtxos.add(utxo)
                             }
-                            WalletManager.fusionClient = FusionClient(
-                                "cashfusion.electroncash.dk",
-                                8788,
-                                filteredUtxos,
-                                wallet.params,
-                                wallet
-                            )
+                            if(WalletManager.fusionClient == null) {
+                                WalletManager.fusionClient = FusionClient(
+                                    "cashfusion.electroncash.dk",
+                                    8788,
+                                    filteredUtxos,
+                                    wallet
+                                )
+                            } else {
+                                WalletManager.fusionClient = WalletManager.fusionClient?.updateUtxos(filteredUtxos)
+                            }
                         }
                     } catch (e: IOException) {
                         e.printStackTrace()

@@ -50,7 +50,7 @@ dependencies {
     implementation "androidx.navigation:navigation-runtime-ktx:$nav_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
-    implementation('com.github.pokkst:bitcoincashj:bca3f9629d') {
+    implementation('com.github.pokkst:bitcoincashj:b5ad9e4268') {
         exclude group: "org.json"
     }
     implementation('org.web3j:core:4.8.7-android') {

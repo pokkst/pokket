@@ -3,6 +3,8 @@ package xyz.pokkst.pokket.cash.ui.main.fragment.send
 import android.app.Activity
 import android.content.*
 import android.content.Context.CLIPBOARD_SERVICE
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -88,10 +90,10 @@ class SendHomeFragment : Fragment() {
                     val statuses = ArrayList<PoolStatus>(fusionClient.poolStatuses)
                     if (statuses.isNotEmpty()) {
                         for (status in statuses) {
-                            if(status.timeUntilStart != 0L) {
-                                statusString += (status.tier.toString() + ": starting in " + status.timeUntilStart + "s")+"\n"
+                            statusString += if(status.timeUntilStart != 0L) {
+                                (status.tier.toString() + ": starting in " + status.timeUntilStart + "s")+"\n"
                             } else {
-                                statusString += (status.tier.toString() + ": " + (((status.players.toDouble() / status.minPlayers.toDouble()) * 100.0)).roundToLong() + "%")+"\n"
+                                (status.tier.toString() + ": " + (((status.players.toDouble() / status.minPlayers.toDouble()) * 100.0)).roundToLong() + "%")+"\n"
                             }
                         }
                         statusString += WalletManager.fusionClient?.fusionStatus
@@ -99,6 +101,7 @@ class SendHomeFragment : Fragment() {
                 }
 
                 dialog?.findViewById<TextView>(R.id.fusion_status_textview)?.text = statusString
+                dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             }
         }
         val filter = IntentFilter()

@@ -8,7 +8,7 @@
         android:id="@+id/fusion_status_imageview"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:src="@drawable/app_icon_round"
+        android:src="@drawable/cashfusion_icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="24dp"
