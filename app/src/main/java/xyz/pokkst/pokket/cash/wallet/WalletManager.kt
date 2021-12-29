@@ -37,6 +37,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import android.R.attr.password
+import org.bitcoinj.protocols.fusion.FusionClient
 import org.web3j.crypto.Bip32ECKeyPair.HARDENED_BIT
 
 import org.web3j.crypto.MnemonicUtils
@@ -54,6 +55,7 @@ class WalletManager {
         var credentials: Credentials? = null
         var walletKit: BIP47AppKit? = null
         var multisigWalletKit: MultisigAppKit? = null
+        var fusionClient: FusionClient? = null
         val wallet: Wallet?
             get() {
                 return walletKit?.wallet() ?: multisigWalletKit?.wallet()
@@ -67,6 +69,8 @@ class WalletManager {
                 return multisigWalletKit != null && walletKit == null
             }
         val parameters: NetworkParameters = MainNetParams.get()
+        private val _readyForFusion: MutableLiveData<Boolean> = MutableLiveData(false);
+        val readyForFusion: LiveData<Boolean> = _readyForFusion;
         private val _syncPercentage: MutableLiveData<Int> = MutableLiveData(0)
         val syncPercentage: LiveData<Int> = _syncPercentage
         private val _refreshEvents: MutableLiveData<Event<String>> = MutableLiveData()
@@ -116,6 +120,8 @@ class WalletManager {
                         PrefsHelper.instance(null)?.getBoolean("private_mode", false) ?: false
                     peerGroup()?.isBloomFilteringEnabled = !privateMode
                     wallet().saveToFile(vWalletFile)
+
+                    _readyForFusion.value = true
 
                     val web3Seed = wallet().keyChainSeed.mnemonicString
                     web3Seed?.let { seed -> initWeb3(seed) }

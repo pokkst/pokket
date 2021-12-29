@@ -17,6 +17,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.bitcoinj.core.TransactionOutput
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.wallet.DeterministicKeyChain
 import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
@@ -26,6 +27,10 @@ import xyz.pokkst.pokket.cash.wallet.WalletManager
 import xyz.pokkst.pokket.cash.wallet.WalletStartupConfig
 import java.io.File
 import java.math.BigDecimal
+import org.bitcoinj.protocols.fusion.FusionClient
+import java.io.IOException
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -200,6 +205,41 @@ class MainActivity : AppCompatActivity() {
                     R.drawable.ic_connected,
                     0
                 )
+            }
+        })
+
+        WalletManager.readyForFusion.observe(this, { ready ->
+            if(ready == true && WalletManager.fusionClient == null) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    try {
+                        val wallet = WalletManager.wallet ?: return@launch
+                        val utxos: List<TransactionOutput> = wallet.utxos.toList()
+                        if (utxos.isNotEmpty()) {
+                            val filteredUtxos: ArrayList<TransactionOutput> = ArrayList()
+                            val inputCount = 4
+                            for (x in 0 until inputCount) {
+                                val randIndex: Int = Random().nextInt(utxos.size)
+                                val utxo: TransactionOutput = utxos[randIndex]
+                                if (!filteredUtxos.contains(utxo)) {
+                                    filteredUtxos.add(utxo)
+                                }
+                            }
+                            WalletManager.fusionClient = FusionClient(
+                                "cashfusion.electroncash.dk",
+                                8788,
+                                filteredUtxos,
+                                wallet.params,
+                                wallet
+                            )
+                            println("Started fusion client.")
+                            while(true) {
+                                println(WalletManager.fusionClient?.fusionStatus)
+                            }
+                        }
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                }
             }
         })
     }
