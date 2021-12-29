@@ -121,7 +121,7 @@ class WalletManager {
                     peerGroup()?.isBloomFilteringEnabled = !privateMode
                     wallet().saveToFile(vWalletFile)
 
-                    _readyForFusion.value = true
+                    _readyForFusion.postValue(true);
 
                     val web3Seed = wallet().keyChainSeed.mnemonicString
                     web3Seed?.let { seed -> initWeb3(seed) }

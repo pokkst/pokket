@@ -31,6 +31,15 @@ import org.bitcoinj.protocols.fusion.FusionClient
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.roundToLong
+import xyz.pokkst.pokket.cash.service.YourService
+import android.R.id
+
+import android.app.NotificationChannel
+
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 
 
 class MainActivity : AppCompatActivity() {
@@ -93,6 +102,9 @@ class MainActivity : AppCompatActivity() {
             val config = WalletStartupConfig(this, seed, newUser, passphrase, path)
             WalletManager.startWallet(config)
         }
+
+        startService(Intent(this, YourService::class.java))
+
     }
 
     private fun prepareViews() {
@@ -216,7 +228,7 @@ class MainActivity : AppCompatActivity() {
                         val utxos: List<TransactionOutput> = wallet.utxos.toList()
                         if (utxos.isNotEmpty()) {
                             val filteredUtxos: ArrayList<TransactionOutput> = ArrayList()
-                            val inputCount = 4
+                            val inputCount = 2
                             for (x in 0 until inputCount) {
                                 val randIndex: Int = Random().nextInt(utxos.size)
                                 val utxo: TransactionOutput = utxos[randIndex]
@@ -231,10 +243,6 @@ class MainActivity : AppCompatActivity() {
                                 wallet.params,
                                 wallet
                             )
-                            println("Started fusion client.")
-                            while(true) {
-                                println(WalletManager.fusionClient?.fusionStatus)
-                            }
                         }
                     } catch (e: IOException) {
                         e.printStackTrace()

@@ -50,7 +50,7 @@ dependencies {
     implementation "androidx.navigation:navigation-runtime-ktx:$nav_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
-    implementation('com.github.pokkst:bitcoincashj:92518cc00e') {
+    implementation('com.github.pokkst:bitcoincashj:bca3f9629d') {
         exclude group: "org.json"
     }
     implementation('org.web3j:core:4.8.7-android') {
@@ -65,4 +65,5 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     implementation 'com.google.zxing:core:3.4.0'
     implementation 'com.journeyapps:zxing-android-embedded:4.0.2@aar'
+    implementation 'org.slf4j:slf4j-api:1.7.30'
 }
