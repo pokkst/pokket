@@ -94,13 +94,9 @@ class SendHomeFragment : Fragment() {
             }
         }
 
-        val iconRunnable = Runnable {
-            val useFusion = PrefsHelper.instance(context)?.getBoolean("use_fusion", true)
-            root.fusion_status_imageview.visibility = if(useFusion == true) View.VISIBLE else View.INVISIBLE
-        }
-        val feeExec: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
-        feeExec.scheduleAtFixedRate(iconRunnable, 0L, 5, TimeUnit.SECONDS)
-        // TODO was too lazy to do a livedata for the setting
+        YourService.cashFusionEnabled.observe(viewLifecycleOwner, { enabled ->
+            root.fusion_status_imageview.visibility = if(enabled == true) View.VISIBLE else View.INVISIBLE
+        })
 
         val filter = IntentFilter()
         filter.addAction(Constants.ACTION_HOP_TO_BCH)
