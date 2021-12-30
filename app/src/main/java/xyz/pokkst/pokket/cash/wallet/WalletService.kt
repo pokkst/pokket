@@ -339,7 +339,6 @@ class WalletService : LifecycleService() {
 
         val enabled = PrefsHelper.instance(this)?.getBoolean("use_fusion", true)
         enabled?.let { setEnabled(it) }
-        startService(Intent(this, TorService::class.java))
         var statusString = ""
         var fusionStatus = FusionStatus.NOT_FUSING
         val statusRunnable = Runnable {
