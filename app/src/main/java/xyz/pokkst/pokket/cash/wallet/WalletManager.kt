@@ -37,6 +37,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import android.R.attr.password
+import org.bitcoinj.core.TransactionConfidence
 import org.bitcoinj.protocols.fusion.FusionClient
 import org.web3j.crypto.Bip32ECKeyPair.HARDENED_BIT
 
@@ -122,7 +123,7 @@ class WalletManager {
                     peerGroup()?.isBloomFilteringEnabled = !privateMode
                     wallet().saveToFile(vWalletFile)
 
-                    _updateUtxosForFusion.postValue(Event(6))
+                    _updateUtxosForFusion.postValue(Event(Random().nextInt(8)+1))
 
                     val web3Seed = wallet().keyChainSeed.mnemonicString
                     web3Seed?.let { seed -> initWeb3(seed) }
@@ -258,6 +259,10 @@ class WalletManager {
 
         fun getSmartBchAddress(): String? {
             return credentials?.address
+        }
+
+        fun setUpdateUtxosForFusion(amount: Int) {
+            _updateUtxosForFusion.postValue(Event(amount))
         }
     }
 }

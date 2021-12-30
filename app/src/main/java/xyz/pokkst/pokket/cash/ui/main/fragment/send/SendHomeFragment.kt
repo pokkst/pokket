@@ -15,15 +15,18 @@ import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_send_home.view.*
+import org.bitcoinj.protocols.fusion.models.FusionStatus
 import org.bitcoinj.protocols.fusion.models.PoolStatus
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.qr.QRHelper
+import xyz.pokkst.pokket.cash.service.YourService
 import xyz.pokkst.pokket.cash.ui.main.MainFragmentDirections
-import xyz.pokkst.pokket.cash.util.Constants
-import xyz.pokkst.pokket.cash.util.PayloadHelper
-import xyz.pokkst.pokket.cash.util.PaymentType
-import xyz.pokkst.pokket.cash.util.UriHelper
+import xyz.pokkst.pokket.cash.util.*
 import xyz.pokkst.pokket.cash.wallet.WalletManager
+import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import kotlin.math.roundToLong
 
 /**
@@ -78,32 +81,27 @@ class SendHomeFragment : Fragment() {
 
         root.fusion_status_imageview.setOnClickListener {
             activity?.runOnUiThread {
-                var statusString = ""
                 val dialogInflater = layoutInflater
                 val dialoglayout: View = dialogInflater.inflate(R.layout.dialog_fusions, null)
                 val builder = context?.let { it1 -> AlertDialog.Builder(it1) }
                 builder?.setView(dialoglayout)
                 val dialog = builder?.show()
 
-                val fusionClient = WalletManager.fusionClient
-                if(fusionClient != null) {
-                    val statuses = ArrayList<PoolStatus>(fusionClient.poolStatuses)
-                    if (statuses.isNotEmpty()) {
-                        for (status in statuses) {
-                            statusString += if(status.timeUntilStart != 0L) {
-                                (status.tier.toString() + ": starting in " + status.timeUntilStart + "s")+"\n"
-                            } else {
-                                (status.tier.toString() + ": " + (((status.players.toDouble() / status.minPlayers.toDouble()) * 100.0)).roundToLong() + "%")+"\n"
-                            }
-                        }
-                        statusString += WalletManager.fusionClient?.fusionStatus
-                    }
-                }
-
-                dialog?.findViewById<TextView>(R.id.fusion_status_textview)?.text = statusString
+                YourService.status.observe(viewLifecycleOwner, {
+                    dialog?.findViewById<TextView>(R.id.fusion_status_textview)?.text = it
+                })
                 dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             }
         }
+
+        val iconRunnable = Runnable {
+            val useFusion = PrefsHelper.instance(context)?.getBoolean("use_fusion", true)
+            root.fusion_status_imageview.visibility = if(useFusion == true) View.VISIBLE else View.INVISIBLE
+        }
+        val feeExec: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+        feeExec.scheduleAtFixedRate(iconRunnable, 0L, 5, TimeUnit.SECONDS)
+        // TODO was too lazy to do a livedata for the setting
+
         val filter = IntentFilter()
         filter.addAction(Constants.ACTION_HOP_TO_BCH)
         filter.addAction(Constants.ACTION_HOP_TO_SBCH)

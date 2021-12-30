@@ -250,4 +250,6 @@
     <string name="bch_balance">%1$s BCH</string>
     <string name="custom_path_checkbox">use custom derivation path</string>
     <string name="custom_path_default">m/44\'/245\'/0\'</string>
+    <string name="fusion_enable">CashFusion: %1$s</string>
+
 </resources>

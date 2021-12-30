@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -17,9 +18,12 @@ import org.bitcoinj.core.slp.SlpOpReturn
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.SettingsActivity
+import xyz.pokkst.pokket.cash.service.YourService
 import xyz.pokkst.pokket.cash.ui.adapter.TransactionAdapter
 import xyz.pokkst.pokket.cash.ui.listener.TxAdapterListener
+import xyz.pokkst.pokket.cash.util.PrefsHelper
 import xyz.pokkst.pokket.cash.wallet.WalletManager
+import java.util.*
 
 
 /**
@@ -32,6 +36,21 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_home, container, false)
+
+        val fusionEnabled = PrefsHelper.instance(context)?.getBoolean("use_fusion", true)
+        root.fusion_enable.findViewById<ImageView>(R.id.setting_arrow_imageview)?.visibility = View.INVISIBLE
+        root.fusion_enable.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.fusion_enable, fusionEnabled.toString())
+        root.fusion_enable.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
+            val useFusion = PrefsHelper.instance(context)?.getBoolean("use_fusion", true) ?: true
+            val newValue = !useFusion
+            PrefsHelper.instance(context)?.edit()?.putBoolean("use_fusion", newValue)?.apply()
+            root.fusion_enable.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.fusion_enable, newValue.toString())
+            if(!newValue) {
+                YourService.setEnabled(false)
+            } else {
+                YourService.setEnabled(true)
+            }
+        }
 
         root.about.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
             navigate(R.id.nav_to_about)

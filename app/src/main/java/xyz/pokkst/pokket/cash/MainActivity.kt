@@ -40,6 +40,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import org.bitcoinj.core.TransactionConfidence
 
 
 class MainActivity : AppCompatActivity() {
@@ -220,33 +221,53 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        YourService.cashFusionEnabled.observe(this, { enabled ->
+            if(enabled) {
+                WalletManager.setUpdateUtxosForFusion(Random().nextInt(8)+1)
+            } else {
+                try {
+                    WalletManager.fusionClient?.stopConnection()
+                    WalletManager.fusionClient = null
+                } catch(e: Exception) {
+
+                }
+            }
+        })
+
         WalletManager.updateUtxosForFusion.observe(this, { event ->
             lifecycleScope.launch(Dispatchers.IO) {
-                var inputCount = event.getContentIfNotHandled()
-                if(inputCount != null && inputCount != 0) {
-                    try {
-                        val wallet = WalletManager.wallet ?: return@launch
-                        val utxos: List<TransactionOutput> = wallet.utxos.toList().shuffled()
-                        if (utxos.isNotEmpty()) {
-                            val filteredUtxos: ArrayList<TransactionOutput> = ArrayList()
-                            if(utxos.size < inputCount) inputCount = utxos.size
-                            for (x in 0 until inputCount) {
-                                val utxo: TransactionOutput = utxos[x]
-                                filteredUtxos.add(utxo)
-                            }
-                            if(WalletManager.fusionClient == null) {
-                                WalletManager.fusionClient = FusionClient(
-                                    "cashfusion.electroncash.dk",
-                                    8788,
-                                    filteredUtxos,
-                                    wallet
-                                )
+                val useFusion = PrefsHelper.instance(this@MainActivity)?.getBoolean("use_fusion", true)
+                if(useFusion == true) {
+                    var inputCount = event.getContentIfNotHandled()
+                    if (inputCount != null && inputCount != 0) {
+                        try {
+                            val wallet = WalletManager.wallet ?: return@launch
+                            val utxos: List<TransactionOutput> = wallet.utxos.toList().shuffled()
+                                .filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING }
+                            if (utxos.isNotEmpty()) {
+                                val filteredUtxos: ArrayList<TransactionOutput> = ArrayList()
+                                if (utxos.size < inputCount) inputCount = utxos.size
+                                for (x in 0 until inputCount) {
+                                    val utxo: TransactionOutput = utxos[x]
+                                    filteredUtxos.add(utxo)
+                                }
+                                if (WalletManager.fusionClient == null) {
+                                    WalletManager.fusionClient = FusionClient(
+                                        "cashfusion.electroncash.dk",
+                                        8788,
+                                        filteredUtxos,
+                                        wallet
+                                    )
+                                } else {
+                                    WalletManager.fusionClient =
+                                        WalletManager.fusionClient?.updateUtxos(filteredUtxos)
+                                }
                             } else {
-                                WalletManager.fusionClient = WalletManager.fusionClient?.updateUtxos(filteredUtxos)
+                                YourService.setStatus("waiting for confirmed coins")
                             }
+                        } catch (e: IOException) {
+                            e.printStackTrace()
                         }
-                    } catch (e: IOException) {
-                        e.printStackTrace()
                     }
                 }
             }

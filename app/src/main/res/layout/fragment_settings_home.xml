@@ -55,6 +55,10 @@
                     app:layout_constraintTop_toBottomOf="@id/appbar_title" />
 
                 <include
+                    android:id="@+id/fusion_enable"
+                    layout="@layout/fragment_component_setting"/>
+
+                <include
                     android:id="@+id/about"
                     layout="@layout/fragment_component_setting"/>
 
