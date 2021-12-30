@@ -318,9 +318,6 @@ class WalletService : LifecycleService() {
             ""
         }
 
-        val intent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
-
         notificationBuilder = NotificationCompat.Builder(this, channelId )
             .setOngoing(true)
             .setTicker("Pokket")
@@ -329,7 +326,6 @@ class WalletService : LifecycleService() {
             .setSmallIcon(R.drawable.app_icon_round)
             .setContentTitle("Pokket")
             .setContentText(FusionStatus.NOT_FUSING.toString())
-            .setContentIntent(pendingIntent)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notificationBuilder = notificationBuilder.setCategory(Notification.CATEGORY_SERVICE)
@@ -367,6 +363,11 @@ class WalletService : LifecycleService() {
                         }
                         statusString += "\n"
                         statusString += fusionStatus
+                    } else {
+                        val utxos = getConfirmedCoins()
+                        if(utxos.isEmpty()) {
+                            statusString = "waiting for confirmed coins"
+                        }
                     }
                 }
             }
@@ -388,8 +389,7 @@ class WalletService : LifecycleService() {
                     if (inputCount != null && inputCount != 0) {
                         try {
                             val wallet = WalletService.wallet ?: return@launch
-                            val utxos: List<TransactionOutput> = wallet.utxos.toList().shuffled()
-                                .filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING }
+                            val utxos = getConfirmedCoins()
                             if (utxos.isNotEmpty()) {
                                 val filteredUtxos: ArrayList<TransactionOutput> = ArrayList()
                                 if (utxos.size < inputCount) inputCount = utxos.size
@@ -407,8 +407,6 @@ class WalletService : LifecycleService() {
                                 } else {
                                     fusionClient?.updateUtxos(filteredUtxos)
                                 }
-                            } else {
-                                setStatus("waiting for confirmed coins")
                             }
                         } catch (e: IOException) {
                             e.printStackTrace()
@@ -428,5 +426,11 @@ class WalletService : LifecycleService() {
         val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         service.createNotificationChannel(chan)
         return channelId
+    }
+
+    private fun getConfirmedCoins(): List<TransactionOutput> {
+        val utxos: List<TransactionOutput> = wallet?.utxos?.shuffled()
+            ?.filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING } ?: return emptyList()
+        return utxos
     }
 }
