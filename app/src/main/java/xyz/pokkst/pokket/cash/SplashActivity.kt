@@ -77,7 +77,6 @@ class SplashActivity : AppCompatActivity() {
             }
         }
 
-        startService(Intent(this, TorService::class.java))
         ContextCompat.startForegroundService(this, Intent(this, WalletService::class.java))
     }
 
