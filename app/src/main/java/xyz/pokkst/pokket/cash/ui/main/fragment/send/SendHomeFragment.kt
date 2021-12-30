@@ -79,8 +79,8 @@ class SendHomeFragment : Fragment() {
                 builder?.setView(dialoglayout)
                 val dialog = builder?.show()
 
-                WalletService.status.observe(viewLifecycleOwner, { status ->
-                    dialog?.findViewById<TextView>(R.id.fusion_status_textview)?.text = status
+                WalletService.fusionData.observe(viewLifecycleOwner, { data ->
+                    dialog?.findViewById<TextView>(R.id.fusion_status_textview)?.text = data?.status
                 })
                 dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             }
