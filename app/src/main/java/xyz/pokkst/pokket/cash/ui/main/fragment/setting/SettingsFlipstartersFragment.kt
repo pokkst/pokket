@@ -24,7 +24,7 @@ import org.bitcoinj.core.TransactionOutput
 import org.bitcoinj.wallet.SendRequest
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.ui.PledgeEntryView
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 
 
 /**
@@ -39,7 +39,7 @@ class SettingsFlipstartersFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_flipstarters, container, false)
-        val frozenUtxos = WalletManager.wallet?.unspents?.filter { it.isFrozen }
+        val frozenUtxos = WalletService.wallet?.unspents?.filter { it.isFrozen }
         root.pledge_list.setOnItemClickListener { parent, view, position, id ->
             val utxo = pledges[position]
             showCancelDialog(utxo)
@@ -98,8 +98,8 @@ class SettingsFlipstartersFragment : Fragment() {
         val cancelPledgeButton = dialog?.findViewById<Button>(R.id.cancel_pledge_button)
         val closeButton = dialog?.findViewById<TextView>(R.id.pledge_close)
         cancelPledgeButton?.setOnClickListener {
-            val cancelReq = SendRequest.cancelFlipstarterPledge(WalletManager.wallet, utxo)
-            val sendResult = WalletManager.wallet?.sendCoins(cancelReq)
+            val cancelReq = SendRequest.cancelFlipstarterPledge(WalletService.wallet, utxo)
+            val sendResult = WalletService.wallet?.sendCoins(cancelReq)
             Futures.addCallback(
                 sendResult?.broadcastComplete,
                 object : FutureCallback<Transaction?> {

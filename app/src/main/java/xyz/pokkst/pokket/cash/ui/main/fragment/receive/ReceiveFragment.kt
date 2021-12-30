@@ -12,7 +12,7 @@ import net.glxn.qrgen.android.QRCode
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.interactors.WalletInteractor
 import xyz.pokkst.pokket.cash.util.ClipboardHelper
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 
 /**
  * A placeholder fragment containing a simple view.
@@ -60,7 +60,7 @@ class ReceiveFragment : Fragment() {
                     AddressViewType.SMARTBCH
                 }
                 AddressViewType.SMARTBCH -> {
-                    refresh(WalletManager.walletKit?.paymentCode, R.drawable.logo_bch_bip47)
+                    refresh(WalletService.walletKit?.paymentCode, R.drawable.logo_bch_bip47)
                     AddressViewType.BIP47
                 }
                 AddressViewType.BIP47 -> {
@@ -73,11 +73,11 @@ class ReceiveFragment : Fragment() {
             }
         }
 
-        if (WalletManager.isMultisigKit) {
+        if (WalletService.isMultisigKit) {
             swapAddressButton?.visibility = View.GONE
         }
 
-        WalletManager.refreshEvents.observe(viewLifecycleOwner, { event ->
+        WalletService.refreshEvents.observe(viewLifecycleOwner, { event ->
             if (event != null) {
                 refresh()
             }
@@ -91,7 +91,7 @@ class ReceiveFragment : Fragment() {
         when (currentAddressViewType) {
             AddressViewType.CASH -> ClipboardHelper.copyToClipboard(
                 activity,
-                "${WalletManager.parameters.cashAddrPrefix}:${address}"
+                "${WalletService.parameters.cashAddrPrefix}:${address}"
             )
             AddressViewType.SMARTBCH -> ClipboardHelper.copyToClipboard(activity, address)
             AddressViewType.BIP47 -> ClipboardHelper.copyToClipboard(activity, address)
@@ -105,7 +105,7 @@ class ReceiveFragment : Fragment() {
                 R.drawable.logo_sbch
             )
             AddressViewType.BIP47 -> refresh(
-                WalletManager.walletKit?.paymentCode,
+                WalletService.walletKit?.paymentCode,
                 R.drawable.logo_bch_bip47
             )
             AddressViewType.CASH -> refresh(
@@ -127,8 +127,8 @@ class ReceiveFragment : Fragment() {
             val qrCode = encoder.bitmap()
             receiveQrCoinIcon?.setImageResource(resId)
             receiveQr?.setImageBitmap(qrCode)
-            receiveText?.text = address?.replace("${WalletManager.parameters.cashAddrPrefix}:", "")
-                ?.replace("${WalletManager.parameters.simpleledgerPrefix}:", "")
+            receiveText?.text = address?.replace("${WalletService.parameters.cashAddrPrefix}:", "")
+                ?.replace("${WalletService.parameters.simpleledgerPrefix}:", "")
         } catch (e: Exception) {
             e.printStackTrace()
         }

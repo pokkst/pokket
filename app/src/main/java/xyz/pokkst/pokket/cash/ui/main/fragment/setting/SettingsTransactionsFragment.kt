@@ -15,7 +15,7 @@ import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.SettingsActivity
 import xyz.pokkst.pokket.cash.ui.adapter.TransactionAdapter
 import xyz.pokkst.pokket.cash.ui.listener.TxAdapterListener
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 
 
 /**
@@ -28,7 +28,7 @@ class SettingsTransactionsFragment : Fragment(), TxAdapterListener {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_transactions, container, false)
-        this.setArrayAdapter(root, WalletManager.wallet)
+        this.setArrayAdapter(root, WalletService.wallet)
         return root
     }
 
@@ -47,7 +47,7 @@ class SettingsTransactionsFragment : Fragment(), TxAdapterListener {
     override fun onClickTransaction(tx: Transaction) {
         (activity as? SettingsActivity)?.adjustDeepMenu(1)
         val txid = tx.txId.toString()
-        val amount = tx.getValue(WalletManager.wallet)
+        val amount = tx.getValue(WalletService.wallet)
         val isSlp = SlpOpReturn.isSlpTx(tx) || SlpOpReturn.isNftChildTx(tx)
         if (amount?.isPositive == true) {
             findNavController().navigate(

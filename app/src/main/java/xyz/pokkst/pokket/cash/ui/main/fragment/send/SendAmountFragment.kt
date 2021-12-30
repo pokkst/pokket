@@ -51,7 +51,7 @@ import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
 import xyz.pokkst.pokket.cash.interactors.TransactionInteractor
 import xyz.pokkst.pokket.cash.interactors.WalletInteractor
 import xyz.pokkst.pokket.cash.util.*
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -75,7 +75,7 @@ class SendAmountFragment : Fragment() {
                 this@SendAmountFragment.findNavController().navigateUp()
             } else if (Constants.ACTION_FRAGMENT_SEND_SEND == intent.action) {
                 if (getCoinAmount() != Coin.ZERO) {
-                    if (WalletManager.isMultisigKit) {
+                    if (WalletService.isMultisigKit) {
                         if (paymentContent?.paymentType == PaymentType.MULTISIG_PAYLOAD) {
                             paymentContent?.addressOrPayload?.let {
                                 this@SendAmountFragment.importMultisigPayload(it)
@@ -142,11 +142,11 @@ class SendAmountFragment : Fragment() {
             val payload =
                 paymentContent?.addressOrPayload?.let { PayloadHelper.decodeMultisigPayload(it) }
             if (payload != null) {
-                val tx = Transaction(WalletManager.parameters, Hex.decode(payload.hex))
+                val tx = Transaction(WalletService.parameters, Hex.decode(payload.hex))
                 val payloadAddress = fetchMultisigPayloadDestination(tx)
                 root?.to_field_text?.text = "to: ${
                     payloadAddress?.replace(
-                        "${WalletManager.parameters.cashAddrPrefix}:",
+                        "${WalletService.parameters.cashAddrPrefix}:",
                         ""
                     )
                 }"
@@ -247,17 +247,17 @@ class SendAmountFragment : Fragment() {
                     PaymentType.CASH_ACCOUNT, PaymentType.ADDRESS -> this.processBitcoinTransaction()
                     PaymentType.PAYMENT_CODE -> {
                         val canSendToPaymentCode =
-                            WalletManager.walletKit?.canSendToPaymentCode(destination)
+                            WalletService.walletKit?.canSendToPaymentCode(destination)
                         if (canSendToPaymentCode == true) {
                             this.attemptBip47Payment()
                         } else {
                             val notification =
-                                WalletManager.walletKit?.makeNotificationTransaction(
+                                WalletService.walletKit?.makeNotificationTransaction(
                                     destination,
                                     true
                                 )
-                            WalletManager.walletKit?.broadcastTransaction(notification?.tx)
-                            WalletManager.walletKit?.putPaymenCodeStatusSent(
+                            WalletService.walletKit?.broadcastTransaction(notification?.tx)
+                            WalletService.walletKit?.putPaymenCodeStatusSent(
                                 destination,
                                 notification?.tx
                             )
@@ -269,7 +269,7 @@ class SendAmountFragment : Fragment() {
                             walletInteractor.getBitcoinWallet(),
                             paymentContent?.addressOrPayload
                         )
-                        val peers = WalletManager.kit?.peerGroup()?.connectedPeers
+                        val peers = WalletService.kit?.peerGroup()?.connectedPeers
                         if (peers != null) {
                             for (peer in peers) {
                                 val tx = sendReq.left
@@ -391,7 +391,7 @@ class SendAmountFragment : Fragment() {
             if (paymentContent != null) {
                 if (paymentContent?.paymentType == PaymentType.ADDRESS) {
                     val toAddress = AddressFactory.create()
-                        .getAddress(WalletManager.parameters, paymentContent?.addressOrPayload)
+                        .getAddress(WalletService.parameters, paymentContent?.addressOrPayload)
                     val myTx = multisigAppKit?.makeIndividualMultisigTransaction(
                         toAddress,
                         getCoinAmount()
@@ -502,7 +502,7 @@ class SendAmountFragment : Fragment() {
                 depositAddress = bip47AppKit.getCurrentOutgoingAddress(paymentChannel)
                 if (depositAddress != null) {
                     paymentChannel.incrementOutgoingIndex()
-                    WalletManager.walletKit?.saveBip47MetaData()
+                    WalletService.walletKit?.saveBip47MetaData()
                     this.processBitcoinTransaction(depositAddress)
                 }
             } else {
@@ -724,15 +724,15 @@ class SendAmountFragment : Fragment() {
             try {
                 val req: SendRequest =
                     if (sendMax) {
-                        SendRequest.emptyWallet(WalletManager.parameters, address)
+                        SendRequest.emptyWallet(WalletService.parameters, address)
                     } else {
-                        SendRequest.to(WalletManager.parameters, address, bchAmount)
+                        SendRequest.to(WalletService.parameters, address, bchAmount)
                     }
 
                 req.allowUnconfirmed()
                 req.ensureMinRequiredFee = false
                 req.feePerKb = Coin.valueOf(1L * 1000L) //1 sat/byte
-                val sendResult = WalletManager.wallet?.sendCoins(req)
+                val sendResult = WalletService.wallet?.sendCoins(req)
                 Futures.addCallback(
                     sendResult?.broadcastComplete,
                     object : FutureCallback<Transaction?> {
@@ -802,7 +802,7 @@ class SendAmountFragment : Fragment() {
             try {
                 var amount = 0L
                 for (output in tx.outputs) {
-                    if (!output.isMineOrWatched(WalletManager.wallet)) {
+                    if (!output.isMineOrWatched(WalletService.wallet)) {
                         amount += output.value.value
                     }
                 }
@@ -889,8 +889,8 @@ class SendAmountFragment : Fragment() {
 
     private fun fetchMultisigPayloadDestination(tx: Transaction): String? {
         for (utxo in tx.outputs) {
-            if (!ScriptPattern.isOpReturn(utxo.scriptPubKey) && !utxo.isMineOrWatched(WalletManager.wallet))
-                return utxo.scriptPubKey.getToAddress(WalletManager.parameters).toCash().toString()
+            if (!ScriptPattern.isOpReturn(utxo.scriptPubKey) && !utxo.isMineOrWatched(WalletService.wallet))
+                return utxo.scriptPubKey.getToAddress(WalletService.parameters).toCash().toString()
         }
 
         return null

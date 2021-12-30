@@ -6,27 +6,27 @@ import org.bitcoinj.kits.MultisigAppKit
 import org.bitcoinj.wallet.Wallet
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 
 class WalletInteractor {
     fun getWalletKit(): BIP47AppKit? {
-        return WalletManager.walletKit
+        return WalletService.walletKit
     }
 
     fun getMultisigKit(): MultisigAppKit? {
-        return WalletManager.multisigWalletKit
+        return WalletService.multisigWalletKit
     }
 
     fun getBitcoinWallet(): Wallet? {
-        return WalletManager.wallet
+        return WalletService.wallet
     }
 
     fun getSmartWallet(): Web3j? {
-        return WalletManager.web3
+        return WalletService.web3
     }
 
     fun getCredentials(): Credentials? {
-        return WalletManager.credentials
+        return WalletService.credentials
     }
 
     fun getBitcoinAddress(): Address? {
@@ -38,7 +38,7 @@ class WalletInteractor {
     }
 
     fun getSmartAddress(): String {
-        return WalletManager.getSmartBchAddress().toString()
+        return WalletService.getInstance().getSmartBchAddress().toString()
     }
 
     companion object {

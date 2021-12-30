@@ -19,7 +19,7 @@ import xyz.pokkst.pokket.cash.interactors.WalletInteractor
 import xyz.pokkst.pokket.cash.util.BalanceFormatter
 import xyz.pokkst.pokket.cash.util.ClipboardHelper
 import xyz.pokkst.pokket.cash.util.PriceHelper
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 import java.util.*
 
 
@@ -61,7 +61,7 @@ class TransactionSentFragment : Fragment() {
                 toAddresses.add("OP_RETURN")
             } else {
                 val address =
-                    tx.outputs[x].scriptPubKey.getToAddress(WalletManager.parameters).toCash()
+                    tx.outputs[x].scriptPubKey.getToAddress(WalletService.parameters).toCash()
                         .toString()
                 toAddresses.add(address)
             }

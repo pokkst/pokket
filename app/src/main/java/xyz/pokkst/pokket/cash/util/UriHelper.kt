@@ -2,7 +2,7 @@ package xyz.pokkst.pokket.cash.util
 
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.util.*
@@ -55,7 +55,7 @@ class UriHelper {
         }
 
         fun parse(uri: String): PaymentContent? {
-            val params = WalletManager.parameters
+            val params = WalletService.parameters
             val mappedVariables = getQueryParams(uri)
             val destinationWithoutPrefix =
                 uri.replace("${params.cashAddrPrefix}:", "")
@@ -103,16 +103,16 @@ class UriHelper {
                     if (addressOrPayload?.contains("#") == true) {
                         return PaymentContent(addressOrPayload, amount, PaymentType.CASH_ACCOUNT)
                     } else if (Address.isValidCashAddr(
-                            WalletManager.parameters,
+                            WalletService.parameters,
                             addressOrPayload
                         ) || Address.isValidLegacyAddress(
-                            WalletManager.parameters,
+                            WalletService.parameters,
                             addressOrPayload
                         )
                     ) {
                         val address = addressOrPayload
                         val addressModified =
-                            address?.replace(WalletManager.parameters.cashAddrPrefix + ":", "")
+                            address?.replace(WalletService.parameters.cashAddrPrefix + ":", "")
                         return if (addressModified == Constants.HOPCASH_BCH_INCOMING) {
                             PaymentContent(addressOrPayload, amount, PaymentType.HOP_TO_SBCH)
                         } else {

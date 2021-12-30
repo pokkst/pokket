@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_settings_epk.view.*
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.util.ClipboardHelper
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 
 
 /**
@@ -21,7 +21,7 @@ class SettingsEpkFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_epk, container, false)
-        val xpub = WalletManager.wallet?.watchingKey?.serializePubB58(WalletManager.parameters)
+        val xpub = WalletService.wallet?.watchingKey?.serializePubB58(WalletService.parameters)
         root.the_epk.text = xpub
         root.the_epk.setOnClickListener {
             ClipboardHelper.copyToClipboard(activity, xpub)

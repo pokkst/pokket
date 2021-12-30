@@ -12,7 +12,7 @@ import xyz.pokkst.pokket.cash.ui.listener.TxAdapterListener
 import xyz.pokkst.pokket.cash.util.BalanceFormatter
 import xyz.pokkst.pokket.cash.util.DateFormatter
 import xyz.pokkst.pokket.cash.util.PriceHelper
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 
 class TransactionAdapter(private val dataSet: List<Transaction>) :
     RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
@@ -51,7 +51,7 @@ class TransactionAdapter(private val dataSet: List<Transaction>) :
             val bitsMoved = itemView.findViewById<TextView>(R.id.transaction_amount_bits)
             val dollarsMoved = itemView.findViewById<TextView>(R.id.transaction_amount_dollars)
 
-            val value = tx.getValue(WalletManager.wallet)
+            val value = tx.getValue(WalletService.wallet)
             val amountStr = value.toPlainString()
             val action = if (value.isPositive) "received" else "sent"
             val received = action == "received"

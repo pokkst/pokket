@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_settings_wipe.view.*
 import xyz.pokkst.pokket.cash.NewUserActivity
 import xyz.pokkst.pokket.cash.R
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 import java.io.File
 
 
@@ -25,9 +25,9 @@ class SettingsWipeFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_settings_wipe, container, false)
         root.continue_button.setOnClickListener {
             val seedEntered = root.editText_phrase.text.toString().trim()
-            val walletSeed = WalletManager.wallet?.keyChainSeed?.mnemonicString
+            val walletSeed = WalletService.wallet?.keyChainSeed?.mnemonicString
             if (seedEntered == walletSeed) {
-                WalletManager.stopWallets()
+                WalletService.getInstance().stopWallets()
                 val intent = Intent(requireContext(), NewUserActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                 wipeAndRestart(intent)
@@ -37,12 +37,12 @@ class SettingsWipeFragment : Fragment() {
     }
 
     private fun wipeAndRestart(intent: Intent) {
-        val walletFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}.wallet")
+        val walletFile = File(WalletService.walletDir, "${WalletService.walletFileName}.wallet")
         val multisigWalletFile =
-            File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.wallet")
-        val spvChainFile = File(WalletManager.walletDir, "${WalletManager.walletFileName}.spvchain")
+            File(WalletService.walletDir, "${WalletService.multisigWalletFileName}.wallet")
+        val spvChainFile = File(WalletService.walletDir, "${WalletService.walletFileName}.spvchain")
         val multisigSpvChainFile =
-            File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.spvchain")
+            File(WalletService.walletDir, "${WalletService.multisigWalletFileName}.spvchain")
         walletFile.delete()
         multisigWalletFile.delete()
         spvChainFile.delete()

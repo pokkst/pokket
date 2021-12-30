@@ -12,7 +12,7 @@ import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.util.ClipboardHelper
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 
 /**
  * A placeholder fragment containing a simple view.
@@ -29,8 +29,8 @@ class MyFollowingKeyFragment : Fragment() {
         val seed = args.seed
         val restoring = args.restoring
         val tempWallet =
-            Wallet.fromSeed(WalletManager.parameters, DeterministicSeed(seed, null, "", 0))
-        val xpub = tempWallet.watchingKey.serializePubB58(WalletManager.parameters)
+            Wallet.fromSeed(WalletService.parameters, DeterministicSeed(seed, null, "", 0))
+        val xpub = tempWallet.watchingKey.serializePubB58(WalletService.parameters)
 
         root.the_phrase.text = xpub
 

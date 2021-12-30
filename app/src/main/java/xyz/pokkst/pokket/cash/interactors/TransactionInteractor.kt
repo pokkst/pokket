@@ -9,7 +9,7 @@ import org.web3j.crypto.RawTransaction
 import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.utils.Numeric
 import xyz.pokkst.pokket.cash.util.Constants
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 import java.math.BigInteger
 
 class TransactionInteractor {
@@ -17,10 +17,10 @@ class TransactionInteractor {
 
     fun createHopToSmartBch(sendMax: Boolean, amount: Coin): SendRequest {
         val incomingAddress = CashAddressFactory.create()
-            .getFromFormattedAddress(WalletManager.parameters, Constants.HOPCASH_BCH_INCOMING)
+            .getFromFormattedAddress(WalletService.parameters, Constants.HOPCASH_BCH_INCOMING)
         val opReturnData =
             ScriptBuilder.createOpReturnScript(walletInteractor.getSmartAddress().toByteArray())
-        val tempTx = org.bitcoinj.core.Transaction(WalletManager.parameters)
+        val tempTx = org.bitcoinj.core.Transaction(WalletService.parameters)
         return if (sendMax) {
             tempTx.addOutput(Coin.ZERO, opReturnData)
             tempTx.addOutput(Coin.ZERO, incomingAddress)

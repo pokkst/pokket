@@ -17,30 +17,17 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.bitcoinj.core.TransactionOutput
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.wallet.DeterministicKeyChain
 import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
 import xyz.pokkst.pokket.cash.util.*
 import xyz.pokkst.pokket.cash.wallet.MultisigWalletStartupConfig
-import xyz.pokkst.pokket.cash.wallet.WalletManager
 import xyz.pokkst.pokket.cash.wallet.WalletStartupConfig
 import java.io.File
 import java.math.BigDecimal
-import org.bitcoinj.protocols.fusion.FusionClient
-import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.roundToLong
-import xyz.pokkst.pokket.cash.service.YourService
-import android.R.id
-
-import android.app.NotificationChannel
-
-import android.app.NotificationManager
-import android.content.Context
-import android.os.Build
-import org.bitcoinj.core.TransactionConfidence
+import xyz.pokkst.pokket.cash.wallet.WalletService
 
 
 class MainActivity : AppCompatActivity() {
@@ -51,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         PrefsHelper.instance(this)
-        WalletManager.walletDir = File(applicationInfo.dataDir)
+        WalletService.walletDir = File(applicationInfo.dataDir)
         val extras = intent.extras
         var derivationPath: String? = null
         var seed: String? = null
@@ -70,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             val keysLength = keys.size - 1
             for (x in 0..keysLength) {
                 val deterministicKey =
-                    DeterministicKey.deserializeB58(keys[x], WalletManager.parameters)
+                    DeterministicKey.deserializeB58(keys[x], WalletService.parameters)
                         .setPath(DeterministicKeyChain.BIP44_ACCOUNT_ZERO_PATH)
                 followingKeys.add(deterministicKey)
             }
@@ -87,7 +74,7 @@ class MainActivity : AppCompatActivity() {
 
         if (!newUser && seed == null) {
             val multisigWalletFile =
-                File(WalletManager.walletDir, "${WalletManager.multisigWalletFileName}.wallet")
+                File(WalletService.walletDir, "${WalletService.multisigWalletFileName}.wallet")
             isMultisig = multisigWalletFile.exists()
         }
 
@@ -98,14 +85,11 @@ class MainActivity : AppCompatActivity() {
 
         if (isMultisig) {
             val config = MultisigWalletStartupConfig(this, seed, newUser, followingKeys, m)
-            WalletManager.startMultisigWallet(config)
+            WalletService.getInstance().startMultisigWallet(config)
         } else {
             val config = WalletStartupConfig(this, seed, newUser, passphrase, path)
-            WalletManager.startWallet(config)
+            WalletService.getInstance().startWallet(config)
         }
-
-        startService(Intent(this, YourService::class.java))
-
     }
 
     private fun prepareViews() {
@@ -143,7 +127,7 @@ class MainActivity : AppCompatActivity() {
                         val swapToSbchButton = dialog?.findViewById<Button>(R.id.swap_to_sbch_button)
                         val swapToBchButton = dialog?.findViewById<Button>(R.id.swap_to_bch_button)
 
-                        if(WalletManager.isMultisigKit) {
+                        if(WalletService.isMultisigKit) {
                             dialog?.findViewById<ImageView>(R.id.sbch_balance_imageview)?.visibility = View.GONE
                             dialog?.findViewById<TextView>(R.id.sbch_balance_textview)?.visibility = View.GONE
                             swapToSbchButton?.visibility = View.GONE
@@ -186,17 +170,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        WalletManager.syncPercentage.observe(this, Observer { pct ->
+        WalletService.syncPercentage.observe(this, Observer { pct ->
             refresh(pct)
         })
 
-        WalletManager.refreshEvents.observe(this, Observer { event ->
+        WalletService.refreshEvents.observe(this, Observer { event ->
             if (event != null) {
                 refresh()
             }
         })
 
-        WalletManager.peerCount.observe(this, Observer { peers ->
+        WalletService.peerCount.observe(this, Observer { peers ->
             if (peers == 0) {
                 appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     0,
@@ -204,14 +188,14 @@ class MainActivity : AppCompatActivity() {
                     R.drawable.ic_disconnected,
                     0
                 )
-            } else if (peers > 0 && peers < WalletManager.parameters.defaultPeerCount) {
+            } else if (peers > 0 && peers < WalletService.parameters.defaultPeerCount) {
                 appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     0,
                     0,
                     R.drawable.ic_connected_partial,
                     0
                 )
-            } else if (peers >= WalletManager.parameters.defaultPeerCount) {
+            } else if (peers >= WalletService.parameters.defaultPeerCount) {
                 appbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     0,
                     0,
@@ -221,54 +205,15 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        YourService.cashFusionEnabled.observe(this, { enabled ->
+        WalletService.cashFusionEnabled.observe(this, { enabled ->
             if(enabled) {
-                WalletManager.setUpdateUtxosForFusion(Random().nextInt(8)+1)
+                WalletService.getInstance().setUpdateUtxosForFusion(Random().nextInt(14)+1)
             } else {
                 try {
-                    WalletManager.fusionClient?.stopConnection()
-                    WalletManager.fusionClient = null
+                    WalletService.fusionClient?.stopConnection()
+                    WalletService.fusionClient = null
                 } catch(e: Exception) {
 
-                }
-            }
-        })
-
-        WalletManager.updateUtxosForFusion.observe(this, { event ->
-            lifecycleScope.launch(Dispatchers.IO) {
-                val useFusion = PrefsHelper.instance(this@MainActivity)?.getBoolean("use_fusion", true)
-                if(useFusion == true) {
-                    var inputCount = event.getContentIfNotHandled()
-                    if (inputCount != null && inputCount != 0) {
-                        try {
-                            val wallet = WalletManager.wallet ?: return@launch
-                            val utxos: List<TransactionOutput> = wallet.utxos.toList().shuffled()
-                                .filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING }
-                            if (utxos.isNotEmpty()) {
-                                val filteredUtxos: ArrayList<TransactionOutput> = ArrayList()
-                                if (utxos.size < inputCount) inputCount = utxos.size
-                                for (x in 0 until inputCount) {
-                                    val utxo: TransactionOutput = utxos[x]
-                                    filteredUtxos.add(utxo)
-                                }
-                                if (WalletManager.fusionClient == null) {
-                                    WalletManager.fusionClient = FusionClient(
-                                        "cashfusion.electroncash.dk",
-                                        8788,
-                                        filteredUtxos,
-                                        wallet
-                                    )
-                                } else {
-                                    WalletManager.fusionClient =
-                                        WalletManager.fusionClient?.updateUtxos(filteredUtxos)
-                                }
-                            } else {
-                                YourService.setStatus("waiting for confirmed coins")
-                            }
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                        }
-                    }
                 }
             }
         })

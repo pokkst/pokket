@@ -18,18 +18,17 @@ import org.bitcoinj.core.slp.SlpOpReturn
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.SettingsActivity
-import xyz.pokkst.pokket.cash.service.YourService
 import xyz.pokkst.pokket.cash.ui.adapter.TransactionAdapter
 import xyz.pokkst.pokket.cash.ui.listener.TxAdapterListener
 import xyz.pokkst.pokket.cash.util.PrefsHelper
-import xyz.pokkst.pokket.cash.wallet.WalletManager
-import java.util.*
+import xyz.pokkst.pokket.cash.wallet.WalletService
 
 
 /**
  * A placeholder fragment containing a simple view.
  */
 class SettingsHomeFragment : Fragment(), TxAdapterListener {
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -46,9 +45,9 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
             PrefsHelper.instance(context)?.edit()?.putBoolean("use_fusion", newValue)?.apply()
             root.fusion_enable.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.fusion_enable, newValue.toString())
             if(!newValue) {
-                YourService.setEnabled(false)
+                WalletService.setEnabled(false)
             } else {
-                YourService.setEnabled(true)
+                WalletService.setEnabled(true)
             }
         }
 
@@ -103,7 +102,7 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
 
         setSyncStatus(root)
 
-        setupTransactions(root, WalletManager.wallet)
+        setupTransactions(root, WalletService.wallet)
         root.more_transactions.setOnClickListener {
             navigate(R.id.nav_to_tx_list)
         }
@@ -112,8 +111,8 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
     }
 
     private fun setSyncStatus(root: View?) {
-        val lastSeenBlockHeight = WalletManager.wallet?.lastBlockSeenHeight
-        val bestBlockHeight = WalletManager.kit?.peerGroup()?.mostCommonChainHeight
+        val lastSeenBlockHeight = WalletService.wallet?.lastBlockSeenHeight
+        val bestBlockHeight = WalletService.kit?.peerGroup()?.mostCommonChainHeight
         when {
             bestBlockHeight == 0 ->
                 root?.sync_status?.text = resources.getString(R.string.not_syncing)
@@ -153,7 +152,7 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
     override fun onClickTransaction(tx: Transaction) {
         (activity as? SettingsActivity)?.adjustDeepMenu(1)
         val txid = tx.txId.toString()
-        val amount = tx.getValue(WalletManager.wallet)
+        val amount = tx.getValue(WalletService.wallet)
         val isSlp = SlpOpReturn.isSlpTx(tx) || SlpOpReturn.isNftChildTx(tx)
         if (amount?.isPositive == true) {
             findNavController().navigate(

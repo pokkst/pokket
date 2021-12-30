@@ -10,19 +10,15 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.bouncycastle.jce.provider.BouncyCastleProvider
-import xyz.pokkst.pokket.cash.wallet.WalletManager
+import xyz.pokkst.pokket.cash.wallet.WalletService
 import java.io.File
 import java.security.Provider
 import java.security.Security
-import org.torproject.jni.TorService
-
-
-
-
 
 class SplashActivity : AppCompatActivity() {
     private val CODE_AUTHENTICATION_VERIFICATION = 241
@@ -44,10 +40,10 @@ class SplashActivity : AppCompatActivity() {
 
             val newUser = !File(
                 applicationInfo.dataDir,
-                "${WalletManager.walletFileName}.wallet"
+                "${WalletService.walletFileName}.wallet"
             ).exists() && !File(
                 applicationInfo.dataDir,
-                "${WalletManager.multisigWalletFileName}.wallet"
+                "${WalletService.multisigWalletFileName}.wallet"
             ).exists()
             if (newUser) {
                 val intent = Intent(baseContext, NewUserActivity::class.java)
@@ -78,10 +74,9 @@ class SplashActivity : AppCompatActivity() {
                     finish()
                 }
             }
-
         }
 
-        startService(Intent(this, TorService::class.java))
+        ContextCompat.startForegroundService(this, Intent(this, WalletService::class.java))
     }
 
     override fun onActivityResult(

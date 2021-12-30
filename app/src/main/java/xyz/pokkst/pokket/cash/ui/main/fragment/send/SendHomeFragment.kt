@@ -15,19 +15,11 @@ import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_send_home.view.*
-import org.bitcoinj.protocols.fusion.models.FusionStatus
-import org.bitcoinj.protocols.fusion.models.PoolStatus
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.qr.QRHelper
-import xyz.pokkst.pokket.cash.service.YourService
 import xyz.pokkst.pokket.cash.ui.main.MainFragmentDirections
 import xyz.pokkst.pokket.cash.util.*
-import xyz.pokkst.pokket.cash.wallet.WalletManager
-import java.util.*
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
-import kotlin.math.roundToLong
+import xyz.pokkst.pokket.cash.wallet.WalletService
 
 /**
  * A placeholder fragment containing a simple view.
@@ -87,14 +79,14 @@ class SendHomeFragment : Fragment() {
                 builder?.setView(dialoglayout)
                 val dialog = builder?.show()
 
-                YourService.status.observe(viewLifecycleOwner, {
+                WalletService.status.observe(viewLifecycleOwner, {
                     dialog?.findViewById<TextView>(R.id.fusion_status_textview)?.text = it
                 })
                 dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             }
         }
 
-        YourService.cashFusionEnabled.observe(viewLifecycleOwner, { enabled ->
+        WalletService.cashFusionEnabled.observe(viewLifecycleOwner, { enabled ->
             root.fusion_status_imageview.visibility = if(enabled == true) View.VISIBLE else View.INVISIBLE
         })
 
@@ -127,7 +119,7 @@ class SendHomeFragment : Fragment() {
     }
 
     private fun isValidPaymentType(address: String): Boolean {
-        return if (WalletManager.isMultisigKit) {
+        return if (WalletService.isMultisigKit) {
             UriHelper.parse(address)?.paymentType == PaymentType.ADDRESS
         } else {
             UriHelper.parse(address) != null
