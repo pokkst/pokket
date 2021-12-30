@@ -6,7 +6,7 @@ import org.bitcoinj.kits.MultisigAppKit
 import org.bitcoinj.wallet.Wallet
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 
 class WalletInteractor {
     fun getWalletKit(): BIP47AppKit? {

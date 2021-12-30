@@ -9,7 +9,7 @@ import org.web3j.crypto.RawTransaction
 import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.utils.Numeric
 import xyz.pokkst.pokket.cash.util.Constants
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 import java.math.BigInteger
 
 class TransactionInteractor {

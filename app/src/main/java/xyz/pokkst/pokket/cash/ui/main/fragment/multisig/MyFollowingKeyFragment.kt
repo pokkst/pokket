@@ -12,7 +12,7 @@ import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.util.ClipboardHelper
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 
 /**
  * A placeholder fragment containing a simple view.

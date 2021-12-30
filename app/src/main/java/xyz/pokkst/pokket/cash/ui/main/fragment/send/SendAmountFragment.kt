@@ -51,7 +51,7 @@ import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
 import xyz.pokkst.pokket.cash.interactors.TransactionInteractor
 import xyz.pokkst.pokket.cash.interactors.WalletInteractor
 import xyz.pokkst.pokket.cash.util.*
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -237,60 +237,67 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun send() {
-        if (balanceInteractor.getBitcoinBalance() != BigDecimal.ZERO) {
-            if (paymentContent != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
-                if (paymentContent == null) paymentContent =
-                    root?.to_field_edit_text?.text?.toString()?.let { UriHelper.parse(it) }
-                val destination = paymentContent?.addressOrPayload
-                when (paymentContent?.paymentType) {
-                    PaymentType.BIP70 -> destination?.let { this.processBIP70(it) }
-                    PaymentType.CASH_ACCOUNT, PaymentType.ADDRESS -> this.processBitcoinTransaction()
-                    PaymentType.PAYMENT_CODE -> {
-                        val canSendToPaymentCode =
-                            WalletService.walletKit?.canSendToPaymentCode(destination)
-                        if (canSendToPaymentCode == true) {
-                            this.attemptBip47Payment()
-                        } else {
-                            val notification =
-                                WalletService.walletKit?.makeNotificationTransaction(
-                                    destination,
-                                    true
-                                )
-                            WalletService.walletKit?.broadcastTransaction(notification?.tx)
-                            WalletService.walletKit?.putPaymenCodeStatusSent(
-                                destination,
-                                notification?.tx
-                            )
-                            this.attemptBip47Payment()
-                        }
-                    }
-                    PaymentType.FLIPSTARTER_PAYLOAD -> {
-                        val sendReq = SendRequest.createFlipstarterPledge(
-                            walletInteractor.getBitcoinWallet(),
-                            paymentContent?.addressOrPayload
-                        )
-                        val peers = WalletService.kit?.peerGroup()?.connectedPeers
-                        if (peers != null) {
-                            for (peer in peers) {
-                                val tx = sendReq.left
-                                peer.sendMessage(tx)
-                            }
-                        }
-
-                        val pledgePayload = sendReq.right
-                        showFlipstarterPledge(pledgePayload)
-                    }
-                    PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
-                    PaymentType.SMARTBCH_ADDRESS -> this.processSmartBchTransaction()
-                    PaymentType.HOP_TO_SBCH -> hopToSbch()
-                    PaymentType.HOP_TO_BCH -> hopToBch()
-                    null -> showToast("please enter a valid destination")
+        if (paymentContent != null || root?.to_field_edit_text?.text?.isNotEmpty() == true) {
+            if (paymentContent == null) paymentContent =
+                root?.to_field_edit_text?.text?.toString()?.let { UriHelper.parse(it) }
+            val destination = paymentContent?.addressOrPayload
+            if (paymentContent?.paymentType == PaymentType.HOP_TO_BCH) {
+                if(balanceInteractor.getSmartBalance() != BigDecimal.ZERO) {
+                    hopToBch()
+                } else {
+                    showToast("sbch wallet balance is zero")
                 }
             } else {
-                showToast("please enter an address")
+                if (balanceInteractor.getBitcoinBalance() != BigDecimal.ZERO) {
+                    when (paymentContent?.paymentType) {
+                        PaymentType.BIP70 -> destination?.let { this.processBIP70(it) }
+                        PaymentType.CASH_ACCOUNT, PaymentType.ADDRESS -> this.processBitcoinTransaction()
+                        PaymentType.PAYMENT_CODE -> {
+                            val canSendToPaymentCode =
+                                WalletService.walletKit?.canSendToPaymentCode(destination)
+                            if (canSendToPaymentCode == true) {
+                                this.attemptBip47Payment()
+                            } else {
+                                val notification =
+                                    WalletService.walletKit?.makeNotificationTransaction(
+                                        destination,
+                                        true
+                                    )
+                                WalletService.walletKit?.broadcastTransaction(notification?.tx)
+                                WalletService.walletKit?.putPaymenCodeStatusSent(
+                                    destination,
+                                    notification?.tx
+                                )
+                                this.attemptBip47Payment()
+                            }
+                        }
+                        PaymentType.FLIPSTARTER_PAYLOAD -> {
+                            val sendReq = SendRequest.createFlipstarterPledge(
+                                walletInteractor.getBitcoinWallet(),
+                                paymentContent?.addressOrPayload
+                            )
+                            val peers = WalletService.kit?.peerGroup()?.connectedPeers
+                            if (peers != null) {
+                                for (peer in peers) {
+                                    val tx = sendReq.left
+                                    peer.sendMessage(tx)
+                                }
+                            }
+
+                            val pledgePayload = sendReq.right
+                            showFlipstarterPledge(pledgePayload)
+                        }
+                        PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
+                        PaymentType.SMARTBCH_ADDRESS -> this.processSmartBchTransaction()
+                        PaymentType.HOP_TO_SBCH -> hopToSbch()
+                        else -> showToast("please enter a valid destination")
+                    }
+                } else {
+                    showToast("bch wallet balance is zero")
+                }
             }
         } else {
-            showToast("wallet balance is zero")
+            showToast("please enter an address")
         }
     }
 

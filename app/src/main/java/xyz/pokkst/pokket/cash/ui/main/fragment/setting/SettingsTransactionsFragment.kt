@@ -15,7 +15,7 @@ import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.SettingsActivity
 import xyz.pokkst.pokket.cash.ui.adapter.TransactionAdapter
 import xyz.pokkst.pokket.cash.ui.listener.TxAdapterListener
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 
 
 /**

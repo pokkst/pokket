@@ -19,7 +19,7 @@ import xyz.pokkst.pokket.cash.interactors.WalletInteractor
 import xyz.pokkst.pokket.cash.util.BalanceFormatter
 import xyz.pokkst.pokket.cash.util.ClipboardHelper
 import xyz.pokkst.pokket.cash.util.PriceHelper
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 import java.util.*
 
 

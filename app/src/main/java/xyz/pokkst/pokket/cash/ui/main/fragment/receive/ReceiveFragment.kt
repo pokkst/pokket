@@ -12,7 +12,7 @@ import net.glxn.qrgen.android.QRCode
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.interactors.WalletInteractor
 import xyz.pokkst.pokket.cash.util.ClipboardHelper
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 
 /**
  * A placeholder fragment containing a simple view.

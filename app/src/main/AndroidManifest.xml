@@ -54,7 +54,7 @@
             tools:replace="android:screenOrientation"
             android:stateNotNeeded="true"/>
         <service
-            android:name=".wallet.WalletService"
+            android:name=".service.WalletService"
             android:exported="true"
             android:stopWithTask="true"/>
     </application>

@@ -21,7 +21,7 @@ import xyz.pokkst.pokket.cash.SettingsActivity
 import xyz.pokkst.pokket.cash.ui.adapter.TransactionAdapter
 import xyz.pokkst.pokket.cash.ui.listener.TxAdapterListener
 import xyz.pokkst.pokket.cash.util.PrefsHelper
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 
 
 /**
@@ -44,11 +44,7 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
             val newValue = !useFusion
             PrefsHelper.instance(context)?.edit()?.putBoolean("use_fusion", newValue)?.apply()
             root.fusion_enable.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.fusion_enable, newValue.toString())
-            if(!newValue) {
-                WalletService.setEnabled(false)
-            } else {
-                WalletService.setEnabled(true)
-            }
+            WalletService.setEnabled(newValue, false)
         }
 
         root.about.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {

@@ -21,13 +21,13 @@ import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.wallet.DeterministicKeyChain
 import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
 import xyz.pokkst.pokket.cash.util.*
-import xyz.pokkst.pokket.cash.wallet.MultisigWalletStartupConfig
-import xyz.pokkst.pokket.cash.wallet.WalletStartupConfig
+import xyz.pokkst.pokket.cash.service.MultisigWalletStartupConfig
+import xyz.pokkst.pokket.cash.service.WalletStartupConfig
 import java.io.File
 import java.math.BigDecimal
 import java.util.*
 import kotlin.collections.ArrayList
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 
 
 class MainActivity : AppCompatActivity() {
@@ -202,19 +202,6 @@ class MainActivity : AppCompatActivity() {
                     R.drawable.ic_connected,
                     0
                 )
-            }
-        })
-
-        WalletService.cashFusionEnabled.observe(this, { enabled ->
-            if(enabled) {
-                WalletService.getInstance().setUpdateUtxosForFusion(Random().nextInt(14)+1)
-            } else {
-                try {
-                    WalletService.fusionClient?.stopConnection()
-                    WalletService.fusionClient = null
-                } catch(e: Exception) {
-
-                }
             }
         })
     }

@@ -24,7 +24,7 @@ import org.bitcoinj.core.TransactionOutput
 import org.bitcoinj.wallet.SendRequest
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.ui.PledgeEntryView
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 
 
 /**
