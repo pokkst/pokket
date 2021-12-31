@@ -15,9 +15,6 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.core.PeerAddress
 import org.bitcoinj.core.TransactionConfidence
@@ -55,10 +52,11 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToLong
 import android.app.PendingIntent
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.livedata.combine
 import xyz.pokkst.pokket.cash.models.FusionData
+import java.lang.Runnable
 
 
 data class WalletStartupConfig(val activity: Activity, val seed: String?, val newUser: Boolean, val passphrase: String?, val derivationPath: KeyChainGroupStructure?)
@@ -67,7 +65,7 @@ data class MultisigWalletStartupConfig(val activity: Activity, val seed: String?
 class WalletService : LifecycleService() {
     companion object {
         private lateinit var instance: WalletService
-
+        private var fusionJob: Job? = null
         fun getInstance(): WalletService {
             return instance
         }
@@ -78,14 +76,36 @@ class WalletService : LifecycleService() {
         private val _cashFusionEnabled: MutableLiveData<Boolean> = MutableLiveData(false)
         private val _updateUtxosForFusion: MutableLiveData<Int> = MutableLiveData()
 
-        private var cachedInputCount = 0
+        private var cachedInputCount = -1
+        private var cachedEnabled = false
         val fusionData = combine(
             _status,
             _cashFusionEnabled,
             _updateUtxosForFusion
         ) { status, enabled, inputs ->
             if(status == null || enabled == null || inputs == null) return@combine null
-            return@combine FusionData(status, enabled, inputs)
+            val event = when {
+                enabled != cachedEnabled -> {
+                    cachedEnabled = enabled
+                    if(enabled) {
+                        Event("restart")
+                    } else {
+                        Event("kill")
+                    }
+                }
+                inputs != cachedInputCount -> {
+                    cachedInputCount = inputs
+                    if(inputs == 0) {
+                        Event("kill")
+                    } else {
+                        Event("restart")
+                    }
+                }
+                else -> {
+                    Event("")
+                }
+            }
+            return@combine FusionData(status, enabled, inputs, event)
         }
 
         fun setEnabled(enabled: Boolean, post: Boolean) {
@@ -345,7 +365,7 @@ class WalletService : LifecycleService() {
 
     private fun startForeground() {
         instance = this
-        addObservers()
+
         val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         var notificationBuilder = createPersistentNotification()
 
@@ -365,7 +385,9 @@ class WalletService : LifecycleService() {
                         fusionStatus = fusionClient.fusionStatus
                         if (fusionClient.socket.isClosed) {
                             statusString += "Not connected to Fusion socket..."
-                            setInputCount(getRandomInputAmount(), true)
+                            if(cachedEnabled) {
+                                setInputCount(getRandomInputAmount(), true)
+                            }
                         } else if (fusionStatus == FusionStatus.FAILED) {
                             statusString += "Fusion failed. Restarting..."
                             setInputCount(getRandomInputAmount(), true)
@@ -383,6 +405,11 @@ class WalletService : LifecycleService() {
                                 }
                                 statusString += "\n"
                                 statusString += fusionStatus
+                            } else {
+                                val utxos = getConfirmedCoins()
+                                if(utxos.isNullOrEmpty()) {
+                                    statusString = "waiting for confirmed coins"
+                                }
                             }
                         }
                     } else {
@@ -403,52 +430,50 @@ class WalletService : LifecycleService() {
                 feeExec.scheduleAtFixedRate(statusRunnable, 0L, 2, TimeUnit.SECONDS)
             }
         }
+
+        addObservers()
     }
 
     private fun addObservers() {
         fusionData.observe(this@WalletService, { data ->
             if (data == null) return@observe
-            println("DATA:: " + data)
-            val enabled = data.enabled
-            System.out.println("1")
-            if (enabled) {
-                var inputCount = data.utxoCount
-                System.out.println("2")
-                if (inputCount != 0 && inputCount != cachedInputCount) {
-                    cachedInputCount = inputCount
-                    System.out.println("3")
-                    val utxos = getConfirmedCoins()
-                    if (utxos.isNotEmpty()) {
-                        System.out.println("4")
-                        val filteredUtxos: ArrayList<TransactionOutput> = ArrayList()
-                        if (utxos.size < inputCount) inputCount = utxos.size
-                        for (x in 0 until inputCount) {
-                            val utxo: TransactionOutput = utxos[x]
-                            filteredUtxos.add(utxo)
-                        }
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            try {
-                                fusionClient = if (fusionClient == null) {
-                                    FusionClient(
-                                        "cashfusion.electroncash.dk",
-                                        8788,
-                                        filteredUtxos,
-                                        wallet
-                                    )
-                                } else {
-                                    fusionClient?.updateUtxos(filteredUtxos)
+            val event = data.event.getContentIfNotHandled()
+            if(event.equals("restart")) {
+                val enabled = data.enabled
+                if(enabled) {
+                    var inputCount = data.utxoCount
+                    if (inputCount != 0) {
+                        val utxos = getConfirmedCoins()
+                        if (utxos.isNotEmpty()) {
+                            val filteredUtxos: ArrayList<TransactionOutput> = ArrayList()
+                            if (utxos.size < inputCount) inputCount = utxos.size
+                            for (x in 0 until inputCount) {
+                                val utxo: TransactionOutput = utxos[x]
+                                filteredUtxos.add(utxo)
+                            }
+                            fusionJob?.cancel()
+                            fusionJob = lifecycleScope.launch(Dispatchers.IO) {
+                                try {
+                                    fusionClient = if (fusionClient == null) {
+                                        FusionClient(
+                                            "cashfusion.electroncash.dk",
+                                            8788,
+                                            filteredUtxos,
+                                            wallet
+                                        )
+                                    } else {
+                                        fusionClient?.updateUtxos(filteredUtxos)
+                                    }
+                                } catch(e: Exception) {
+                                    e.printStackTrace()
                                 }
-                            } catch(e: Exception) {
-                                e.printStackTrace()
                             }
                         }
+                    } else {
+                        tryKillFusionClient()
                     }
-                } else {
-                    System.out.println("6")
-                    tryKillFusionClient()
                 }
-            } else {
-                System.out.println("7")
+            } else if(event.equals("kill")) {
                 tryKillFusionClient()
             }
         })
@@ -457,6 +482,8 @@ class WalletService : LifecycleService() {
     private fun tryKillFusionClient() {
         try {
             fusionClient?.stopConnection()
+            fusionJob?.cancel()
+            fusionJob = null
             fusionClient = null
         } catch(e: Exception) {
 
