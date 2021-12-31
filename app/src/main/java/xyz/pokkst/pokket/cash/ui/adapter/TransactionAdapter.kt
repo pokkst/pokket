@@ -12,7 +12,7 @@ import xyz.pokkst.pokket.cash.ui.listener.TxAdapterListener
 import xyz.pokkst.pokket.cash.util.BalanceFormatter
 import xyz.pokkst.pokket.cash.util.DateFormatter
 import xyz.pokkst.pokket.cash.util.PriceHelper
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 
 class TransactionAdapter(private val dataSet: List<Transaction>) :
     RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {

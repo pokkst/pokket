@@ -19,7 +19,7 @@ import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.qr.QRHelper
 import xyz.pokkst.pokket.cash.ui.main.MainFragmentDirections
 import xyz.pokkst.pokket.cash.util.*
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 
 /**
  * A placeholder fragment containing a simple view.
@@ -79,15 +79,16 @@ class SendHomeFragment : Fragment() {
                 builder?.setView(dialoglayout)
                 val dialog = builder?.show()
 
-                WalletService.status.observe(viewLifecycleOwner, {
-                    dialog?.findViewById<TextView>(R.id.fusion_status_textview)?.text = it
+                WalletService.fusionData.observe(viewLifecycleOwner, { data ->
+                    dialog?.findViewById<TextView>(R.id.fusion_status_textview)?.text = data?.status
                 })
                 dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             }
         }
 
-        WalletService.cashFusionEnabled.observe(viewLifecycleOwner, { enabled ->
-            root.fusion_status_imageview.visibility = if(enabled == true) View.VISIBLE else View.INVISIBLE
+        WalletService.fusionData.observe(viewLifecycleOwner, { data ->
+            if(data == null) return@observe
+            root.fusion_status_imageview.visibility = if(data.enabled) View.VISIBLE else View.INVISIBLE
         })
 
         val filter = IntentFilter()

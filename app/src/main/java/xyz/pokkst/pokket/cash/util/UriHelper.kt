@@ -2,7 +2,7 @@ package xyz.pokkst.pokket.cash.util
 
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
-import xyz.pokkst.pokket.cash.wallet.WalletService
+import xyz.pokkst.pokket.cash.service.WalletService
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.util.*
