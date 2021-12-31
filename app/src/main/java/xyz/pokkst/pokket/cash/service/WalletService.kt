@@ -141,7 +141,7 @@ class WalletService : LifecycleService() {
         }
 
         fun getRandomInputAmount(): Int {
-            return Random().nextInt(14)+1
+            return Random().nextInt(5)+1
         }
 
         // MAIN WALLET SERVICE
@@ -305,7 +305,7 @@ class WalletService : LifecycleService() {
 
     private fun getConfirmedCoins(): List<TransactionOutput> {
         val utxos: List<TransactionOutput> = wallet?.utxos?.shuffled()
-            /*?.filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING }*/ ?: return emptyList()
+            ?.filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING } ?: return emptyList()
         return utxos
     }
     private fun setupNodeOnStart() {
