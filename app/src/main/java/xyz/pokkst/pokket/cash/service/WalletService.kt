@@ -52,6 +52,7 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToLong
 import android.app.PendingIntent
+import android.os.PowerManager
 import kotlinx.coroutines.*
 import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.livedata.combine
@@ -356,6 +357,13 @@ class WalletService : LifecycleService() {
 
     fun getSmartBchAddress(): String? {
         return credentials?.address
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WalletService::class.java.name);
+        wakeLock.acquire()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
