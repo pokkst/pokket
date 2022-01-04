@@ -54,6 +54,8 @@ import kotlin.math.roundToLong
 import android.app.PendingIntent
 import android.os.PowerManager
 import kotlinx.coroutines.*
+import org.bitcoinj.protocols.fusion.FusionListener
+import org.bitcoinj.protocols.fusion.models.PoolStatus
 import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.livedata.combine
 import xyz.pokkst.pokket.cash.models.FusionData
@@ -63,10 +65,12 @@ import java.lang.Runnable
 data class WalletStartupConfig(val activity: Activity, val seed: String?, val newUser: Boolean, val passphrase: String?, val derivationPath: KeyChainGroupStructure?)
 data class MultisigWalletStartupConfig(val activity: Activity, val seed: String?, val newUser: Boolean, val followingKeys: List<DeterministicKey>, val m: Int)
 
-class WalletService : LifecycleService() {
+class WalletService : LifecycleService(), FusionListener {
     companion object {
         private lateinit var instance: WalletService
         private var fusionJob: Job? = null
+        private var fusionStatus: FusionStatus = FusionStatus.NOT_FUSING
+        private var poolStatus: ArrayList<PoolStatus> = ArrayList()
         fun getInstance(): WalletService {
             return instance
         }
@@ -381,7 +385,6 @@ class WalletService : LifecycleService() {
         enabled?.let { setEnabled(it, false) }
         startService(Intent(this, TorService::class.java))
         var statusString = ""
-        var fusionStatus = FusionStatus.NOT_FUSING
 
         //TODO add listener to FusionClient.java in bitcoincashj to listen for status updates there
         lifecycleScope.launchWhenCreated {
@@ -390,7 +393,6 @@ class WalletService : LifecycleService() {
                     statusString = ""
                     val fusionClient = fusionClient
                     if (fusionClient != null) {
-                        fusionStatus = fusionClient.fusionStatus
                         if (fusionClient.socket.isClosed) {
                             statusString += "Not connected to Fusion socket..."
                             if(cachedEnabled) {
@@ -400,9 +402,8 @@ class WalletService : LifecycleService() {
                             statusString += "Fusion failed. Restarting..."
                             setInputCount(getRandomInputAmount(), true)
                         } else {
-                            val poolStatuses = fusionClient.poolStatuses
-                            if (poolStatuses.isNotEmpty()) {
-                                for (status in poolStatuses) {
+                            if (poolStatus.isNotEmpty()) {
+                                for (status in poolStatus) {
                                     val pct =
                                         (((status.players.toDouble() / status.minPlayers.toDouble()) * 100.0)).roundToLong()
                                     statusString += if (pct >= 100) {
@@ -467,7 +468,8 @@ class WalletService : LifecycleService() {
                                             "cashfusion.electroncash.dk",
                                             8788,
                                             filteredUtxos,
-                                            wallet
+                                            wallet,
+                                            this@WalletService
                                         )
                                     } else {
                                         fusionClient?.updateUtxos(filteredUtxos)
@@ -535,5 +537,16 @@ class WalletService : LifecycleService() {
         val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         service.createNotificationChannel(chan)
         return channelId
+    }
+
+    override fun onPoolStatus(poolStatusList: MutableList<PoolStatus>?) {
+        poolStatus = poolStatusList as ArrayList<PoolStatus>
+    }
+
+    override fun onFusionStatus(status: FusionStatus?) {
+        if (status != null) {
+            fusionStatus = status
+            setStatus(status.toString(), true)
+        }
     }
 }
