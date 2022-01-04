@@ -80,7 +80,7 @@ class WalletService : LifecycleService(), FusionListener {
         private val _status: MutableLiveData<String> = MutableLiveData()
         private val _cashFusionEnabled: MutableLiveData<Boolean> = MutableLiveData(false)
         private val _updateUtxosForFusion: MutableLiveData<Int> = MutableLiveData()
-
+        private var backoff: Double = 0.5
         private var cachedInputCount = -1
         private var cachedEnabled = false
         val fusionData = combine(
@@ -396,11 +396,22 @@ class WalletService : LifecycleService(), FusionListener {
                         if (fusionClient.socket.isClosed) {
                             statusString += "Not connected to Fusion socket..."
                             if(cachedEnabled) {
-                                setInputCount(getRandomInputAmount(), true)
+                                backoff *= 2.0
+
+                                if(backoff < 20.0) {
+                                    setInputCount(getRandomInputAmount(), true)
+                                } else {
+                                    tryKillFusionClient()
+                                }
                             }
                         } else if (fusionStatus == FusionStatus.FAILED) {
-                            statusString += "Fusion failed. Restarting..."
-                            setInputCount(getRandomInputAmount(), true)
+                            backoff *= 2.0
+                            if(backoff < 20.0) {
+                                statusString += "Fusion failed. Restarting..."
+                                setInputCount(getRandomInputAmount(), true)
+                            } else {
+                                tryKillFusionClient()
+                            }
                         } else {
                             if (poolStatus.isNotEmpty()) {
                                 for (status in poolStatus) {
@@ -463,6 +474,7 @@ class WalletService : LifecycleService(), FusionListener {
                             fusionJob?.cancel()
                             fusionJob = lifecycleScope.launch(Dispatchers.IO) {
                                 try {
+                                    Thread.sleep((backoff*1000.0).toLong())
                                     fusionClient = if (fusionClient == null) {
                                         FusionClient(
                                             "cashfusion.electroncash.dk",
@@ -475,6 +487,7 @@ class WalletService : LifecycleService(), FusionListener {
                                         fusionClient?.updateUtxos(filteredUtxos)
                                     }
                                 } catch(e: Exception) {
+                                    backoff *= 2.0
                                     e.printStackTrace()
                                 }
                             }
@@ -496,7 +509,7 @@ class WalletService : LifecycleService(), FusionListener {
             fusionJob = null
             fusionClient = null
         } catch(e: Exception) {
-
+            e.printStackTrace()
         }
     }
 
