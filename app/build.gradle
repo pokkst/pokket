@@ -11,8 +11,8 @@ android {
         applicationId 'xyz.pokkst.pokket'
         minSdkVersion 17
         targetSdkVersion 30
-        versionCode 705
-        versionName "0.7.5-cf8"
+        versionCode 706
+        versionName "0.7.6-cf9"
         multiDexEnabled = true
     }
     buildTypes {

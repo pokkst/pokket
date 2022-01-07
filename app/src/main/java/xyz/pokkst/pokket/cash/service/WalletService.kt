@@ -310,7 +310,7 @@ class WalletService : LifecycleService(), FusionListener {
 
     private fun getConfirmedCoins(): List<TransactionOutput> {
         val utxos: List<TransactionOutput> = wallet?.utxos?.shuffled()
-            /*?.filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING }*/ ?: return emptyList()
+            ?.filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING } ?: return emptyList()
         return utxos
     }
     private fun setupNodeOnStart() {
@@ -397,7 +397,7 @@ class WalletService : LifecycleService(), FusionListener {
                             if(cachedEnabled) {
                                 backoff *= 2.0
 
-                                if(backoff < 20.0) {
+                                if(backoff < 100.0) {
                                     setInputCount(getRandomInputAmount(), true)
                                 } else {
                                     tryKillFusionClient()
@@ -405,13 +405,13 @@ class WalletService : LifecycleService(), FusionListener {
                             }
                         } else if (fusionStatus == FusionStatus.FAILED) {
                             backoff *= 2.0
-                            if(backoff < 20.0) {
-                                fusionStatus = FusionStatus.NOT_FUSING
+                            if(backoff < 100.0) {
                                 statusString += "Fusion failed. Restarting..."
                                 setInputCount(getRandomInputAmount(), true)
                             } else {
                                 tryKillFusionClient()
                             }
+                            fusionStatus = FusionStatus.NOT_FUSING
                         } else {
                             if (poolStatus.isNotEmpty()) {
                                 for (status in poolStatus) {
@@ -437,7 +437,12 @@ class WalletService : LifecycleService(), FusionListener {
                         statusString = if(utxos.isEmpty()) {
                             "waiting for confirmed coins"
                         } else {
-                            "CashFusion offline"
+                            if(cachedEnabled) {
+                                setInputCount(getRandomInputAmount(), true)
+                                "restarting Fusion..."
+                            } else {
+                                "CashFusion offline"
+                            }
                         }
                     }
 
