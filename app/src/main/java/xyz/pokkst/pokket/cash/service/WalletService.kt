@@ -310,7 +310,7 @@ class WalletService : LifecycleService(), FusionListener {
 
     private fun getConfirmedCoins(): List<TransactionOutput> {
         val utxos: List<TransactionOutput> = wallet?.utxos?.shuffled()
-            ?.filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING } ?: return emptyList()
+            /*?.filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING }*/ ?: return emptyList()
         return utxos
     }
     private fun setupNodeOnStart() {
@@ -406,6 +406,7 @@ class WalletService : LifecycleService(), FusionListener {
                         } else if (fusionStatus == FusionStatus.FAILED) {
                             backoff *= 2.0
                             if(backoff < 20.0) {
+                                fusionStatus = FusionStatus.NOT_FUSING
                                 statusString += "Fusion failed. Restarting..."
                                 setInputCount(getRandomInputAmount(), true)
                             } else {
