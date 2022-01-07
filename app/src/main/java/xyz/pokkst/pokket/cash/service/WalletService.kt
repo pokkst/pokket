@@ -386,58 +386,49 @@ class WalletService : LifecycleService(), FusionListener {
         startService(Intent(this, TorService::class.java))
         var statusString = ""
 
-        //TODO add listener to FusionClient.java in bitcoincashj to listen for status updates there
         lifecycleScope.launchWhenCreated {
             withContext(Dispatchers.IO) {
                 val statusRunnable = Runnable {
                     statusString = ""
-                    val fusionClient = fusionClient
-                    if (fusionClient != null) {
-                        if (fusionClient.socket.isClosed) {
-                            statusString += "Not connected to Fusion socket..."
-                            if(cachedEnabled) {
-                                backoff *= 2.0
-
-                                if(backoff < 20.0) {
-                                    setInputCount(getRandomInputAmount(), true)
-                                } else {
-                                    tryKillFusionClient()
-                                }
-                            }
-                        } else if (fusionStatus == FusionStatus.FAILED) {
+                    if (fusionClient?.socket?.isClosed == true) {
+                        statusString += "Not connected to Fusion socket..."
+                        if(cachedEnabled) {
                             backoff *= 2.0
+
                             if(backoff < 20.0) {
-                                statusString += "Fusion failed. Restarting..."
                                 setInputCount(getRandomInputAmount(), true)
                             } else {
                                 tryKillFusionClient()
                             }
+                        }
+                    } else if (fusionStatus == FusionStatus.FAILED) {
+                        backoff *= 2.0
+                        if(backoff < 20.0) {
+                            statusString += "Fusion failed. Restarting..."
+                            setInputCount(getRandomInputAmount(), true)
                         } else {
-                            if (poolStatus.isNotEmpty()) {
-                                for (status in poolStatus) {
-                                    val pct =
-                                        (((status.players.toDouble() / status.minPlayers.toDouble()) * 100.0)).roundToLong()
-                                    statusString += if (pct >= 100) {
-                                        (status.tier.toString() + ": starting in " + status.timeUntilStart + "s") + "\n"
-                                    } else {
-                                        (status.tier.toString() + ": " + status.players + "/" + status.minPlayers) + "\n"
-                                    }
-                                }
-                                statusString += "\n"
-                                statusString += fusionStatus
-                            } else {
-                                val utxos = getConfirmedCoins()
-                                if(utxos.isNullOrEmpty()) {
-                                    statusString = "waiting for confirmed coins"
-                                }
-                            }
+                            tryKillFusionClient()
                         }
                     } else {
-                        val utxos = getConfirmedCoins()
-                        statusString = if(utxos.isEmpty()) {
-                            "waiting for confirmed coins"
+                        if (poolStatus.isNotEmpty()) {
+                            for (status in poolStatus) {
+                                val pct =
+                                    (((status.players.toDouble() / status.minPlayers.toDouble()) * 100.0)).roundToLong()
+                                statusString += if (pct >= 100) {
+                                    (status.tier.toString() + ": starting in " + status.timeUntilStart + "s") + "\n"
+                                } else {
+                                    (status.tier.toString() + ": " + status.players + "/" + status.minPlayers) + "\n"
+                                }
+                            }
+                            statusString += "\n"
+                            statusString += fusionStatus
                         } else {
-                            "CashFusion offline"
+                            val utxos = getConfirmedCoins()
+                            statusString = if(utxos.isNullOrEmpty()) {
+                                "waiting for confirmed coins"
+                            } else {
+                                "CashFusion offline"
+                            }
                         }
                     }
 
@@ -488,6 +479,7 @@ class WalletService : LifecycleService(), FusionListener {
                                     }
                                 } catch(e: Exception) {
                                     backoff *= 2.0
+                                    fusionClient = null
                                     e.printStackTrace()
                                 }
                             }
