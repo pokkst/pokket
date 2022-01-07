@@ -502,7 +502,9 @@ class WalletService : LifecycleService(), FusionListener {
             fusionClient = null
         } catch(e: Exception) {
             e.printStackTrace()
+            setInputCount(getRandomInputAmount(), true)
         }
+        backoff = 0.5
     }
 
     private fun createPersistentNotification(): NotificationCompat.Builder {
