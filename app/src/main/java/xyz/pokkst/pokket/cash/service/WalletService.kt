@@ -42,7 +42,6 @@ import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.livedata.Event
 import xyz.pokkst.pokket.cash.util.PrefsHelper
 import java.io.File
-import java.io.IOException
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
@@ -51,12 +50,10 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToLong
-import android.app.PendingIntent
 import android.os.PowerManager
 import kotlinx.coroutines.*
 import org.bitcoinj.protocols.fusion.FusionListener
 import org.bitcoinj.protocols.fusion.models.PoolStatus
-import xyz.pokkst.pokket.cash.MainActivity
 import xyz.pokkst.pokket.cash.livedata.combine
 import xyz.pokkst.pokket.cash.models.FusionData
 import java.lang.Runnable
@@ -309,10 +306,11 @@ class WalletService : LifecycleService(), FusionListener {
     }
 
     private fun getConfirmedCoins(): List<TransactionOutput> {
-        val utxos: List<TransactionOutput> = wallet?.utxos?.shuffled()
-            ?.filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING } ?: return emptyList()
-        return utxos
+        return wallet?.calculateAllSpendCandidates(true, true, false)?.shuffled()
+            ?.filter { it.parentTransaction?.confidence?.confidenceType == TransactionConfidence.ConfidenceType.BUILDING }
+            ?: return emptyList()
     }
+
     private fun setupNodeOnStart() {
         val nodeIP = PrefsHelper.instance(null)?.getString("node_ip", null)
         if (nodeIP?.isNotEmpty() == true) {

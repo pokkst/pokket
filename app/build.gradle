@@ -11,8 +11,8 @@ android {
         applicationId 'xyz.pokkst.pokket'
         minSdkVersion 17
         targetSdkVersion 30
-        versionCode 707
-        versionName "0.7.7-cf10"
+        versionCode 708
+        versionName "0.7.8-cf11"
         multiDexEnabled = true
     }
     buildTypes {
@@ -50,7 +50,7 @@ dependencies {
     implementation "androidx.navigation:navigation-runtime-ktx:$nav_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
-    implementation('com.github.pokkst:bitcoincashj:bff95e55ac') {
+    implementation('com.github.pokkst:bitcoincashj:31717dbaf5') {
         exclude group: "org.json"
     }
     implementation('org.web3j:core:4.8.7-android') {
