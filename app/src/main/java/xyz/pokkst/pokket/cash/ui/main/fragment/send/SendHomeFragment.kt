@@ -79,16 +79,15 @@ class SendHomeFragment : Fragment() {
                 builder?.setView(dialoglayout)
                 val dialog = builder?.show()
 
-                WalletService.fusionData.observe(viewLifecycleOwner, { data ->
-                    dialog?.findViewById<TextView>(R.id.fusion_status_textview)?.text = data?.status
+                WalletService.status.observe(viewLifecycleOwner, {
+                    dialog?.findViewById<TextView>(R.id.fusion_status_textview)?.text = it
                 })
                 dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             }
         }
 
-        WalletService.fusionData.observe(viewLifecycleOwner, { data ->
-            if(data == null) return@observe
-            root.fusion_status_imageview.visibility = if(data.enabled) View.VISIBLE else View.INVISIBLE
+        WalletService.cashFusionEnabled.observe(viewLifecycleOwner, { enabled ->
+            root.fusion_status_imageview.visibility = if(enabled == true) View.VISIBLE else View.INVISIBLE
         })
 
         val filter = IntentFilter()

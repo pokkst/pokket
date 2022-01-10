@@ -204,6 +204,19 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         })
+
+        WalletService.cashFusionEnabled.observe(this, { enabled ->
+            if(enabled) {
+                WalletService.getInstance().setUpdateUtxosForFusion()
+            } else {
+                try {
+                    WalletService.fusionClient?.stopConnection()
+                    WalletService.fusionClient = null
+                } catch(e: Exception) {
+
+                }
+            }
+        })
     }
 
     override fun onBackPressed() {

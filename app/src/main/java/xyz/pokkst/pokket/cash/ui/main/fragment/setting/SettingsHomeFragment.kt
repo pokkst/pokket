@@ -44,7 +44,7 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
             val newValue = !useFusion
             PrefsHelper.instance(context)?.edit()?.putBoolean("use_fusion", newValue)?.apply()
             root.fusion_enable.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.fusion_enable, newValue.toString())
-            WalletService.setEnabled(newValue, false)
+            WalletService.setEnabled(newValue)
         }
 
         root.about.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
