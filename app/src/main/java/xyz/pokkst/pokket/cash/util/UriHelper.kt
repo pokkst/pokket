@@ -59,7 +59,7 @@ class UriHelper {
             val mappedVariables = getQueryParams(uri)
             val destinationWithoutPrefix =
                 uri.replace("${params.cashAddrPrefix}:", "")
-                    .replace("${params.simpleledgerPrefix}:", "")
+                    .replace("${params.simpleledgerPrefix}:", "").replace("ethereum:", "")
             if (destinationWithoutPrefix.contains("http")) {
                 addressOrPayload = if (mappedVariables["r"] != null) {
                     (mappedVariables["r"] ?: error(""))[0]
@@ -88,11 +88,9 @@ class UriHelper {
                         null
                     }
 
-                    //MetaMask adds an "ethereum:" prefix regardless of chain. They should really make it configurable.
-                    addressOrPayload = uri.replace("ethereum:", "")
-
                     addressOrPayload = when {
-                        uri.startsWith(SMARTBCH_PREFIX) -> getQueryBaseAddress(uri).toLowerCase()
+                        destinationWithoutPrefix.startsWith(SMARTBCH_PREFIX) -> getQueryBaseAddress(uri).toLowerCase()
+                            .replace("ethereum:", "")
                         uri.startsWith(params.cashAddrPrefix) -> getQueryBaseAddress(
                             uri
                         ).replace("${params.cashAddrPrefix}:", "")

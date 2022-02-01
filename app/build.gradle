@@ -6,13 +6,13 @@ apply plugin: 'androidx.navigation.safeargs.kotlin'
 
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId 'xyz.pokkst.pokket'
-        minSdkVersion 17
-        targetSdkVersion 30
-        versionCode 709
-        versionName "0.7.9-cf12"
+        minSdkVersion 21
+        targetSdkVersion 31
+        versionCode 710
+        versionName "0.7.10-cf13"
         multiDexEnabled = true
     }
     buildTypes {
