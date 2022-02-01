@@ -341,12 +341,14 @@ class WalletService : LifecycleService(), FusionListener {
 
         val enabled = PrefsHelper.instance(this)?.getBoolean("use_fusion", true)
         enabled?.let { setEnabled(it) }
-        startService(Intent(this, TorService::class.java))
         var statusString = ""
         val statusRunnable = Runnable {
             statusString = ""
             val torOnline = isServerSocketInUse(9050)
             statusString += "Tor online: $torOnline"
+            if(!torOnline) {
+                startService(Intent(this, TorService::class.java))
+            }
             val fusionClient = fusionClient
             val utxos = getConfirmedCoins()
             if (fusionClient != null) {
