@@ -56,6 +56,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.roundToLong
 import org.bitcoinj.protocols.fusion.FusionListener
 import org.bitcoinj.protocols.fusion.models.PoolStatus
+import java.net.ServerSocket
 
 
 data class WalletStartupConfig(val activity: Activity, val seed: String?, val newUser: Boolean, val passphrase: String?, val derivationPath: KeyChainGroupStructure?)
@@ -344,6 +345,8 @@ class WalletService : LifecycleService(), FusionListener {
         var statusString = ""
         val statusRunnable = Runnable {
             statusString = ""
+            val torOnline = isServerSocketInUse(9050)
+            statusString += "Tor online: $torOnline"
             val fusionClient = fusionClient
             val utxos = getConfirmedCoins()
             if (fusionClient != null) {
@@ -459,6 +462,16 @@ class WalletService : LifecycleService(), FusionListener {
     override fun onFusionStatus(status: FusionStatus?) {
         if (status != null) {
             fusionStatus = status
+        }
+    }
+
+    private fun isServerSocketInUse(port: Int): Boolean {
+        return try {
+            ServerSocket(port).close()
+            false
+        } catch (e: IOException) {
+            // Could not connect.
+            true
         }
     }
 }

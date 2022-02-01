@@ -88,6 +88,9 @@ class UriHelper {
                         null
                     }
 
+                    //MetaMask adds an "ethereum:" prefix regardless of chain. They should really make it configurable.
+                    addressOrPayload = uri.replace("ethereum:", "")
+
                     addressOrPayload = when {
                         uri.startsWith(SMARTBCH_PREFIX) -> getQueryBaseAddress(uri).toLowerCase()
                         uri.startsWith(params.cashAddrPrefix) -> getQueryBaseAddress(
