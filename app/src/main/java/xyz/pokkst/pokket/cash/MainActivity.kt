@@ -1,6 +1,8 @@
 package xyz.pokkst.pokket.cash
 
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -20,14 +22,12 @@ import kotlinx.coroutines.launch
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.wallet.DeterministicKeyChain
 import xyz.pokkst.pokket.cash.interactors.BalanceInteractor
-import xyz.pokkst.pokket.cash.util.*
 import xyz.pokkst.pokket.cash.service.MultisigWalletStartupConfig
+import xyz.pokkst.pokket.cash.service.WalletService
 import xyz.pokkst.pokket.cash.service.WalletStartupConfig
+import xyz.pokkst.pokket.cash.util.*
 import java.io.File
 import java.math.BigDecimal
-import java.util.*
-import kotlin.collections.ArrayList
-import xyz.pokkst.pokket.cash.service.WalletService
 
 
 class MainActivity : AppCompatActivity() {
@@ -205,18 +205,18 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        WalletService.cashFusionEnabled.observe(this, { enabled ->
-            if(enabled) {
+        WalletService.cashFusionEnabled.observe(this) { enabled ->
+            if (enabled) {
                 WalletService.getInstance().setUpdateUtxosForFusion()
             } else {
                 try {
                     WalletService.fusionClient?.stopConnection()
                     WalletService.fusionClient = null
-                } catch(e: Exception) {
+                } catch (e: Exception) {
 
                 }
             }
-        })
+        }
     }
 
     override fun onBackPressed() {

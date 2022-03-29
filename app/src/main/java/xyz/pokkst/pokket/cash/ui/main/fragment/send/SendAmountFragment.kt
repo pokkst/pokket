@@ -248,52 +248,59 @@ class SendAmountFragment : Fragment() {
                     showToast("sbch wallet balance is zero")
                 }
             } else {
-                if (balanceInteractor.getBitcoinBalance() != BigDecimal.ZERO) {
-                    when (paymentContent?.paymentType) {
-                        PaymentType.BIP70 -> destination?.let { this.processBIP70(it) }
-                        PaymentType.CASH_ACCOUNT, PaymentType.ADDRESS -> this.processBitcoinTransaction()
-                        PaymentType.PAYMENT_CODE -> {
-                            val canSendToPaymentCode =
-                                WalletService.walletKit?.canSendToPaymentCode(destination)
-                            if (canSendToPaymentCode == true) {
-                                this.attemptBip47Payment()
-                            } else {
-                                val notification =
-                                    WalletService.walletKit?.makeNotificationTransaction(
-                                        destination,
-                                        true
-                                    )
-                                WalletService.walletKit?.broadcastTransaction(notification?.tx)
-                                WalletService.walletKit?.putPaymenCodeStatusSent(
-                                    destination,
-                                    notification?.tx
-                                )
-                                this.attemptBip47Payment()
-                            }
-                        }
-                        PaymentType.FLIPSTARTER_PAYLOAD -> {
-                            val sendReq = SendRequest.createFlipstarterPledge(
-                                walletInteractor.getBitcoinWallet(),
-                                paymentContent?.addressOrPayload
-                            )
-                            val peers = WalletService.kit?.peerGroup()?.connectedPeers
-                            if (peers != null) {
-                                for (peer in peers) {
-                                    val tx = sendReq.left
-                                    peer.sendMessage(tx)
-                                }
-                            }
-
-                            val pledgePayload = sendReq.right
-                            showFlipstarterPledge(pledgePayload)
-                        }
-                        PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
-                        PaymentType.SMARTBCH_ADDRESS -> this.processSmartBchTransaction()
-                        PaymentType.HOP_TO_SBCH -> hopToSbch()
-                        else -> showToast("please enter a valid destination")
+                if(paymentContent?.paymentType == PaymentType.SMARTBCH_ADDRESS) {
+                    if(balanceInteractor.getSmartBalance() != BigDecimal.ZERO) {
+                        this.processSmartBchTransaction()
+                    } else {
+                        showToast("sbch wallet balance is zero")
                     }
                 } else {
-                    showToast("bch wallet balance is zero")
+                    if (balanceInteractor.getBitcoinBalance() != BigDecimal.ZERO) {
+                        when (paymentContent?.paymentType) {
+                            PaymentType.BIP70 -> destination?.let { this.processBIP70(it) }
+                            PaymentType.CASH_ACCOUNT, PaymentType.ADDRESS -> this.processBitcoinTransaction()
+                            PaymentType.PAYMENT_CODE -> {
+                                val canSendToPaymentCode =
+                                    WalletService.walletKit?.canSendToPaymentCode(destination)
+                                if (canSendToPaymentCode == true) {
+                                    this.attemptBip47Payment()
+                                } else {
+                                    val notification =
+                                        WalletService.walletKit?.makeNotificationTransaction(
+                                            destination,
+                                            true
+                                        )
+                                    WalletService.walletKit?.broadcastTransaction(notification?.tx)
+                                    WalletService.walletKit?.putPaymenCodeStatusSent(
+                                        destination,
+                                        notification?.tx
+                                    )
+                                    this.attemptBip47Payment()
+                                }
+                            }
+                            PaymentType.FLIPSTARTER_PAYLOAD -> {
+                                val sendReq = SendRequest.createFlipstarterPledge(
+                                    walletInteractor.getBitcoinWallet(),
+                                    paymentContent?.addressOrPayload
+                                )
+                                val peers = WalletService.kit?.peerGroup()?.connectedPeers
+                                if (peers != null) {
+                                    for (peer in peers) {
+                                        val tx = sendReq.left
+                                        peer.sendMessage(tx)
+                                    }
+                                }
+
+                                val pledgePayload = sendReq.right
+                                showFlipstarterPledge(pledgePayload)
+                            }
+                            PaymentType.MULTISIG_PAYLOAD -> showToast("send is in incorrect state")
+                            PaymentType.HOP_TO_SBCH -> hopToSbch()
+                            else -> showToast("please enter a valid destination")
+                        }
+                    } else {
+                        showToast("bch wallet balance is zero")
+                    }
                 }
             }
         } else {

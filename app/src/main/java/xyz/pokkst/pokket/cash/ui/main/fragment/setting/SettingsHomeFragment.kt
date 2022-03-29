@@ -1,5 +1,6 @@
 package xyz.pokkst.pokket.cash.ui.main.fragment.setting
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -18,10 +19,10 @@ import org.bitcoinj.core.slp.SlpOpReturn
 import org.bitcoinj.wallet.Wallet
 import xyz.pokkst.pokket.cash.R
 import xyz.pokkst.pokket.cash.SettingsActivity
+import xyz.pokkst.pokket.cash.service.WalletService
 import xyz.pokkst.pokket.cash.ui.adapter.TransactionAdapter
 import xyz.pokkst.pokket.cash.ui.listener.TxAdapterListener
 import xyz.pokkst.pokket.cash.util.PrefsHelper
-import xyz.pokkst.pokket.cash.service.WalletService
 
 
 /**
@@ -36,15 +37,32 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_home, container, false)
 
-        val fusionEnabled = PrefsHelper.instance(context)?.getBoolean("use_fusion", true)
+        val fusionEnabled = PrefsHelper.instance(context)?.getBoolean("use_fusion", false)
         root.fusion_enable.findViewById<ImageView>(R.id.setting_arrow_imageview)?.visibility = View.INVISIBLE
         root.fusion_enable.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.fusion_enable, fusionEnabled.toString())
         root.fusion_enable.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
-            val useFusion = PrefsHelper.instance(context)?.getBoolean("use_fusion", true) ?: true
+            val useFusion = PrefsHelper.instance(context)?.getBoolean("use_fusion", false) ?: false
             val newValue = !useFusion
             PrefsHelper.instance(context)?.edit()?.putBoolean("use_fusion", newValue)?.apply()
             root.fusion_enable.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.fusion_enable, newValue.toString())
             WalletService.setEnabled(newValue)
+
+            val torOnline = WalletService.isServerSocketInUse(9050)
+
+            if(!torOnline && newValue) {
+                try {
+                    val orbotIntent: Intent? = activity?.packageManager?.getLaunchIntentForPackage("org.torproject.android")
+                    orbotIntent?.addCategory(Intent.CATEGORY_LAUNCHER)
+                    if(orbotIntent == null) return@setOnClickListener
+                    startActivity(orbotIntent)
+                } catch(e: ActivityNotFoundException) {
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=org.torproject.android")))
+                    } catch (anfe: ActivityNotFoundException) {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=org.torproject.android")))
+                    }
+                }
+            }
         }
 
         root.about.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
