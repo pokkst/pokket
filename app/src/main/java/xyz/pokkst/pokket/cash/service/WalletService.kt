@@ -131,14 +131,6 @@ class WalletService : LifecycleService(), FusionListener {
                 true
             }
         }
-
-        fun isAppInstalled(targetPackage: String, pm: PackageManager): Boolean {
-            val packages: List<ApplicationInfo> = pm.getInstalledApplications(0)
-            for (packageInfo in packages) {
-                if (packageInfo.packageName == targetPackage) return true
-            }
-            return false
-        }
     }
 
     private fun startPeriodicRefresher() {
