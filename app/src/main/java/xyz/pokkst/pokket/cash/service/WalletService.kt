@@ -57,6 +57,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.roundToLong
 import org.bitcoinj.protocols.fusion.FusionListener
 import org.bitcoinj.protocols.fusion.models.PoolStatus
+import xyz.pokkst.pokket.cash.util.Constants
 import java.net.ServerSocket
 
 
@@ -171,7 +172,7 @@ class WalletService : LifecycleService(), FusionListener {
                     _peerCount.postValue(peerCount)
                 }
                 val privateMode =
-                    PrefsHelper.instance(null)?.getBoolean("private_mode", false) ?: false
+                    PrefsHelper.instance(null)?.getBoolean(Constants.PREF_PRIVATE_MODE, false) ?: false
                 peerGroup()?.isBloomFilteringEnabled = !privateMode
                 wallet().saveToFile(vWalletFile)
 
@@ -264,7 +265,7 @@ class WalletService : LifecycleService(), FusionListener {
     }
 
     private fun setupNodeOnStart() {
-        val nodeIP = PrefsHelper.instance(null)?.getString("node_ip", null)
+        val nodeIP = PrefsHelper.instance(null)?.getString(Constants.PREF_NODE_IP, null)
         if (nodeIP?.isNotEmpty() == true) {
             var node1: InetAddress? = null
             try {
@@ -324,7 +325,7 @@ class WalletService : LifecycleService(), FusionListener {
 
     private fun startForeground() {
         instance = this
-        val enabled = PrefsHelper.instance(this)?.getBoolean("use_fusion", false)
+        val enabled = PrefsHelper.instance(this)?.getBoolean(Constants.PREF_USE_FUSION, false)
         enabled?.let { setEnabled(it) }
         val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         var notificationBuilder: NotificationCompat.Builder? = null
@@ -360,7 +361,7 @@ class WalletService : LifecycleService(), FusionListener {
             val torOnline = isServerSocketInUse(9050)
             statusString += "Tor online: $torOnline\n"
             val useFusion =
-                PrefsHelper.instance(this@WalletService)?.getBoolean("use_fusion", false)
+                PrefsHelper.instance(this@WalletService)?.getBoolean(Constants.PREF_USE_FUSION, false)
             if(useFusion == true && torOnline) {
                 val fusionClient = fusionClient
                 val utxos = getConfirmedCoins()
@@ -427,7 +428,7 @@ class WalletService : LifecycleService(), FusionListener {
         updateUtxosForFusion.observe(this) { event ->
             lifecycleScope.launch(Dispatchers.IO) {
                 val useFusion =
-                    PrefsHelper.instance(this@WalletService)?.getBoolean("use_fusion", false)
+                    PrefsHelper.instance(this@WalletService)?.getBoolean(Constants.PREF_USE_FUSION, false)
                 if (useFusion == true) {
                     var inputCount = event.getContentIfNotHandled()
                     if (inputCount != null && inputCount != 0) {
@@ -441,8 +442,8 @@ class WalletService : LifecycleService(), FusionListener {
                                     val utxo: TransactionOutput = utxos[x]
                                     filteredUtxos.add(utxo)
                                 }
-                                fusionClient = if (fusionClient == null) {
-                                    FusionClient(
+                                if (fusionClient == null) {
+                                    fusionClient = FusionClient(
                                         "cashfusion.electroncash.dk",
                                         8788,
                                         filteredUtxos,
@@ -451,10 +452,9 @@ class WalletService : LifecycleService(), FusionListener {
                                     )
                                 } else {
                                     val syncPct = _syncPercentage.value ?: 0
-                                    if(syncPct >= 100) {
+                                    fusionClient = if(syncPct >= 100) {
                                         fusionClient?.updateUtxos(filteredUtxos)
                                     } else {
-                                        println("sync pct is less than 100: $syncPct")
                                         fusionClient?.stopConnection()
                                         null
                                     }

@@ -22,6 +22,7 @@ import xyz.pokkst.pokket.cash.SettingsActivity
 import xyz.pokkst.pokket.cash.service.WalletService
 import xyz.pokkst.pokket.cash.ui.adapter.TransactionAdapter
 import xyz.pokkst.pokket.cash.ui.listener.TxAdapterListener
+import xyz.pokkst.pokket.cash.util.Constants
 import xyz.pokkst.pokket.cash.util.PrefsHelper
 
 
@@ -37,13 +38,13 @@ class SettingsHomeFragment : Fragment(), TxAdapterListener {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings_home, container, false)
 
-        val fusionEnabled = PrefsHelper.instance(context)?.getBoolean("use_fusion", false)
+        val fusionEnabled = PrefsHelper.instance(context)?.getBoolean(Constants.PREF_USE_FUSION, false)
         root.fusion_enable.findViewById<ImageView>(R.id.setting_arrow_imageview)?.visibility = View.INVISIBLE
         root.fusion_enable.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.fusion_enable, fusionEnabled.toString())
         root.fusion_enable.findViewById<RelativeLayout>(R.id.setting_layout).setOnClickListener {
-            val useFusion = PrefsHelper.instance(context)?.getBoolean("use_fusion", false) ?: false
+            val useFusion = PrefsHelper.instance(context)?.getBoolean(Constants.PREF_USE_FUSION, false) ?: false
             val newValue = !useFusion
-            PrefsHelper.instance(context)?.edit()?.putBoolean("use_fusion", newValue)?.apply()
+            PrefsHelper.instance(context)?.edit()?.putBoolean(Constants.PREF_USE_FUSION, newValue)?.apply()
             root.fusion_enable.findViewById<TextView>(R.id.setting_label).text = resources.getString(R.string.fusion_enable, newValue.toString())
             WalletService.setEnabled(newValue)
 
