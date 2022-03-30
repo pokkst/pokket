@@ -154,6 +154,9 @@ class WalletService : LifecycleService(), FusionListener {
             walletFileName
         ) {
             override fun onSetupCompleted() {
+                if(wallet().isFusionUpgradeRequired(preferredOutputScriptType)) {
+                    wallet().upgradeToFusion(preferredOutputScriptType, null)
+                }
                 wallet().isAcceptRiskyTransactions = true
                 wallet().allowSpendingUnconfirmedTransactions()
                 _syncPercentage.postValue(0)
