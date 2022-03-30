@@ -12,7 +12,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 711
-        versionName "0.7.11-cf13"
+        versionName "0.7.11-cf14"
         multiDexEnabled = true
     }
     buildTypes {
