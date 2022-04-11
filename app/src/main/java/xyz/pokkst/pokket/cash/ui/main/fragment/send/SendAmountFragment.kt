@@ -131,6 +131,9 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun prepareViews() {
+        val sendType = PrefsHelper.instance(context)?.getString(Constants.PREF_SEND_TYPE, "bch") ?: "bch"
+        bchIsSendType = sendType == "bch"
+        swapSendTypes(root)
         (activity as? MainActivity)?.toggleSendScreen(true)
 
         root?.input_type_toggle?.isChecked = true
@@ -532,6 +535,7 @@ class SendAmountFragment : Fragment() {
     private fun swapSendTypes(root: View?) {
         if (root != null) {
             if (bchIsSendType) {
+                PrefsHelper.instance(context)?.edit()?.putString(Constants.PREF_SEND_TYPE, "bch")?.apply()
                 //We are changing from BCH as the alt currency.
                 val bchValue = root.alt_currency_display.text.toString()
                 val fiatValue = root.send_amount_input.text.toString()
@@ -540,6 +544,7 @@ class SendAmountFragment : Fragment() {
                 root.send_amount_input.setText(bchValue)
                 root.alt_currency_display.text = fiatValue
             } else {
+                PrefsHelper.instance(context)?.edit()?.putString(Constants.PREF_SEND_TYPE, "fiat")?.apply()
                 //We are changing from fiat as the alt currency.
                 val bchValue = root.send_amount_input.text.toString()
                 val fiatValue = root.alt_currency_display.text.toString()

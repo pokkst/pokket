@@ -12,6 +12,7 @@ class Constants {
         const val PREF_USE_FUSION = "use_cashfusion"
         const val PREF_NODE_IP = "node_ip"
         const val PREF_PRIVATE_MODE = "private_mode"
+        const val PREF_SEND_TYPE = "send_type"
 
 
         const val DERIVATION_PATH_DEFAULT = "m/44'/245'/0'"
