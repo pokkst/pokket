@@ -245,17 +245,21 @@ class SendAmountFragment : Fragment() {
                 root?.to_field_edit_text?.text?.toString()?.let { UriHelper.parse(it) }
             val destination = paymentContent?.addressOrPayload
             if (paymentContent?.paymentType == PaymentType.HOP_TO_BCH) {
-                if(balanceInteractor.getSmartBalance() != BigDecimal.ZERO) {
-                    hopToBch()
-                } else {
-                    showToast("sbch wallet balance is zero")
+                lifecycleScope.launch(Dispatchers.IO) {
+                    if(balanceInteractor.getSmartBalance() != BigDecimal.ZERO) {
+                        hopToBch()
+                    } else {
+                        showToast("sbch wallet balance is zero")
+                    }
                 }
             } else {
                 if(paymentContent?.paymentType == PaymentType.SMARTBCH_ADDRESS) {
-                    if(balanceInteractor.getSmartBalance() != BigDecimal.ZERO) {
-                        this.processSmartBchTransaction()
-                    } else {
-                        showToast("sbch wallet balance is zero")
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        if (balanceInteractor.getSmartBalance() != BigDecimal.ZERO) {
+                            this@SendAmountFragment.processSmartBchTransaction()
+                        } else {
+                            showToast("sbch wallet balance is zero")
+                        }
                     }
                 } else {
                     if (balanceInteractor.getBitcoinBalance() != BigDecimal.ZERO) {
@@ -339,65 +343,63 @@ class SendAmountFragment : Fragment() {
     }
 
     private fun hopToBch() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val wallet = walletInteractor.getSmartWallet()
-            val totalBalance = balanceInteractor.getSmartBalanceRaw()
-            if (totalBalance == BigInteger.ZERO) {
-                showToast("balance is zero")
-                return@launch
+        val wallet = walletInteractor.getSmartWallet()
+        val totalBalance = balanceInteractor.getSmartBalanceRaw()
+        if (totalBalance == BigInteger.ZERO) {
+            showToast("balance is zero")
+            return
+        }
+        val nonce = wallet?.ethGetTransactionCount(
+            walletInteractor.getSmartAddress(),
+            DefaultBlockParameterName.LATEST as DefaultBlockParameter
+        )?.send()?.transactionCount
+        if (nonce == null) {
+            showToast("could not fetch nonce")
+            return
+        }
+        val gasPrice = wallet.ethGasPrice().send().gasPrice
+        if (gasPrice == null) {
+            showToast("could not fetch gas price")
+            return
+        }
+        val swapMaximum = BigDecimal.valueOf(10.0)
+        val tx = if (this@SendAmountFragment.sendMax) {
+            val amount = BalanceFormatter.toEtherBalance(totalBalance.toLong())
+            if(amount != null && amount >= swapMaximum) {
+                showToast("cannot swap more than 10 bch")
+                return
             }
-            val nonce = wallet?.ethGetTransactionCount(
-                walletInteractor.getSmartAddress(),
-                DefaultBlockParameterName.LATEST as DefaultBlockParameter
-            )?.send()?.transactionCount
-            if (nonce == null) {
-                showToast("could not fetch nonce")
-                return@launch
+            transactionInteractor.createHopToBitcoin(
+                this@SendAmountFragment.sendMax,
+                nonce,
+                gasPrice,
+                totalBalance
+            )
+        } else {
+            val amount = getCoinAmount().toBtc()
+            if(amount >= swapMaximum) {
+                showToast("cannot swap more than 10 bch")
+                return
             }
-            val gasPrice = wallet.ethGasPrice().send().gasPrice
-            if (gasPrice == null) {
-                showToast("could not fetch gas price")
-                return@launch
-            }
-            val swapMaximum = BigDecimal.valueOf(10.0)
-            val tx = if (this@SendAmountFragment.sendMax) {
-                val amount = BalanceFormatter.toEtherBalance(totalBalance.toLong())
-                if(amount != null && amount >= swapMaximum) {
-                    showToast("cannot swap more than 10 bch")
-                    return@launch
-                }
-                transactionInteractor.createHopToBitcoin(
-                    this@SendAmountFragment.sendMax,
-                    nonce,
-                    gasPrice,
-                    totalBalance
-                )
-            } else {
-                val amount = getCoinAmount().toBtc()
-                if(amount >= swapMaximum) {
-                    showToast("cannot swap more than 10 bch")
-                    return@launch
-                }
-                val amountWei = Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger()
-                transactionInteractor.createHopToBitcoin(
-                    this@SendAmountFragment.sendMax,
-                    nonce,
-                    gasPrice,
-                    amountWei
-                )
-            }
+            val amountWei = Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger()
+            transactionInteractor.createHopToBitcoin(
+                this@SendAmountFragment.sendMax,
+                nonce,
+                gasPrice,
+                amountWei
+            )
+        }
 
-            val signedMessage =
-                TransactionEncoder.signMessage(tx, walletInteractor.getCredentials())
-            val signedTx = Numeric.toHexString(signedMessage)
+        val signedMessage =
+            TransactionEncoder.signMessage(tx, walletInteractor.getCredentials())
+        val signedTx = Numeric.toHexString(signedMessage)
 
-            val response =
-                walletInteractor.getSmartWallet()?.ethSendRawTransaction(signedTx)?.send()
-            if (response?.hasError() == false) {
-                activity?.runOnUiThread {
-                    showToast("coins sent!")
-                    (activity as? MainActivity)?.toggleSendScreen(false)
-                }
+        val response =
+            walletInteractor.getSmartWallet()?.ethSendRawTransaction(signedTx)?.send()
+        if (response?.hasError() == false) {
+            activity?.runOnUiThread {
+                showToast("coins sent!")
+                (activity as? MainActivity)?.toggleSendScreen(false)
             }
         }
     }

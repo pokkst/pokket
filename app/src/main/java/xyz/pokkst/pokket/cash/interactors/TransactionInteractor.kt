@@ -56,7 +56,7 @@ class TransactionInteractor {
                 ourAddress,
                 nonce,
                 gasPrice,
-                BigInteger.valueOf(22000),
+                BigInteger.valueOf(SWAP_GAS_LIMIT),
                 incomingAddress,
                 amount,
                 dataField
@@ -68,7 +68,7 @@ class TransactionInteractor {
             val req = RawTransaction.createTransaction(
                 nonce,
                 gasPrice,
-                BigInteger.valueOf(22000),
+                BigInteger.valueOf(SWAP_GAS_LIMIT),
                 incomingAddress,
                 sendValue,
                 dataField
@@ -78,7 +78,7 @@ class TransactionInteractor {
             val req = RawTransaction.createTransaction(
                 nonce,
                 gasPrice,
-                BigInteger.valueOf(22000),
+                BigInteger.valueOf(SWAP_GAS_LIMIT),
                 incomingAddress,
                 amount,
                 dataField
@@ -89,6 +89,7 @@ class TransactionInteractor {
 
     companion object {
         private var instance: TransactionInteractor? = null
+        const val SWAP_GAS_LIMIT = 21864L
         fun getInstance(): TransactionInteractor {
             if (instance == null) {
                 instance = TransactionInteractor()
